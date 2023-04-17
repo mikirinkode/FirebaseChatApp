@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import com.mikirinkode.firebasechatapp.MainActivity
 import com.mikirinkode.firebasechatapp.databinding.ActivityLoginBinding
@@ -50,11 +51,11 @@ class LoginActivity : AppCompatActivity(), LoginView {
     }
 
     override fun showLoading() {
-//        TODO("Not yet implemented")
+        binding.progressBarLogin.visibility = View.VISIBLE
     }
 
     override fun hideLoading() {
-//        TODO("Not yet implemented")
+        binding.progressBarLogin.visibility = View.GONE
     }
 
     private fun actionClicked() {
@@ -66,10 +67,21 @@ class LoginActivity : AppCompatActivity(), LoginView {
                 presenter.performSignIn(email, password)
             }
 
+            btnGoogle.setOnClickListener {
+                presenter.performSignInGoogle(this@LoginActivity)
+            }
+
             btnGoToRegister.setOnClickListener {
                 startActivity(Intent(this@LoginActivity, RegisterActivity::class.java))
                 finish()
             }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (data != null){
+            presenter.onActivityResult(this, requestCode, resultCode, data)
         }
     }
 }
