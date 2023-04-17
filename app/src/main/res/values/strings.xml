@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Firebase Chat App</string>
+    <string name="txt_button_login">LOGIN</string>
+    <string name="txt_hint_password">Password</string>
+    <string name="txt_hint_email">Email</string>
+    <string name="txt_welcome_description">Silahkan login terlebih dahulu dengan menggunakan username dan password anda.</string>
+    <string name="txt_welcome_back">Selamat Datang Kembali!</string>
+    <string name="txt_do_not_have_account">Belum punya akun?</string>
+    <string name="txt_button_register">Daftar</string>
+    <string name="txt_already_have_account">Sudah punya akun?</string>
+    <string name="txt_welcome_newcomer">Halo, Selamat Datang!</string>
+    <string name="txt_welcome_register_description">Silahkan buat akun terlebih dahulu sebelum masuk ke aplikasi.</string>
+    <string name="txt_hint_password_confirmation">Konfirmasi Password</string>
 </resources>

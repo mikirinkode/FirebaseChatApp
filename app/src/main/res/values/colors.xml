@@ -1,10 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <color name="orange_200">#FFCC80</color>
+    <color name="orange_500">#FF9800</color>
+    <color name="orange_700">#F57C00</color>
+
+    <color name="colorPrimary">@color/orange_500</color>
+    <color name="colorPrimaryVariant">@color/orange_700</color>
+    <color name="colorPrimaryDark">@color/orange_200</color>
+    <color name="colorPrimaryVariantDark">@color/orange_700</color>
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="red">#df2951</color>
+    <color name="gray">#878787</color>
+
+    <color name="white_window_background">#F0F6FF</color>
+    <color name="black_window_background">#17212B</color>
+    <color name="black_secondary_background">#1E2B38</color>
+
+    <color name="white_night_theme_text_color">#F0F6FF</color>
+    <color name="black_light_theme_text_color">#243342</color>
+
+    <color name="gray_tabs_title">#B5C6D8</color>
+    <color name="gray_divider_view">#B5C6D8</color>
+
+    <color name="gray_tokopedia_text">#7F91A4</color>
+
+    <color name="red_transparent20">#33DF2951</color>
+    <color name="backgroundColorRecycler">#e7e7e7</color>
 </resources>
