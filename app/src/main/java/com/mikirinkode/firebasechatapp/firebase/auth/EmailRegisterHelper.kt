@@ -3,6 +3,7 @@ package com.mikirinkode.firebasechatapp.firebase.auth
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
 
 class EmailRegisterHelper(
@@ -10,7 +11,7 @@ class EmailRegisterHelper(
 ) {
 
     private val auth: FirebaseAuth? = FirebaseHelper.instance().getFirebaseAuth()
-
+    private val pref = LocalSharedPref.instance()
 
     fun performRegister(
         email: String,
@@ -28,6 +29,9 @@ class EmailRegisterHelper(
                         val user: FirebaseUser? = task.result.user
                         mListener.onEmailRegisterSuccess()
                         Log.e("EmailRegisterHelper", "login perform onEmailRegisterSuccess")
+
+                        val username = user?.displayName ?: user?.email ?: "user"
+                        pref?.startSession(username)
                     }
                     else if (task.isCanceled){
                         mListener.onEmailRegisterFail("Registration cancelled")

@@ -2,6 +2,7 @@ package com.mikirinkode.firebasechatapp.firebase.auth
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
 
 class EmailLoginHelper(
@@ -9,6 +10,7 @@ class EmailLoginHelper(
 ) {
 
     private val auth: FirebaseAuth? = FirebaseHelper.instance().getFirebaseAuth()
+    private val pref = LocalSharedPref.instance()
 
     fun performLogin(
         email: String,
@@ -26,7 +28,7 @@ class EmailLoginHelper(
                     mListener.onEmailLoginSuccess(user?.uid)
 
                     val username = user?.displayName ?: user?.email ?: "user"
-//                    pref?.startSession(username)
+                    pref?.startSession(username)
 
                 } else {
                     Log.e(TAG, task.exception.toString())

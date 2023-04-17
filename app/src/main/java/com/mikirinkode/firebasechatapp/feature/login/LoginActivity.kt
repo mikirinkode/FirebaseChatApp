@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.km4quest.wafa.data.local.prefs.DataConstant
 import com.mikirinkode.firebasechatapp.MainActivity
+import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.databinding.ActivityLoginBinding
 import com.mikirinkode.firebasechatapp.feature.register.RegisterActivity
 
@@ -16,11 +18,15 @@ class LoginActivity : AppCompatActivity(), LoginView {
     }
 
     private lateinit var presenter: LoginPresenter
+    private val pref: LocalSharedPref? by lazy {
+        LocalSharedPref.instance()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        checkLoggedUser()
         initView()
         setupPresenter()
         actionClicked()
@@ -30,6 +36,15 @@ class LoginActivity : AppCompatActivity(), LoginView {
         super.onDestroy()
         presenter.detachView()
     }
+
+    private fun checkLoggedUser() {
+        val isLoggedIn: Boolean? = pref?.getBoolean(DataConstant.IS_LOGGED_IN)
+
+        if (isLoggedIn == true) {
+            goToMainView()
+        }
+    }
+
 
     private fun initView() {}
     private fun setupPresenter(){

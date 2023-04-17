@@ -12,6 +12,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.ktx.Firebase
+import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
 import com.mikirinkode.firebasechatapp.utils.Constants
 
@@ -27,7 +28,7 @@ class GoogleAuthHelper(
 //        Firebase.analytics
 //    }
 //
-//    private var pref: LocalSharedPref? = null
+    private var pref: LocalSharedPref? = null
 
     init {
         if (mListener == null) {
@@ -35,6 +36,7 @@ class GoogleAuthHelper(
         }
         buildSignInOptions()
         mAuth = FirebaseHelper.instance().getFirebaseAuth()
+        pref = LocalSharedPref.instance()
     }
 
     private fun buildSignInOptions() {
@@ -77,7 +79,7 @@ class GoogleAuthHelper(
                     if (task.isSuccessful) {
                         val user : GoogleAuthUser = parseToGoogleUser(account)
 
-//                        pref?.startSession(user.name ?: user.email ?: "User")
+                        pref?.startSession(user.name ?: user.email ?: "User")
 
                         mListener?.onGoogleAuthSignIn(
                             user.idToken,
