@@ -6,6 +6,7 @@ import com.google.common.reflect.TypeParameter
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.km4quest.wafa.data.local.prefs.DataConstant
+import com.mikirinkode.firebasechatapp.data.model.UserAccount
 
 class LocalSharedPref {
 
@@ -115,9 +116,9 @@ class LocalSharedPref {
         }
     }
 
-    fun startSession(username: String){
+    fun startSession(user: UserAccount){
         saveBoolean(DataConstant.IS_LOGGED_IN, true)
-        saveString(DataConstant.USERNAME, username)
+        saveObject(DataConstant.USER, user)
     }
 
     fun clearSession() {

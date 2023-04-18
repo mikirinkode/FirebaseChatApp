@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
+import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
 import com.mikirinkode.firebasechatapp.helper.DateHelper
 
@@ -30,10 +31,15 @@ class EmailRegisterHelper(
             auth?.createUserWithEmailAndPassword(email, password)
                 ?.addOnCompleteListener { task ->
 
-                    Log.e("EmailRegisterHelper", "login createUserWithEmailAndPassword addOnCompleteListener")
+                    Log.e(
+                        "EmailRegisterHelper",
+                        "login createUserWithEmailAndPassword addOnCompleteListener"
+                    )
                     if (task.isSuccessful) {
                         Log.e("EmailRegisterHelper", "task success")
                         val loggedUser: FirebaseUser? = task.result.user
+
+                        val avatarUrl = if (loggedUser?.photoUrl == null) "" else loggedUser.photoUrl.toString()
 
                         val documentRef =
                             fireStore?.collection("users")?.document(loggedUser?.uid ?: "")
@@ -42,7 +48,7 @@ class EmailRegisterHelper(
                             "userId" to loggedUser?.uid,
                             "email" to loggedUser?.email,
                             "name" to name,
-                            "avatarUrl" to loggedUser?.photoUrl,
+                            "avatarUrl" to avatarUrl,
                             "createdAt" to date,
                             "lastLoginAt" to date,
                             "updatedAt" to date,
@@ -55,7 +61,17 @@ class EmailRegisterHelper(
                             Log.e("EmailRegisterHelper", "login perform onEmailRegisterSuccess")
 
                             val username = loggedUser?.displayName ?: loggedUser?.email ?: "user"
-                            pref?.startSession(username)
+                            pref?.startSession(
+                                UserAccount(
+                                    loggedUser?.uid,
+                                    loggedUser?.email,
+                                    name,
+                                    avatarUrl,
+                                    date,
+                                    date,
+                                    date
+                                )
+                            )
                             Log.e("EmailRegisterHelper", "firestore success")
 
                         }?.addOnFailureListener {

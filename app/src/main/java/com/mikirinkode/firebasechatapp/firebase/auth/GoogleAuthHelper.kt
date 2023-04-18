@@ -13,7 +13,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.ktx.Firebase
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
+import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
+import com.mikirinkode.firebasechatapp.helper.DateHelper
 import com.mikirinkode.firebasechatapp.utils.Constants
 
 class GoogleAuthHelper(
@@ -23,12 +25,8 @@ class GoogleAuthHelper(
 
     private var mGoogleSignInClient: GoogleSignInClient? = null
     private var mAuth: FirebaseAuth? = null
-
-//    private val firebaseAnalytics: FirebaseAnalytics by lazy {
-//        Firebase.analytics
-//    }
-//
     private var pref: LocalSharedPref? = null
+    private val fireStore = FirebaseHelper.instance().getFirestore()
 
     init {
         if (mListener == null) {
@@ -77,14 +75,43 @@ class GoogleAuthHelper(
 
                 mAuth?.signInWithCredential(credential)?.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val user : GoogleAuthUser = parseToGoogleUser(account)
+                        val googleAccount: GoogleAuthUser = parseToGoogleUser(account)
+                        val loggedUser = mAuth?.currentUser
 
-                        pref?.startSession(user.name ?: user.email ?: "User")
-
-                        mListener?.onGoogleAuthSignIn(
-                            user.idToken,
-                            user.id
+                        val documentRef =
+                            loggedUser?.uid?.let { fireStore?.collection("users")?.document(it) }
+                        val date = DateHelper.getCurrentDate()
+                        val user = hashMapOf(
+                            "userId" to loggedUser?.uid,
+                            "email" to googleAccount.email,
+                            "name" to googleAccount.name,
+                            "avatarUrl" to googleAccount.photoUrl,
+                            "createdAt" to date,
+                            "lastLoginAt" to date,
+                            "updatedAt" to date,
                         )
+                        documentRef?.set(user)?.addOnSuccessListener {
+
+                            pref?.startSession(
+                                UserAccount(
+                                    loggedUser.uid,
+                                    googleAccount.email,
+                                    googleAccount.name,
+                                    googleAccount.photoUrl.toString(),
+                                    date,
+                                    date,
+                                    date
+                                )
+                            )
+
+                            mListener?.onGoogleAuthSignIn(
+                                googleAccount.idToken,
+                                googleAccount.id
+                            )
+                        }?.addOnFailureListener {
+                            Log.e("googleAuthHelper", "firestore failed")
+                            mListener?.onGoogleAuthSignInFailed("Registration failed: ${it.message}")
+                        }
                     }
                 }
             }
