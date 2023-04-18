@@ -1,21 +1,38 @@
 package com.mikirinkode.firebasechatapp.firebase
 
 import android.util.Log
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.ktx.toObject
+import com.mikirinkode.firebasechatapp.data.model.UserAccount
 
 class FirebaseUserListHelper(
+    val mListener: FirebaseUserListener
 ) {
     private val auth = FirebaseHelper.instance().getFirebaseAuth()
+    private val firestore = FirebaseHelper.instance().getFirestore()
 
 
     fun getUserList() {
         Log.e(TAG, "getUserList")
-        val userList = ArrayList<FirebaseUser>()
+        val userList = ArrayList<UserAccount>()
 
-
+        firestore?.collection("users")
+            ?.get()
+            ?.addOnSuccessListener { documentList ->
+                Log.e(TAG, "getUserList addOnSuccessListener")
+                for (document in documentList) {
+                    if (document != null){
+                        val userAccount: UserAccount = document.toObject()
+                        userList.add(userAccount)
+                    }
+                Log.e(TAG, "getUserList ${userList.size}")
+                }
+                Log.e(TAG, "getUserList ${userList.size}")
+                mListener.onGetAllUserDataSuccess(userList)
+            }
+            ?.addOnFailureListener {
+                Log.e(TAG, "getUserList addOnFailureListener")
+                // TODO: on fail
+            }
     }
 
     companion object {

@@ -32,7 +32,7 @@
         <ImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
-            tools:src="@tools:sample/avatars"
+            android:src="@drawable/ic_default_user_avatar"
             android:id="@+id/ivUserAvatar"/>
     </androidx.cardview.widget.CardView>
 

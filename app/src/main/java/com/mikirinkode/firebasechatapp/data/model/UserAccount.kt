@@ -1,11 +1,11 @@
 package com.mikirinkode.firebasechatapp.data.model
 
 data class UserAccount(
-    val userId: String?,
-    val email: String?,
-    val name: String?,
-    val avatarUrl: String?,
-    val createdAt: String?,
-    val lastLoginAt: String?,
-    val updatedAt: String?,
+    var userId: String? = "",
+    var email: String? = "",
+    var name: String? = "",
+    var avatarUrl: String? = "",
+    var createdAt: String? = "",
+    var lastLoginAt: String? = "",
+    var updatedAt: String? = "",
 )

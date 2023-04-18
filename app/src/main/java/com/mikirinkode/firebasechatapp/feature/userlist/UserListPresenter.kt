@@ -2,15 +2,22 @@ package com.mikirinkode.firebasechatapp.feature.userlist
 
 import android.util.Log
 import com.mikirinkode.firebasechatapp.base.BasePresenter
+import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListHelper
+import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListener
 
-class UserListPresenter: BasePresenter<UserListView> {
+class UserListPresenter: BasePresenter<UserListView>, FirebaseUserListener {
     private var mView: UserListView? = null
-    private val mHelper: FirebaseUserListHelper = FirebaseUserListHelper()
+    private val mHelper: FirebaseUserListHelper = FirebaseUserListHelper(this)
 
     fun getUserList(){
         mHelper.getUserList()
         Log.d("UserListPresenter", "getUserList")
+    }
+
+    override fun onGetAllUserDataSuccess(users: List<UserAccount>) {
+        mView?.setDataToRecyclerView(users)
+        Log.d("UserListPresenter", "users: ${users.size}")
     }
 
     override fun attachView(view: UserListView) {

@@ -3,6 +3,8 @@ package com.mikirinkode.firebasechatapp.feature.userlist
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityUserListBinding
 
 class UserListActivity : AppCompatActivity(), UserListView {
@@ -12,6 +14,10 @@ class UserListActivity : AppCompatActivity(), UserListView {
     }
 
     private lateinit var presenter: UserListPresenter
+
+    private val userAdapter: UserListAdapter by lazy {
+        UserListAdapter()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,12 +33,21 @@ class UserListActivity : AppCompatActivity(), UserListView {
         presenter.detachView()
     }
 
-    private fun initView() {}
+    private fun initView() {
+        binding.apply {
+            rvUser.layoutManager = LinearLayoutManager(this@UserListActivity)
+            rvUser.adapter = userAdapter
+        }
+    }
 
     private fun setupPresenter(){
         presenter = UserListPresenter()
         presenter.attachView(this)
         presenter.getUserList()
+    }
+
+    override fun setDataToRecyclerView(users: List<UserAccount>) {
+        userAdapter.setData(users)
     }
 
     override fun showLoading() {
