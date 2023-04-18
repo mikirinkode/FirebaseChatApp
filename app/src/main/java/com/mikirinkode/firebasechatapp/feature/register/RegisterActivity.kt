@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import com.mikirinkode.firebasechatapp.MainActivity
+import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.databinding.ActivityRegisterBinding
 import com.mikirinkode.firebasechatapp.feature.login.LoginActivity
 

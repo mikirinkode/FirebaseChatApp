@@ -7,7 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.km4quest.wafa.data.local.prefs.DataConstant
-import com.mikirinkode.firebasechatapp.MainActivity
+import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.databinding.ActivityLoginBinding
 import com.mikirinkode.firebasechatapp.feature.register.RegisterActivity
