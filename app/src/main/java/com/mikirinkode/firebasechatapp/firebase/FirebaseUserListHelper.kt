@@ -12,6 +12,7 @@ class FirebaseUserListHelper(
 
 
     fun getUserList() {
+        val currentUser = auth?.currentUser
         Log.e(TAG, "getUserList")
         val userList = ArrayList<UserAccount>()
 
@@ -21,8 +22,10 @@ class FirebaseUserListHelper(
                 Log.e(TAG, "getUserList addOnSuccessListener")
                 for (document in documentList) {
                     if (document != null){
-                        val userAccount: UserAccount = document.toObject()
-                        userList.add(userAccount)
+                        if (document["userId"] != currentUser?.uid){
+                            val userAccount: UserAccount = document.toObject()
+                            userList.add(userAccount)
+                        }
                     }
                 Log.e(TAG, "getUserList ${userList.size}")
                 }

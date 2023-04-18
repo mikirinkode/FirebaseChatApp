@@ -15,7 +15,7 @@
         android:theme="@style/Theme.FirebaseChatApp"
         tools:targetApi="31">
         <activity
-            android:name=".ChatActivity"
+            android:name=".feature.chat.ChatActivity"
             android:exported="false" />
         <activity
             android:name=".feature.userlist.UserListActivity"

@@ -11,11 +11,13 @@ class UserListPresenter: BasePresenter<UserListView>, FirebaseUserListener {
     private val mHelper: FirebaseUserListHelper = FirebaseUserListHelper(this)
 
     fun getUserList(){
+        mView?.showLoading()
         mHelper.getUserList()
         Log.d("UserListPresenter", "getUserList")
     }
 
     override fun onGetAllUserDataSuccess(users: List<UserAccount>) {
+        mView?.hideLoading()
         mView?.setDataToRecyclerView(users)
         Log.d("UserListPresenter", "users: ${users.size}")
     }
