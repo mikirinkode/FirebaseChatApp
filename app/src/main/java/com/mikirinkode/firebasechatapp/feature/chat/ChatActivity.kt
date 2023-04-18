@@ -2,6 +2,7 @@ package com.mikirinkode.firebasechatapp.feature.chat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.mikirinkode.firebasechatapp.R
 
 class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -8,15 +8,18 @@ class RegisterPresenter: BasePresenter<RegisterView>, EmailRegisterListener {
     private var view: RegisterView? = null
     private val emailRegisterHelper = EmailRegisterHelper(mListener = this)
 
-    fun performRegister(email: String, password: String) {
-        emailRegisterHelper.performRegister(email, password)
+    fun performRegister(name: String, email: String, password: String) {
+        view?.showLoading()
+        emailRegisterHelper.performRegister(name, email, password)
     }
 
     override fun onEmailRegisterSuccess() {
+        view?.hideLoading()
         view?.onRegisterSuccess()
     }
 
     override fun onEmailRegisterFail(errorMessage: String?) {
+        view?.hideLoading()
         errorMessage?.let { view?.onRegisterFailed(it) }
     }
 

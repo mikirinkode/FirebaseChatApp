@@ -58,9 +58,10 @@ class RegisterActivity : AppCompatActivity(), RegisterView {
     private fun onActionClick(){
         binding.apply {
             btnRegister.setOnClickListener {
+                val name: String = etName.text.toString().trim()
                 val email: String = etEmail.text.toString().trim()
                 val password: String = etPassword.text.toString().trim()
-                presenter.performRegister(email, password)
+                presenter.performRegister(name, email, password)
             }
 
             btnGoToLogin.setOnClickListener {

@@ -15,10 +15,12 @@ class LoginPresenter(): BasePresenter<LoginView>, EmailLoginListener, GoogleAuth
 
     fun performSignIn(email: String, password: String) {
         Log.e("LoginPresenter", "login performSignIn")
+        view?.showLoading()
         emailLoginHelper.performLogin(email, password)
     }
 
     fun performSignInGoogle(mActivity: Activity){
+        view?.showLoading()
         val googleAuthHelper = GoogleAuthHelper(mActivity, this)
         googleAuthHelper.performSignIn()
     }
@@ -31,19 +33,23 @@ class LoginPresenter(): BasePresenter<LoginView>, EmailLoginListener, GoogleAuth
     override fun onEmailLoginSuccess(userId: String?) {
         Log.e("LoginPresenter", "login onEmailSignInSuccess")
         view?.onLoginSuccess()
+        view?.hideLoading()
     }
 
     override fun onEmailLoginFail(errorMessage: String?) {
         Log.e("LoginPresenter", "login onEmailSignInFail")
         view?.onLoginFailed(errorMessage.toString())
+        view?.hideLoading()
     }
 
     override fun onGoogleAuthSignIn(authToken: String?, userId: String?) {
         view?.onLoginSuccess()
+        view?.hideLoading()
     }
 
     override fun onGoogleAuthSignInFailed(errorMessage: String?) {
         view?.onLoginFailed(errorMessage.toString())
+        view?.hideLoading()
     }
 
     override fun attachView(view: LoginView) {

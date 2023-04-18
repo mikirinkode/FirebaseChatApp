@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
+import com.mikirinkode.firebasechatapp.helper.DateHelper
 
 class EmailRegisterHelper(
     private val mListener: EmailRegisterListener
@@ -12,8 +13,10 @@ class EmailRegisterHelper(
 
     private val auth: FirebaseAuth? = FirebaseHelper.instance().getFirebaseAuth()
     private val pref = LocalSharedPref.instance()
+    private val fireStore = FirebaseHelper.instance().getFirestore()
 
     fun performRegister(
+        name: String,
         email: String,
         password: String,
     ) {
@@ -22,21 +25,49 @@ class EmailRegisterHelper(
             if (auth == null) {
                 mListener.onEmailRegisterFail("An Error Occurred, please report to the developer.")
             }
+            Log.e("EmailRegisterHelper", "login valid")
 
             auth?.createUserWithEmailAndPassword(email, password)
-                ?.addOnCompleteListener {task ->
-                    if (task.isSuccessful){
-                        val user: FirebaseUser? = task.result.user
-                        mListener.onEmailRegisterSuccess()
-                        Log.e("EmailRegisterHelper", "login perform onEmailRegisterSuccess")
+                ?.addOnCompleteListener { task ->
 
-                        val username = user?.displayName ?: user?.email ?: "user"
-                        pref?.startSession(username)
-                    }
-                    else if (task.isCanceled){
+                    Log.e("EmailRegisterHelper", "login createUserWithEmailAndPassword addOnCompleteListener")
+                    if (task.isSuccessful) {
+                        Log.e("EmailRegisterHelper", "task success")
+                        val loggedUser: FirebaseUser? = task.result.user
+
+                        val documentRef =
+                            fireStore?.collection("users")?.document(loggedUser?.uid ?: "")
+                        val date = DateHelper.getCurrentDate()
+                        val user = hashMapOf(
+                            "userId" to loggedUser?.uid,
+                            "email" to loggedUser?.email,
+                            "name" to name,
+                            "avatarUrl" to loggedUser?.photoUrl,
+                            "createdAt" to date,
+                            "lastLoginAt" to date,
+                            "updatedAt" to date,
+                        )
+
+                        documentRef?.set(user)?.addOnSuccessListener {
+
+                            Log.e("EmailRegisterHelper", "doc ref")
+                            mListener.onEmailRegisterSuccess()
+                            Log.e("EmailRegisterHelper", "login perform onEmailRegisterSuccess")
+
+                            val username = loggedUser?.displayName ?: loggedUser?.email ?: "user"
+                            pref?.startSession(username)
+                            Log.e("EmailRegisterHelper", "firestore success")
+
+                        }?.addOnFailureListener {
+                            Log.e("EmailRegisterHelper", "firestore failed")
+                            mListener.onEmailRegisterFail("Registration failed: ${it.message}")
+                        }
+                    } else if (task.isCanceled) {
                         mListener.onEmailRegisterFail("Registration cancelled")
+                        Log.e("EmailRegisterHelper", "cancelled")
+                        Log.e("EmailRegisterHelper", "${task.isSuccessful}")
                     } else {
-                        Log.e("EmailRegisterHelper", "login perform failed")
+                        Log.e("EmailRegisterHelper", "${task.result}")
                         Log.e("EmailRegisterHelper", "login perform failed")
                         mListener.onEmailRegisterFail("Authentication failed")
                     }

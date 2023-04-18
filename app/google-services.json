@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "903732674782",
+    "firebase_url": "https://fir-chat-app-f133c-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "fir-chat-app-f133c",
     "storage_bucket": "fir-chat-app-f133c.appspot.com"
   },
@@ -22,7 +23,7 @@
           }
         },
         {
-          "client_id": "903732674782-ft3531j59c5tqrc8ktili72j1p1fdmec.apps.googleusercontent.com",
+          "client_id": "903732674782-rn2169rufjngvrjopg5ps9mr9pi71mmv.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

@@ -11,4 +11,5 @@
     <string name="txt_welcome_newcomer">Halo, Selamat Datang!</string>
     <string name="txt_welcome_register_description">Silahkan buat akun terlebih dahulu sebelum masuk ke aplikasi.</string>
     <string name="txt_hint_password_confirmation">Konfirmasi Password</string>
+    <string name="txt_hint_name">Nama</string>
 </resources>
