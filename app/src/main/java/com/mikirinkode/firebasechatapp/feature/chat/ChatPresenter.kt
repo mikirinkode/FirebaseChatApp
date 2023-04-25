@@ -1,5 +1,6 @@
 package com.mikirinkode.firebasechatapp.feature.chat
 
+import android.net.Uri
 import android.util.Log
 import com.mikirinkode.firebasechatapp.base.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
@@ -14,6 +15,10 @@ class ChatPresenter: BasePresenter<ChatView>, ChatEventListener, UserOnlineStatu
 
     fun sendMessage(message: String, senderId: String, receiverId: String){
         chatHelper.sendMessage(message, senderId, receiverId)
+    }
+
+    fun sendMessage(message: String, senderId: String, receiverId: String, file: Uri, path: String){
+        chatHelper.sendMessage(message, senderId, receiverId, file, path)
     }
 
     fun receiveMessage(receiverId: String, senderId: String){

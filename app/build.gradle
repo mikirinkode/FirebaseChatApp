@@ -52,6 +52,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth-ktx:'
     implementation 'com.google.firebase:firebase-database-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'com.google.firebase:firebase-storage-ktx'
 
     //----- Google play services auth for login using google account
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
@@ -63,4 +64,11 @@ dependencies {
 
     //----- for load an image
     implementation 'com.github.bumptech.glide:glide:4.15.1'
+
+
+    //----- user permission
+    implementation 'com.karumi:dexter:6.2.2'
+
+    //----- coil
+    implementation("io.coil-kt:coil:1.1.1")
 }

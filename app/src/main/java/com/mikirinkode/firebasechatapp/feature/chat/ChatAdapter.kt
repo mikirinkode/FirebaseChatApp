@@ -8,6 +8,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.marginEnd
 import androidx.core.view.marginStart
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.databinding.ItemMessageBinding
@@ -34,6 +35,13 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
 
                 tvMessage.text = chat.message
                 tvTimestamp.text = time
+
+                if (chat.imageUrl != ""){
+                    ivMessageExtraImage.visibility = View.VISIBLE
+                    Glide.with(itemView.context)
+                        .load(chat.imageUrl)
+                        .into(ivMessageExtraImage)
+                }
 
                 val view = itemView.findViewById<View>(R.id.cardItemMessage)
                 val params = view.layoutParams as ViewGroup.MarginLayoutParams

@@ -5,17 +5,20 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 class FirebaseHelper {
     private var firebaseAuth: FirebaseAuth? = null
     private var firebaseDatabase: FirebaseDatabase? = null
     private var firebaseFirestore: FirebaseFirestore? = null
+    private var firebaseStorage: FirebaseStorage? = null
 
     fun initialize(context: Context?) {
         if (context != null) {
             firebaseAuth = FirebaseAuth.getInstance()
             firebaseDatabase = FirebaseDatabase.getInstance()
             firebaseFirestore = FirebaseFirestore.getInstance()
+            firebaseStorage = FirebaseStorage.getInstance()
         }
     }
 
@@ -29,6 +32,10 @@ class FirebaseHelper {
 
     fun getFirestore(): FirebaseFirestore? {
         return firebaseFirestore
+    }
+
+    fun getStorage(): FirebaseStorage? {
+        return firebaseStorage
     }
 
     companion object {

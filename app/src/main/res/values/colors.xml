@@ -14,12 +14,15 @@
     <color name="red">#df2951</color>
     <color name="gray">#878787</color>
 
-    <color name="white_window_background">#F0F6FF</color>
-    <color name="black_window_background">#17212B</color>
+    <color name="light_window_background">#F0F6FF</color>
+    <color name="night_window_background">#17212B</color>
     <color name="black_secondary_background">#1E2B38</color>
 
-    <color name="white_night_theme_text_color">#F0F6FF</color>
-    <color name="black_light_theme_text_color">#243342</color>
+    <color name="light_color_on_background">#DBE5F3</color>
+    <color name="night_color_on_background">#131C25</color>
+
+    <color name="night_theme_text_color">#F0F6FF</color>
+    <color name="light_theme_text_color">#243342</color>
 
     <color name="gray_tabs_title">#B5C6D8</color>
     <color name="gray_divider_view">#B5C6D8</color>
