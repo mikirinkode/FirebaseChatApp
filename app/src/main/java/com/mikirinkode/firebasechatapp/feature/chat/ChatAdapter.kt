@@ -9,6 +9,7 @@ import androidx.core.view.marginEnd
 import androidx.core.view.marginStart
 import androidx.recyclerview.widget.RecyclerView
 import com.mikirinkode.firebasechatapp.R
+import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.databinding.ItemMessageBinding
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
@@ -25,7 +26,8 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
 
         fun bind(chat: ChatMessage) {
             binding.apply {
-                val timestamp = Timestamp(1649095500000) // Example timestamp value
+                // TODO: create date helper
+                val timestamp = Timestamp(chat.timestamp)
                 val date = Date(timestamp.time)
                 val dateFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
                 val time = dateFormat.format(date)

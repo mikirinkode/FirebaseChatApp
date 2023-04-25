@@ -14,7 +14,7 @@ import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
 import com.mikirinkode.firebasechatapp.feature.login.LoginActivity
 import com.mikirinkode.firebasechatapp.feature.userlist.UserListActivity
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainView {
 
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -28,12 +28,29 @@ class MainActivity : AppCompatActivity() {
         pref?.getObject(DataConstant.USER, UserAccount::class.java)
     }
 
+    private lateinit var presenter: MainPresenter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
         initView()
+        setupPresenter()
         onActionClick()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.detachView()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (presenter != null){
+            presenter.updateUserOnlineStatus()
+        } else {
+            setupPresenter()
+        }
     }
 
     private fun initView() {
@@ -47,6 +64,15 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+    private fun setupPresenter(){
+        presenter = MainPresenter()
+        presenter.attachView(this)
+        presenter.updateUserOnlineStatus()
+    }
+
+    override fun showLoading() {}
+    override fun hideLoading() {}
 
     private fun onActionClick() {
         binding.apply {

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import com.mikirinkode.firebasechatapp.base.BasePresenter
+import com.mikirinkode.firebasechatapp.firebase.CommonFirebaseTaskHelper
 import com.mikirinkode.firebasechatapp.firebase.auth.EmailLoginHelper
 import com.mikirinkode.firebasechatapp.firebase.auth.EmailLoginListener
 import com.mikirinkode.firebasechatapp.firebase.auth.GoogleAuthHelper
@@ -12,6 +13,11 @@ import com.mikirinkode.firebasechatapp.firebase.auth.GoogleAuthListener
 class LoginPresenter(): BasePresenter<LoginView>, EmailLoginListener, GoogleAuthListener {
     private var view: LoginView? = null
     private val emailLoginHelper = EmailLoginHelper(mListener = this)
+    private val commonFirebaseTaskHelper = CommonFirebaseTaskHelper()
+
+    fun updateUserOnlineStatus(){
+        commonFirebaseTaskHelper.updateUserOnlineStatus()
+    }
 
     fun performSignIn(email: String, password: String) {
         Log.e("LoginPresenter", "login performSignIn")

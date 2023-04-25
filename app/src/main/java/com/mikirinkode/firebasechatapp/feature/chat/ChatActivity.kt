@@ -2,14 +2,20 @@ package com.mikirinkode.firebasechatapp.feature.chat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.km4quest.wafa.data.local.prefs.DataConstant
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
+import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
+import com.mikirinkode.firebasechatapp.data.model.UserOnlineStatus
 import com.mikirinkode.firebasechatapp.databinding.ActivityChatBinding
 import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ChatActivity : AppCompatActivity(), ChatView {
 
@@ -41,6 +47,13 @@ class ChatActivity : AppCompatActivity(), ChatView {
         initView()
         observeMessage()
         onActionClicked()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (receiverId != null){
+            presenter.getUserOnlineStatus(receiverId!!)
+        }
     }
 
     override fun onDestroy() {
@@ -89,10 +102,29 @@ class ChatActivity : AppCompatActivity(), ChatView {
     private fun setupPresenter(){
         presenter = ChatPresenter()
         presenter.attachView(this)
+        if (receiverId != null){
+            presenter.getUserOnlineStatus(receiverId!!)
+        }
     }
 
     override fun updateMessages(messages: List<ChatMessage>) {
         chatAdapter.setData(messages)
+    }
+
+    override fun updateReceiverOnlineStatus(status: UserOnlineStatus) {
+        Log.e("ChatActivity", "receiver status: $status")
+        Log.e("ChatActivity", "receiver status: ${status.online}")
+        Log.e("ChatActivity", "receiver status: ${status.lastOnlineTimestamp}")
+        if (status.online){
+            binding.tvUserStatus.text = "Online"
+        } else {
+            val timestamp = Timestamp(status.lastOnlineTimestamp)
+            val date = Date(timestamp.time)
+            val dateFormat = SimpleDateFormat("dd MMMM yyyy hh:mm a", Locale.getDefault())
+            val formattedDate = dateFormat.format(date)
+
+            binding.tvUserStatus.text = "Last Online at $formattedDate"
+        }
     }
 
     override fun showLoading() {}

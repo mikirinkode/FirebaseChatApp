@@ -32,6 +32,11 @@ class LoginActivity : AppCompatActivity(), LoginView {
         actionClicked()
     }
 
+    override fun onResume() {
+        super.onResume()
+        presenter.updateUserOnlineStatus()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         presenter.detachView()
@@ -50,6 +55,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
     private fun setupPresenter(){
         presenter = LoginPresenter()
         presenter.attachView(this)
+        presenter.updateUserOnlineStatus()
     }
 
     private fun goToMainView(){

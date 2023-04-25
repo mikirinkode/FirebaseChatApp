@@ -50,7 +50,19 @@
             app:layout_constraintTop_toTopOf="@id/cardUserAvatar"
             tools:text="Muhammad Wafa"
             android:layout_marginStart="16dp"
-            android:textSize="16sp"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+        <TextView
+            android:id="@+id/tvUserStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/cardUserAvatar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvName"
+            tools:text="Online"
+            android:layout_marginStart="16dp"
+            android:textSize="12sp"
             android:maxLines="1"
             android:ellipsize="end"/>
         

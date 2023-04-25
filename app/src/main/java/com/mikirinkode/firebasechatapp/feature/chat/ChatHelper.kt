@@ -3,6 +3,7 @@ package com.mikirinkode.firebasechatapp.feature.chat
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
 
 class ChatHelper(
@@ -48,10 +49,3 @@ class ChatHelper(
 interface ChatEventListener {
     fun onDataChangeReceived(messages: List<ChatMessage>)
 }
-
-data class ChatMessage(
-    val message: String = "",
-    val timestamp: Long = 0L,
-    val senderId: String = "",
-    val receiverId: String = "",
-)
