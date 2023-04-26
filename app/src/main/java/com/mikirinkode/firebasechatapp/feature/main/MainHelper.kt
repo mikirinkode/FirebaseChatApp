@@ -1,6 +1,9 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
 import android.util.Log
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.data.model.Conversation
@@ -17,7 +20,7 @@ class MainHelper(
     private val storage = FirebaseHelper.instance().getStorage()
     private val firestore = FirebaseHelper.instance().getFirestore()
 
-    private val chatMessagesRef = database?.getReference("chatMessages")
+    private val chatMessagesRef = database?.getReference("conversations")
 
     private suspend fun getUserById(userId: String): MutableList<DocumentSnapshot>? {
         val querySnapshot = firestore?.collection("users")
@@ -33,69 +36,76 @@ class MainHelper(
         val currentUser = auth?.currentUser
 
         val conversations = mutableListOf<Conversation>()
+        val result: ArrayList<Conversation> = ArrayList()
+//        firestore?.collection("conversations")
+//            ?.whereArrayContains("userIdList", currentUser?.uid.toString())
+//            ?.get()
+//            ?.addOnSuccessListener { documentList ->
+//                Log.e("MainHelper", "uid: ${currentUser?.uid.toString()}")
+//                Log.e("MainHelper", "size: ${documentList.size()}")
+//                for (document in documentList) {
+//                    val conversation: Conversation = document.toObject()
+//
+//                    // get interlocutor object
+//                    for (userId in conversation.userIdList) {
+//                        if (userId != currentUser?.uid) {
+//                            runBlocking {
+//                                val documents = getUserById(userId)
+//                                if (documents != null) {
+//                                    for (doc in documents) {
+//                                        val userAccount: UserAccount? = doc.toObject()
+//
+//                                        Log.e("MainHelper", "user ${userAccount?.name}")
+//                                        conversation.interlocutor = userAccount
+//                                        conversations.add(conversation)
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                    mListener.onDataChangeReceived(conversations)
+//                }
+//            }
 
-        firestore?.collection("conversations")
-            ?.whereArrayContains("userIdList", currentUser?.uid.toString())
-            ?.get()
-            ?.addOnSuccessListener { documentList ->
-                Log.e("MainHelper", "uid: ${currentUser?.uid.toString()}")
-                Log.e("MainHelper", "size: ${documentList.size()}")
-                for (document in documentList) {
-                    val conversation: Conversation = document.toObject()
 
-                    // get interlocutor object
-                    for (userId in conversation.userIdList) {
-                        if (userId != currentUser?.uid) {
-                            runBlocking {
-                                val documents = getUserById(userId)
-                                if (documents != null) {
-                                    for (doc in documents) {
-                                        val userAccount: UserAccount? = doc.toObject()
+        chatMessagesRef?.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                conversations.clear()
+                    Log.e("MainHelper", "snapshots size :${dataSnapshot.children}")
+                for (snapshot in dataSnapshot.children) {
+                    val userIds = snapshot.key?.split("-")
+                    val firstUserId = userIds?.first()
+                    val secondUserId = userIds?.last()
 
-                                        Log.e("MainHelper", "user ${userAccount?.name}")
-                                        conversation.interlocutor = userAccount
-                                        conversations.add(conversation)
-                                    }
-                                }
+                    if (firstUserId == currentUser?.uid) {
+                        val conversation = snapshot.getValue(Conversation::class.java)
+                        runBlocking {
+                            val documents = secondUserId?.let { getUserById(it) }
+                            val userAccount: UserAccount? = documents?.first()?.toObject()
+                            conversation?.interlocutor = userAccount
+                            if (conversation != null) {
+                                conversations.add(conversation)
+                            }
+                        }
+                    } else if (secondUserId == currentUser?.uid) {
+                        val conversation = snapshot.getValue(Conversation::class.java)
+                        runBlocking {
+                            val documents = firstUserId?.let { getUserById(it) }
+                            val userAccount: UserAccount? = documents?.first()?.toObject()
+                            conversation?.interlocutor = userAccount
+                            if (conversation != null) {
+                                conversations.add(conversation)
                             }
                         }
                     }
-                    mListener.onDataChangeReceived(conversations)
                 }
+                mListener.onDataChangeReceived(conversations)
             }
 
-
-//        chatMessagesRef?.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                for (snapshot in dataSnapshot.children) {
-//                    val userIds = snapshot.key?.split("-")
-//                    val firstUserId = userIds?.first()
-//                    val secondUserId = userIds?.last()
-//                    if (firstUserId == currentUser?.uid) {
-//                        val conversation = snapshot.getValue(Conversation::class.java)
-//                        val userAccount = secondUserId?.let { getUserById(it) }
-//                        conversation?.interlocutors = userAccount
-//
-//                        if (conversation != null) {
-//                            conversations.add(conversation)
-//                        }
-//                    } else if (secondUserId == currentUser?.uid) {
-//                        val conversation = snapshot.getValue(Conversation::class.java)
-//                        val userAccount = firstUserId?.let { getUserById(it) }
-//
-//                        conversation?.interlocutors = userAccount
-//                        if (conversation != null) {
-//                            conversations.add(conversation)
-//                        }
-//                    }
-//                }
-//                mListener.onDataChangeReceived(conversations)
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-////                TODO("Not yet implemented")
-//            }
-//        })
+            override fun onCancelled(error: DatabaseError) {
+//                TODO("Not yet implemented")
+            }
+        })
     }
 }
 

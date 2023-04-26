@@ -27,9 +27,6 @@ class ChatHelper(
         val chatMessage = ChatMessage(
             message, "", timeStamp, senderId, receiverId
         )
-        chatMessagesRef?.child(conversationId)?.child("messages")?.push()?.setValue(chatMessage)
-
-        val ref = firestore?.collection("conversations")?.document(conversationId)
 
         val conversation = hashMapOf(
             "conversationId" to conversationId,
@@ -38,7 +35,13 @@ class ChatHelper(
             "lastMessageTimestamp" to timeStamp,
             "lastSenderId" to senderId
         )
-        ref?.set(conversation, SetOptions.merge())
+
+        chatMessagesRef?.child(conversationId)?.updateChildren(conversation)
+        chatMessagesRef?.child(conversationId)?.child("messages")?.push()?.setValue(chatMessage)
+
+//        val ref = firestore?.collection("conversations")?.document(conversationId)
+
+//        ref?.set(conversation, SetOptions.merge())
     }
 
     fun sendMessage(message: String, senderId: String, receiverId: String, file: Uri, path: String) {
@@ -51,10 +54,6 @@ class ChatHelper(
                 val chatMessage = ChatMessage(
                     message, imageUrl = uri.toString(), timeStamp, senderId, receiverId
                 )
-                chatMessagesRef?.child(conversationId)?.child("messages")?.push()?.setValue(chatMessage)
-
-                val ref = firestore?.collection("conversations")?.document(conversationId)
-
                 val conversation = hashMapOf(
                     "conversationId" to conversationId,
                     "userIdList" to listOf(senderId, receiverId),
@@ -62,7 +61,12 @@ class ChatHelper(
                     "lastMessageTimestamp" to timeStamp,
                     "lastSenderId" to senderId
                 )
-                ref?.set(conversation, SetOptions.merge())
+                chatMessagesRef?.child(conversationId)?.updateChildren(conversation)
+                chatMessagesRef?.child(conversationId)?.child("messages")?.push()?.setValue(chatMessage)
+
+//                val ref = firestore?.collection("conversations")?.document(conversationId)
+//
+//                ref?.set(conversation, SetOptions.merge())
             }
         }
 
