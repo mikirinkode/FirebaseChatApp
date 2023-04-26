@@ -17,17 +17,16 @@ class FirebaseUserListHelper(
         val userList = ArrayList<UserAccount>()
 
         firestore?.collection("users")
+            ?.whereNotEqualTo("userId", currentUser?.uid)
             ?.get()
             ?.addOnSuccessListener { documentList ->
                 Log.e(TAG, "getUserList addOnSuccessListener")
                 for (document in documentList) {
-                    if (document != null){
-                        if (document["userId"] != currentUser?.uid){
-                            val userAccount: UserAccount = document.toObject()
-                            userList.add(userAccount)
-                        }
+                    if (document != null) {
+                        val userAccount: UserAccount = document.toObject()
+                        userList.add(userAccount)
                     }
-                Log.e(TAG, "getUserList ${userList.size}")
+                    Log.e(TAG, "getUserList ${userList.size}")
                 }
                 Log.e(TAG, "getUserList ${userList.size}")
                 mListener.onGetAllUserDataSuccess(userList)

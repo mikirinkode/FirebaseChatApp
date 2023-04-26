@@ -54,6 +54,9 @@ class ChatActivity : AppCompatActivity(), ChatView {
     companion object {
         private const val CAMERA_REQUEST_CODE = 1
         private const val GALLERY_REQUEST_CODE = 2
+        const val EXTRA_INTENT_RECEIVER_ID = "key_receiver_id"
+        const val EXTRA_INTENT_RECEIVER_AVATAR = "key_receiver_avatar"
+        const val EXTRA_INTENT_RECEIVER_NAME = "key_receiver_name"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,7 +72,7 @@ class ChatActivity : AppCompatActivity(), ChatView {
 
     override fun onResume() {
         super.onResume()
-        if (receiverId != null){
+        if (receiverId != null) {
             presenter.getUserOnlineStatus(receiverId!!)
         }
     }
@@ -80,9 +83,9 @@ class ChatActivity : AppCompatActivity(), ChatView {
     }
 
     private fun handleIntent() {
-        receiverId = intent.getStringExtra("key_receiver_id")
-        val receiverAvatar = intent.getStringExtra("key_receiver_avatar")
-        val receiverName = intent.getStringExtra("key_receiver_name")
+        receiverId = intent.getStringExtra(EXTRA_INTENT_RECEIVER_ID)
+        val receiverAvatar = intent.getStringExtra(EXTRA_INTENT_RECEIVER_AVATAR)
+        val receiverName = intent.getStringExtra(EXTRA_INTENT_RECEIVER_NAME)
 
         setupReceiverProfile(receiverName, receiverAvatar)
     }
@@ -100,7 +103,7 @@ class ChatActivity : AppCompatActivity(), ChatView {
         }
     }
 
-    private fun observeMessage(){
+    private fun observeMessage() {
         val userId = pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
         if (userId != null && receiverId != null) {
             presenter.receiveMessage(receiverId!!, userId)
@@ -110,17 +113,18 @@ class ChatActivity : AppCompatActivity(), ChatView {
     private fun setupReceiverProfile(receiverName: String?, receiverAvatar: String?) {
         binding.apply {
             tvName.text = receiverName
-            if (receiverAvatar != null && receiverAvatar != ""){
+            if (receiverAvatar != null && receiverAvatar != "") {
                 Glide.with(this@ChatActivity)
                     .load(receiverAvatar)
                     .into(ivUserAvatar)
             }
         }
     }
-    private fun setupPresenter(){
+
+    private fun setupPresenter() {
         presenter = ChatPresenter()
         presenter.attachView(this)
-        if (receiverId != null){
+        if (receiverId != null) {
             presenter.getUserOnlineStatus(receiverId!!)
         }
     }
@@ -188,28 +192,28 @@ class ChatActivity : AppCompatActivity(), ChatView {
         Log.e("ChatActivity", "receiver status: $status")
         Log.e("ChatActivity", "receiver status: ${status.online}")
         Log.e("ChatActivity", "receiver status: ${status.lastOnlineTimestamp}")
-        if (status.online){
-            binding.tvUserStatus.text = "Online"
-        } else {
-            val timestamp = Timestamp(status.lastOnlineTimestamp)
-            val date = Date(timestamp.time)
-            val dateFormat = SimpleDateFormat("dd MMMM yyyy hh:mm a", Locale.getDefault())
-            val formattedDate = dateFormat.format(date)
+        val timestamp = Timestamp(status.lastOnlineTimestamp)
+        val date = Date(timestamp.time)
+        val dateFormat = SimpleDateFormat("dd MMMM yyyy hh:mm a", Locale.getDefault())
+        val formattedDate = dateFormat.format(date)
 
-            binding.tvUserStatus.text = "Last Online at $formattedDate"
-        }
+        binding.tvUserStatus.text = "Last Online at $formattedDate"
+//        if (status.online){
+//            binding.tvUserStatus.text = "Online"
+//        } else {
+//        }
     }
 
     override fun showLoading() {}
 
     override fun hideLoading() {}
 
-    private fun onActionClicked(){
+    private fun onActionClicked() {
         binding.apply {
             btnBack.setOnClickListener { onBackPressed() }
 
             btnAddExtras.setOnClickListener {
-                if(layoutSelectExtras.visibility == View.GONE){
+                if (layoutSelectExtras.visibility == View.GONE) {
                     layoutSelectExtras.visibility = View.VISIBLE
                 } else {
                     layoutSelectExtras.visibility = View.GONE
@@ -218,11 +222,12 @@ class ChatActivity : AppCompatActivity(), ChatView {
 
             btnSend.setOnClickListener {
                 val message = etMessage.text.toString().trim()
-                if (message.isNotBlank()){
-                    val senderId = pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
-                    if (senderId != null && receiverId != null){
+                if (message.isNotBlank()) {
+                    val senderId =
+                        pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
+                    if (senderId != null && receiverId != null) {
                         etMessage.setText("")
-                        if (selectedFile != null){
+                        if (selectedFile != null) {
                             val imageExtension = MimeTypeMap.getSingleton()
                                 .getExtensionFromMimeType(
                                     contentResolver.getType(
@@ -230,8 +235,15 @@ class ChatActivity : AppCompatActivity(), ChatView {
                                     )
                                 )
 
-                            val path = "messages/images-" + System.currentTimeMillis() + "." + imageExtension
-                            presenter.sendMessage(message, senderId, receiverId!!, selectedFile!!, path)
+                            val path =
+                                "messages/images-" + System.currentTimeMillis() + "." + imageExtension
+                            presenter.sendMessage(
+                                message,
+                                senderId,
+                                receiverId!!,
+                                selectedFile!!,
+                                path
+                            )
                             binding.layoutSelectExtras.visibility = View.GONE
                             binding.layoutSelectedImage.visibility = View.GONE
                             selectedFile = null
@@ -244,7 +256,8 @@ class ChatActivity : AppCompatActivity(), ChatView {
 
             btnCamera.setOnClickListener {
                 // TODO: Handle later
-                Toast.makeText(this@ChatActivity, "Unimplemented", Toast.LENGTH_SHORT).show() // TODO: Remove later
+                Toast.makeText(this@ChatActivity, "Unimplemented", Toast.LENGTH_SHORT)
+                    .show() // TODO: Remove later
             }
 
             btnImportFromGallery.setOnClickListener {
