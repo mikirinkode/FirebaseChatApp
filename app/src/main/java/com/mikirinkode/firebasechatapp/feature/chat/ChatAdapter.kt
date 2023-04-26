@@ -21,6 +21,7 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
 
     private val messages: ArrayList<ChatMessage> = ArrayList()
     private var loggedUserId: String = ""
+    var chatClickListener: ChatClickListener? = null
 
     inner class ViewHolder(private val binding: ItemMessageBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -51,12 +52,33 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
                     view.layoutParams = params
                     view.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_sender_message_card)
 //                    view.setBackgroundResource(R.drawable.bg_sender_message_card)
+
+                    // it makes ui so laggy
+                    if (chat.beenRead){
+                        ivMessageStatus.visibility = View.VISIBLE
+                        Glide.with(itemView.context)
+                            .load(ResourcesCompat.getDrawable(itemView.resources, R.drawable.ic_chat_been_read, null))
+                            .into(ivMessageStatus)
+                    } else {
+                        if (chat.deliveredTimestamp != 0L){
+                            ivMessageStatus.visibility = View.VISIBLE
+                            Glide.with(itemView.context)
+                                .load(ResourcesCompat.getDrawable(itemView.resources, R.drawable.ic_chat_unread, null))
+                                .into(ivMessageStatus)
+                        }
+                    }
                 } else {
+                    ivMessageStatus.visibility = View.GONE
                     params.setMargins(32, 32, 128, 0)
                     view.layoutParams = params
                     view.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_receiver_message_card)
 //                    view.setBackgroundResource(R.drawable.bg_receiver_message_card)
                 }
+            }
+
+            itemView.setOnLongClickListener {
+                chatClickListener?.onLongClick(chat)
+                true
             }
         }
     }
@@ -82,5 +104,9 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
         messages.clear()
         messages.addAll(newList)
         notifyDataSetChanged()
+    }
+
+    interface ChatClickListener {
+        fun onLongClick(chat: ChatMessage)
     }
 }

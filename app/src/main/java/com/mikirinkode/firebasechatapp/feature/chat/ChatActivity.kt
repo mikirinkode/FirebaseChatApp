@@ -22,18 +22,16 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.km4quest.wafa.data.local.prefs.DataConstant
-import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.data.model.UserOnlineStatus
 import com.mikirinkode.firebasechatapp.databinding.ActivityChatBinding
-import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ChatActivity : AppCompatActivity(), ChatView {
+class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListener {
 
     private val binding: ActivityChatBinding by lazy {
         ActivityChatBinding.inflate(layoutInflater)
@@ -70,7 +68,13 @@ class ChatActivity : AppCompatActivity(), ChatView {
         onActionClicked()
     }
 
+    override fun onPause() {
+        Log.e("ChatActivity", "onPause")
+        super.onPause()
+    }
+
     override fun onResume() {
+        Log.e("ChatActivity", "onResume")
         super.onResume()
         if (receiverId != null) {
             presenter.getUserOnlineStatus(receiverId!!)
@@ -97,6 +101,8 @@ class ChatActivity : AppCompatActivity(), ChatView {
             val userId = pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
             rvMessages.layoutManager = LinearLayoutManager(this@ChatActivity)
             rvMessages.adapter = chatAdapter
+            chatAdapter.chatClickListener = this@ChatActivity
+
             if (userId != null) {
                 chatAdapter.setLoggedUserId(userId)
             }
@@ -184,6 +190,10 @@ class ChatActivity : AppCompatActivity(), ChatView {
         startActivityForResult(intent, GALLERY_REQUEST_CODE)
     }
 
+    private fun showOnLongChatClickDialog() {
+        Toast.makeText(this, "on long presee", Toast.LENGTH_SHORT).show()
+    }
+
     override fun updateMessages(messages: List<ChatMessage>) {
         chatAdapter.setData(messages)
     }
@@ -207,6 +217,10 @@ class ChatActivity : AppCompatActivity(), ChatView {
     override fun showLoading() {}
 
     override fun hideLoading() {}
+
+    override fun onLongClick(chat: ChatMessage) {
+        showOnLongChatClickDialog()
+    }
 
     private fun onActionClicked() {
         binding.apply {
@@ -258,6 +272,11 @@ class ChatActivity : AppCompatActivity(), ChatView {
                 // TODO: Handle later
                 Toast.makeText(this@ChatActivity, "Unimplemented", Toast.LENGTH_SHORT)
                     .show() // TODO: Remove later
+            }
+
+            btnCamera.setOnLongClickListener {
+                showOnLongChatClickDialog()
+                true
             }
 
             btnImportFromGallery.setOnClickListener {

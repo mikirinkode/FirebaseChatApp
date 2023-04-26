@@ -2,9 +2,9 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardItemMessage"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/cardItemMessage"
     app:strokeWidth="0dp">
 
 
@@ -14,35 +14,47 @@
         android:padding="12dp">
 
         <ImageView
-            android:visibility="gone"
-            tools:visibility="visible"
             android:id="@+id/ivMessageExtraImage"
             android:layout_width="match_parent"
             android:layout_height="150dp"
-            tools:src="@tools:sample/backgrounds/scenic"
             android:scaleType="centerCrop"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/backgrounds/scenic"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/tvMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toStartOf="@id/tvTimestamp"
-            app:layout_constraintTop_toBottomOf="@id/ivMessageExtraImage"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tvTimestamp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivMessageExtraImage"
             tools:text="some messagess" />
 
         <TextView
             android:id="@+id/tvTimestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ivMessageStatus"
             app:layout_constraintTop_toTopOf="@id/tvMessage"
             tools:text="20:15" />
+
+        <ImageView
+            android:id="@+id/ivMessageStatus"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/tvTimestamp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvTimestamp"
+            tools:src="@drawable/ic_chat_been_read"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
