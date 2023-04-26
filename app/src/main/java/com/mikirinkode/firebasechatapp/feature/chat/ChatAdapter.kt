@@ -1,5 +1,6 @@
 package com.mikirinkode.firebasechatapp.feature.chat
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,6 +49,12 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
                 val params = view.layoutParams as ViewGroup.MarginLayoutParams
 
                 if(chat.senderId == loggedUserId) {
+
+                    Log.e("ChatAdapter", "beenRead: ${chat.beenRead}, message: ${chat.message}")
+//                    Log.e("ChatAdapter", "sender: ${chat.senderId}")
+//                    Log.e("ChatAdapter", "logged user id: ${loggedUserId}")
+//                    Log.e("ChatAdapter", "message: ${chat.message}")
+
                     params.setMargins(192, 32, 32, 0)
                     view.layoutParams = params
                     view.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_sender_message_card)
@@ -56,19 +63,26 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
                     // it makes ui so laggy
                     if (chat.beenRead){
                         ivMessageStatus.visibility = View.VISIBLE
+                        tvTimestamp.text = "sudah dibaca"
                         Glide.with(itemView.context)
                             .load(ResourcesCompat.getDrawable(itemView.resources, R.drawable.ic_chat_been_read, null))
                             .into(ivMessageStatus)
-                    } else {
-                        if (chat.deliveredTimestamp != 0L){
-                            ivMessageStatus.visibility = View.VISIBLE
-                            Glide.with(itemView.context)
-                                .load(ResourcesCompat.getDrawable(itemView.resources, R.drawable.ic_chat_unread, null))
-                                .into(ivMessageStatus)
-                        }
+//                        ivBeenRead.visibility = View.VISIBLE
+//                        ivUnread.visibility = View.GONE
+                    }
+                    if (chat.deliveredTimestamp != 0L){
+//                        ivBeenRead.visibility = View.GONE
+//                        ivUnread.visibility = View.VISIBLE
+//                            ivMessageStatus.visibility = View.VISIBLE
+//                            Glide.with(itemView.context)
+//                                .load(ResourcesCompat.getDrawable(itemView.resources, R.drawable.ic_chat_unread, null))
+//                                .into(ivMessageStatus)
                     }
                 } else {
                     ivMessageStatus.visibility = View.GONE
+                    ivBeenRead.visibility = View.GONE
+                    ivUnread.visibility = View.GONE
+
                     params.setMargins(32, 32, 128, 0)
                     view.layoutParams = params
                     view.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_receiver_message_card)

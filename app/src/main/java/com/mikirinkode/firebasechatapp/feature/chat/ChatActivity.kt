@@ -222,9 +222,17 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
         showOnLongChatClickDialog()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+    }
+
     private fun onActionClicked() {
         binding.apply {
-            btnBack.setOnClickListener { onBackPressed() }
+            btnBack.setOnClickListener {
+                onBackPressed()
+                finish()
+            }
 
             btnAddExtras.setOnClickListener {
                 if (layoutSelectExtras.visibility == View.GONE) {
