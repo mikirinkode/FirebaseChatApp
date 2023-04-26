@@ -13,7 +13,7 @@
         <item name="android:fontFamily">@font/poppins</item>
         <item name="android:textColor">@color/night_theme_text_color</item>
         <item name="android:windowBackground">@color/night_window_background</item>
-        <item name="background">@color/black_secondary_background</item>
-        <item name="backgroundColor">@color/colorPrimaryDark</item>
+        <item name="background">@color/night_secondary_background</item>
+        <item name="backgroundColor">@color/night_third_background</item>
     </style>
 </resources>

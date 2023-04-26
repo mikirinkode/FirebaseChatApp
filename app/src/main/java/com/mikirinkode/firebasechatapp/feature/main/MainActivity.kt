@@ -14,6 +14,7 @@ import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
 import com.mikirinkode.firebasechatapp.feature.login.LoginActivity
+import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.feature.userlist.UserListActivity
 
 class MainActivity : AppCompatActivity(), MainView {
@@ -32,8 +33,8 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private lateinit var presenter: MainPresenter
 
-    private val chatHistoryAdapter: MainAdapter by lazy {
-        MainAdapter()
+    private val chatHistoryAdapter: ChatHistoryAdapter by lazy {
+        ChatHistoryAdapter()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,6 +96,15 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun onActionClick() {
         binding.apply {
+            ivUserAvatar.setOnClickListener {
+                startActivity(
+                    Intent(this@MainActivity, ProfileActivity::class.java).putExtra(
+                        ProfileActivity.EXTRA_INTENT_USER_ID,
+                        user?.userId
+                    )
+                )
+            }
+
             btnNewChat.setOnClickListener {
                 startActivity(Intent(this@MainActivity, UserListActivity::class.java))
             }

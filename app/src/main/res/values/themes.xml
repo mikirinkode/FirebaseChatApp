@@ -15,6 +15,5 @@
         <item name="android:windowBackground">@color/light_window_background</item>
         <item name="background">@color/white</item>
         <item name="backgroundColor">@color/colorPrimary</item>
-        <item name="colorOnBackground">@color/light_color_on_background</item>
     </style>
 </resources>

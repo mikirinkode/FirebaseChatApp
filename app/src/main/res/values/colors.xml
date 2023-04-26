@@ -16,7 +16,8 @@
 
     <color name="light_window_background">#F0F6FF</color>
     <color name="night_window_background">#17212B</color>
-    <color name="black_secondary_background">#1E2B38</color>
+    <color name="night_secondary_background">#1E2B38</color>
+    <color name="night_third_background">#1E2B38</color>
 
     <color name="light_color_on_background">#DBE5F3</color>
     <color name="night_color_on_background">#131C25</color>

@@ -30,43 +30,10 @@ class MainHelper(
         return querySnapshot?.documents
     }
 
-    // todo: last message not auto update
-    // try to change the listener or change to realtime database
     fun receiveMessageHistory() {
         val currentUser = auth?.currentUser
 
         val conversations = mutableListOf<Conversation>()
-        val result: ArrayList<Conversation> = ArrayList()
-//        firestore?.collection("conversations")
-//            ?.whereArrayContains("userIdList", currentUser?.uid.toString())
-//            ?.get()
-//            ?.addOnSuccessListener { documentList ->
-//                Log.e("MainHelper", "uid: ${currentUser?.uid.toString()}")
-//                Log.e("MainHelper", "size: ${documentList.size()}")
-//                for (document in documentList) {
-//                    val conversation: Conversation = document.toObject()
-//
-//                    // get interlocutor object
-//                    for (userId in conversation.userIdList) {
-//                        if (userId != currentUser?.uid) {
-//                            runBlocking {
-//                                val documents = getUserById(userId)
-//                                if (documents != null) {
-//                                    for (doc in documents) {
-//                                        val userAccount: UserAccount? = doc.toObject()
-//
-//                                        Log.e("MainHelper", "user ${userAccount?.name}")
-//                                        conversation.interlocutor = userAccount
-//                                        conversations.add(conversation)
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                    mListener.onDataChangeReceived(conversations)
-//                }
-//            }
-
 
         chatMessagesRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
