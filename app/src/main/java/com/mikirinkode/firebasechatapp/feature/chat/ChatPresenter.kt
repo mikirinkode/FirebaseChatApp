@@ -28,17 +28,11 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
     }
 
     fun receiveMessage(loggedUserId: String, openedUserId: String) {
-        Log.e("chatpresenter", "received message called")
-        Log.e("chatpresenter", "helper: $chatHelper")
-
         chatHelper = ChatHelper(this, loggedUserId, openedUserId)
         chatHelper?.receiveMessages()
     }
 
     override fun onDataChangeReceived(messages: List<ChatMessage>) {
-        Log.e("chatpresenter", "onDataChangeReceived")
-        Log.e("chatpresenter", "messages: ${messages.size}")
-        Log.e("chatpresenter", "view: $mView")
         mView?.updateMessages(messages)
     }
 
@@ -55,8 +49,6 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
     }
 
     override fun detachView() {
-        Log.e("ChatPresenter", "detaching view")
-
         chatHelper?.deactivateListener()
         chatHelper = null
         mView = null

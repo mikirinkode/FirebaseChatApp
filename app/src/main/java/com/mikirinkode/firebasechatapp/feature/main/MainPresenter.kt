@@ -18,6 +18,7 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     }
 
     fun getMessageHistory() {
+        Log.e("MainPresenter", "getMessageHistory called")
         mainHelper.receiveMessageHistory()
     }
 

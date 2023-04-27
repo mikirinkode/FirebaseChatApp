@@ -20,7 +20,7 @@ class MainHelper(
     private val storage = FirebaseHelper.instance().getStorage()
     private val firestore = FirebaseHelper.instance().getFirestore()
 
-    private val chatMessagesRef = database?.getReference("conversations")
+    private val conversationsRef = database?.getReference("conversations")
 
     private suspend fun getUserById(userId: String): MutableList<DocumentSnapshot>? {
         val querySnapshot = firestore?.collection("users")
@@ -31,12 +31,14 @@ class MainHelper(
     }
 
     fun receiveMessageHistory() {
+        Log.e("ChatHistoryHelper", "receiveMessageHistory called")
         val currentUser = auth?.currentUser
 
         val conversations = mutableListOf<Conversation>()
 
-        chatMessagesRef?.addValueEventListener(object : ValueEventListener {
+        conversationsRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
+                Log.e("ChatHistoryHelper", "receiveMessageHistory listener on data change")
                 conversations.clear()
                 for (snapshot in dataSnapshot.children) {
                     val userIds = snapshot.key?.split("-")
@@ -45,6 +47,7 @@ class MainHelper(
 
                     if (firstUserId == currentUser?.uid) {
                         val conversation = snapshot.getValue(Conversation::class.java)
+                        Log.e("ChatHistoryHelper", "total messages : ${conversation?.messages?.size}")
                         runBlocking {
                             val documents = secondUserId?.let { getUserById(it) }
                             val userAccount: UserAccount? = documents?.first()?.toObject()
@@ -52,15 +55,31 @@ class MainHelper(
                             if (conversation != null) {
                                 conversations.add(conversation)
                             }
+
+                            conversation?.messages?.forEach { (key, message) ->
+                                if (message.deliveredTimestamp == 0L && message.receiverId == currentUser?.uid){
+                                    if (conversation.conversationId != null){
+                                        updateMessageDeliveredTime(conversation.conversationId!!, message.messageId)
+                                    }
+                                }
+                            }
                         }
                     } else if (secondUserId == currentUser?.uid) {
                         val conversation = snapshot.getValue(Conversation::class.java)
+                        Log.e("ChatHistoryHelper", "total messages : ${conversation?.messages?.size}")
                         runBlocking {
                             val documents = firstUserId?.let { getUserById(it) }
                             val userAccount: UserAccount? = documents?.first()?.toObject()
                             conversation?.interlocutor = userAccount
                             if (conversation != null) {
                                 conversations.add(conversation)
+                            }
+                            conversation?.messages?.forEach { (key, message) ->
+                                if (message.deliveredTimestamp == 0L && message.receiverId == currentUser?.uid){
+                                    if (conversation.conversationId != null){
+                                        updateMessageDeliveredTime(conversation.conversationId!!, message.messageId)
+                                    }
+                                }
                             }
                         }
                     }
@@ -72,6 +91,14 @@ class MainHelper(
 //                TODO("Not yet implemented")
             }
         })
+    }
+
+    private fun updateMessageDeliveredTime(conversationId: String, messageId: String) {
+        val timeStamp = System.currentTimeMillis()
+
+        val messageRef =
+            conversationsRef?.child(conversationId)?.child("messages")?.child(messageId)?.ref
+        messageRef?.child("deliveredTimestamp")?.setValue(timeStamp)
     }
 }
 

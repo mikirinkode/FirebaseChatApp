@@ -53,12 +53,12 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun onResume() {
         super.onResume()
-        if (presenter != null) {
-            presenter.updateUserOnlineStatus()
-            presenter.getMessageHistory()
-        } else {
-            setupPresenter()
-        }
+//        if (presenter != null) {
+//            presenter.updateUserOnlineStatus()
+//            presenter.getMessageHistory()
+//        } else {
+//            setupPresenter()
+//        }
     }
 
     private fun initView() {
@@ -84,7 +84,6 @@ class MainActivity : AppCompatActivity(), MainView {
         presenter = MainPresenter()
         presenter.attachView(this)
         presenter.updateUserOnlineStatus()
-        presenter.getMessageHistory()
     }
 
     override fun onChatHistoryReceived(conversations: List<Conversation>) {

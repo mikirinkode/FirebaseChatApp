@@ -60,10 +60,21 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
                         tvMessageStatus.text = "✓✓"
                         tvMessageStatus.setTextColor(ResourcesCompat.getColor(itemView.resources, R.color.message_been_read_color, null))
                     }
-                    if (chat.deliveredTimestamp != 0L){
+                    if (!chat.beenRead && chat.deliveredTimestamp != 0L){
                         tvMessageStatus.visibility = View.VISIBLE
                         tvMessageStatus.text = "✓✓"
                     }
+
+                    if (!chat.beenRead && chat.deliveredTimestamp == 0L && chat.timestamp != 0L){
+                        tvMessageStatus.visibility = View.VISIBLE
+                        tvMessageStatus.text = "✓"
+                    }
+
+                    if (!chat.beenRead && chat.deliveredTimestamp == 0L && chat.timestamp == 0L){
+                        tvMessageStatus.visibility = View.VISIBLE
+                        tvMessageStatus.text = "sending"
+                    }
+
                 } else {
                     tvMessageStatus.visibility = View.GONE
 //                    ivMessageStatus.visibility = View.GONE

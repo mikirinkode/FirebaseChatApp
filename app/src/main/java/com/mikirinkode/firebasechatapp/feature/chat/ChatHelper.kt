@@ -28,22 +28,15 @@ class ChatHelper(
                 val chatMessage = snapshot.getValue(ChatMessage::class.java)
 
                 if (chatMessage != null) {
-                            Log.e("ChatHelper", "message id: ${chatMessage.messageId} --- been read? : ${chatMessage.beenRead}")
-                            Log.e("ChatHelper", "logged id: $loggedUserId --- opened Id : $openedChatUserId")
-                            Log.e("ChatHelper", "receiver id: ${chatMessage.receiverId} --- sender Id : ${chatMessage.senderId}")
 
                     if (chatMessage.receiverId == loggedUserId && chatMessage.senderId == openedChatUserId) {
-                            Log.e("ChatHelper", "${chatMessage.messageId} you are the receiver")
 
                         messages.add(chatMessage)
                         if (!chatMessage.beenRead) {
-                            Log.e("ChatHelper", "message has not been read, should call update message read time function")
                             updateMessageReadTime(snapshot?.key ?: "")
-                            Log.e("ChatHelper", "message has not been read, after call update message read time function")
                         }
                     }
                     if (chatMessage.receiverId == openedChatUserId && chatMessage.senderId == loggedUserId) {
-                            Log.e("ChatHelper", "${chatMessage.messageId} you are the sender")
                         messages.add(chatMessage)
                     }
                 }
@@ -66,12 +59,12 @@ class ChatHelper(
         val conversation = hashMapOf(
             "conversationId" to conversationId,
             "userIdList" to listOf(senderId, receiverId),
-            "lastMessage" to message,
-            "lastMessageTimestamp" to timeStamp,
-            "lastSenderId" to senderId
         )
 
+        // TODO: it is still 2x write, try to make it 1x write
         conversationsRef?.child(conversationId)?.updateChildren(conversation)
+//        conversationsRef?.child(conversationId)?.child("lastMessage")?.setValue(message)
+
         val newMessageKey = conversationsRef?.child(conversationId)?.child("messages")?.push()?.key
         if (newMessageKey != null) {
             val chatMessage = ChatMessage(
@@ -110,9 +103,6 @@ class ChatHelper(
                 val conversation = hashMapOf(
                     "conversationId" to conversationId,
                     "userIdList" to listOf(senderId, receiverId),
-                    "lastMessage" to message,
-                    "lastMessageTimestamp" to timeStamp,
-                    "lastSenderId" to senderId
                 )
                 conversationsRef?.child(conversationId)?.updateChildren(conversation)
                 val newMessageKey =
@@ -153,21 +143,13 @@ class ChatHelper(
         val conversationId =
             if (openedChatUserId < loggedUserId) "$openedChatUserId-$loggedUserId" else "$loggedUserId-$openedChatUserId"
 
-        Log.e("ChatHelper", "deactivateListener called")
         conversationsRef?.child(conversationId)?.child("messages")
             ?.removeEventListener(receiveListener)
     }
 
-    private fun updateMessageDeliveredTime(conversationId: String, messageId: String) {
-        val timeStamp = System.currentTimeMillis()
-
-        val messageRef =
-            conversationsRef?.child(conversationId)?.child("messages")?.child(messageId)?.ref
-        messageRef?.child("deliveredTimestamp")?.setValue(timeStamp)
-    }
 
     private fun updateMessageReadTime(messageId: String) {
-        Log.e("ChatHelper", "updateMessageReadTime called, message id: $messageId")
+
         val conversationId =
             if (openedChatUserId < loggedUserId) "$openedChatUserId-$loggedUserId" else "$loggedUserId-$openedChatUserId"
         val timeStamp = System.currentTimeMillis()

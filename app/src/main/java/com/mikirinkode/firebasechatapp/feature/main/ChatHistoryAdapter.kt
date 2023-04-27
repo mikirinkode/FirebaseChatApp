@@ -1,10 +1,15 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.mikirinkode.firebasechatapp.R
+import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.databinding.ItemChatHistoryBinding
 import com.mikirinkode.firebasechatapp.feature.chat.ChatActivity
@@ -23,21 +28,60 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
 
         fun bind(conversation: Conversation) {
             binding.apply {
+                val latestTimestamp: Long? = conversation.messages.maxByOrNull { it.value.timestamp }?.value?.timestamp
+                val latestMessage: ChatMessage? =
+                    conversation.messages.values.first { it.timestamp == latestTimestamp }
+
                 // TODO: create date helper
-                val timestamp = Timestamp(conversation.lastMessageTimestamp)
+                val timestamp = Timestamp(latestMessage?.timestamp ?: 0)
                 val date = Date(timestamp.time)
                 val dateFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
                 val time = dateFormat.format(date)
 
+
                 tvTimestamp.text = time
-                tvMessage.text = conversation.lastMessage
+                tvMessage.text = latestMessage?.message
                 tvUserName.text = conversation.interlocutor?.name
+
                 if (conversation.interlocutor?.avatarUrl != null && conversation.interlocutor?.avatarUrl != ""){
                     Glide.with(itemView.context)
                         .load(conversation.interlocutor?.avatarUrl).into(binding.ivUserAvatar)
                 }
 
+                if (latestMessage?.senderId == loggedUserId){
+                    if (latestMessage.beenRead){
+                        tvMessageStatus.visibility = View.VISIBLE
+                        tvMessageStatus.text = "✓✓"
+                        tvMessageStatus.setTextColor(ResourcesCompat.getColor(itemView.resources, R.color.message_been_read_color, null))
+                    }
+                    if (!latestMessage.beenRead && latestMessage.deliveredTimestamp != 0L){
+                        val currentNightMode = itemView.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
 
+                        when (currentNightMode) {
+                            Configuration.UI_MODE_NIGHT_YES -> {
+                                // The system is currently in night mode
+                                tvMessageStatus.setTextColor(ResourcesCompat.getColor(itemView.resources, R.color.night_theme_text_color, null))
+                            }
+                            Configuration.UI_MODE_NIGHT_NO -> {
+                                // The system is currently in day mode
+                                tvMessageStatus.setTextColor(ResourcesCompat.getColor(itemView.resources, R.color.light_theme_text_color, null))
+                            }
+                            Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                                // We don't know what mode we're in, assume day mode
+                                tvMessageStatus.setTextColor(ResourcesCompat.getColor(itemView.resources, R.color.light_theme_text_color, null))
+                            }
+                        }
+
+                        tvMessageStatus.visibility = View.VISIBLE
+                        tvMessageStatus.text = "✓✓"
+
+                    }
+
+                    if (!latestMessage.beenRead && latestMessage.deliveredTimestamp == 0L && latestMessage.timestamp != 0L){
+                        tvMessageStatus.visibility = View.VISIBLE
+                        tvMessageStatus.text = "✓"
+                    }
+                }
             }
             itemView.setOnClickListener {
                 itemView.context.startActivity(

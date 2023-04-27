@@ -70,31 +70,8 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
         onActionClicked()
     }
 
-    override fun onStart() {
-        super.onStart()
-        Log.e("ChatActivity", "onStart")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.e("ChatActivity", "onStop")
-    }
-
-    override fun onPause() {
-        Log.e("ChatActivity", "onPause")
-//        presenter.detachView()
-        super.onPause()
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        Log.e("ChatActivity", "onRestart")
-    }
-
     override fun onResume() {
-        Log.e("ChatActivity", "onResume")
         super.onResume()
-//        presenter.attachView(this)
         if (openedUserId != null) {
             presenter.getUserOnlineStatus(openedUserId!!)
         }
@@ -102,7 +79,6 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.e("ChatActivity", "onDestroy")
         presenter.detachView()
     }
 
