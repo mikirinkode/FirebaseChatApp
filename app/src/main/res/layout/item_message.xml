@@ -41,40 +41,49 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@+id/ivMessageStatus"
+            app:layout_constraintEnd_toStartOf="@+id/tvMessageStatus"
             app:layout_constraintTop_toTopOf="@id/tvMessage"
             tools:text="20:15" />
-
-        <ImageView
-            android:id="@+id/ivMessageStatus"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:layout_constraintBottom_toBottomOf="@id/tvTimestamp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tvTimestamp"
-            tools:visibility="visible" />
-
-        <ImageView
-            android:id="@+id/ivBeenRead"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+        <TextView
+            android:id="@+id/tvMessageStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="been read"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tvTimestamp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tvTimestamp"
-            android:src="@drawable/ic_chat_been_read"
             tools:visibility="visible" />
+<!--        <ImageView-->
+<!--            android:id="@+id/ivMessageStatus"-->
+<!--            android:layout_width="20dp"-->
+<!--            android:layout_height="20dp"-->
+<!--            app:layout_constraintBottom_toBottomOf="@id/tvTimestamp"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="@id/tvTimestamp"-->
+<!--            tools:visibility="visible" />-->
 
-        <ImageView
-            android:id="@+id/ivUnread"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/tvTimestamp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tvTimestamp"
-            android:src="@drawable/ic_chat_unread"
-            tools:visibility="visible" />
+<!--        <ImageView-->
+<!--            android:id="@+id/ivBeenRead"-->
+<!--            android:layout_width="20dp"-->
+<!--            android:layout_height="20dp"-->
+<!--            android:visibility="gone"-->
+<!--            app:layout_constraintBottom_toBottomOf="@id/tvTimestamp"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="@id/tvTimestamp"-->
+<!--            android:src="@drawable/ic_chat_been_read"-->
+<!--            tools:visibility="visible" />-->
+
+<!--        <ImageView-->
+<!--            android:id="@+id/ivUnread"-->
+<!--            android:layout_width="20dp"-->
+<!--            android:layout_height="20dp"-->
+<!--            android:visibility="gone"-->
+<!--            app:layout_constraintBottom_toBottomOf="@id/tvTimestamp"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="@id/tvTimestamp"-->
+<!--            android:src="@drawable/ic_chat_unread"-->
+<!--            tools:visibility="visible" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
