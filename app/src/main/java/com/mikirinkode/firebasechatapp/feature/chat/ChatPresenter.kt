@@ -8,30 +8,41 @@ import com.mikirinkode.firebasechatapp.data.model.UserOnlineStatus
 import com.mikirinkode.firebasechatapp.firebase.FirebaseUserOnlineStatusHelper
 import com.mikirinkode.firebasechatapp.firebase.UserOnlineStatusEventListener
 
-class ChatPresenter: BasePresenter<ChatView>, ChatEventListener, UserOnlineStatusEventListener {
+class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStatusEventListener {
     private var mView: ChatView? = null
-    private val chatHelper = ChatHelper(this)
+    private var chatHelper: ChatHelper? = null
     private val userOnlineStatusHelper = FirebaseUserOnlineStatusHelper(this)
 
-    fun sendMessage(message: String, senderId: String, receiverId: String){
-        chatHelper.sendMessage(message, senderId, receiverId)
+    fun sendMessage(message: String, senderId: String, receiverId: String) {
+        chatHelper?.sendMessage(message, senderId, receiverId)
     }
 
-    fun sendMessage(message: String, senderId: String, receiverId: String, file: Uri, path: String){
-        chatHelper.sendMessage(message, senderId, receiverId, file, path)
+    fun sendMessage(
+        message: String,
+        senderId: String,
+        receiverId: String,
+        file: Uri,
+        path: String
+    ) {
+        chatHelper?.sendMessage(message, senderId, receiverId, file, path)
     }
 
-    fun receiveMessage(receiverId: String, senderId: String){
-        chatHelper.receiveMessages(receiverId, senderId)
+    fun receiveMessage(loggedUserId: String, openedUserId: String) {
+        Log.e("chatpresenter", "received message called")
+        Log.e("chatpresenter", "helper: $chatHelper")
+
+        chatHelper = ChatHelper(this, loggedUserId, openedUserId)
+        chatHelper?.receiveMessages()
     }
 
     override fun onDataChangeReceived(messages: List<ChatMessage>) {
-        Log.e("chatpresenter", "messages: $messages")
+        Log.e("chatpresenter", "onDataChangeReceived")
         Log.e("chatpresenter", "messages: ${messages.size}")
+        Log.e("chatpresenter", "view: $mView")
         mView?.updateMessages(messages)
     }
 
-    fun getUserOnlineStatus(userId: String){
+    fun getUserOnlineStatus(userId: String) {
         userOnlineStatusHelper.getUserOnlineStatus(userId)
     }
 
@@ -44,6 +55,10 @@ class ChatPresenter: BasePresenter<ChatView>, ChatEventListener, UserOnlineStatu
     }
 
     override fun detachView() {
-        mView  = null
+        Log.e("ChatPresenter", "detaching view")
+
+        chatHelper?.deactivateListener()
+        chatHelper = null
+        mView = null
     }
 }

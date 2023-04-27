@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.firebase.firestore.auth.User
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ItemUserBinding
 import com.mikirinkode.firebasechatapp.feature.chat.ChatActivity
@@ -32,9 +31,9 @@ class UserListAdapter : RecyclerView.Adapter<UserListAdapter.ViewHolder>() {
                         itemView.context,
                         ChatActivity::class.java
                     )
-                        .putExtra(ChatActivity.EXTRA_INTENT_RECEIVER_ID, user.userId)
-                        .putExtra(ChatActivity.EXTRA_INTENT_RECEIVER_AVATAR, user.avatarUrl)
-                        .putExtra(ChatActivity.EXTRA_INTENT_RECEIVER_NAME, user.name)
+                        .putExtra(ChatActivity.EXTRA_INTENT_OPENED_USER_ID, user.userId)
+                        .putExtra(ChatActivity.EXTRA_INTENT_OPENED_USER_AVATAR, user.avatarUrl)
+                        .putExtra(ChatActivity.EXTRA_INTENT_OPENED_USER_NAME, user.name)
                 )
             }
         }

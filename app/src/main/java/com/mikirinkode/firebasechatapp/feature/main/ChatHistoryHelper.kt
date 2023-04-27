@@ -38,7 +38,6 @@ class MainHelper(
         chatMessagesRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 conversations.clear()
-                    Log.e("MainHelper", "snapshots size :${dataSnapshot.children}")
                 for (snapshot in dataSnapshot.children) {
                     val userIds = snapshot.key?.split("-")
                     val firstUserId = userIds?.first()

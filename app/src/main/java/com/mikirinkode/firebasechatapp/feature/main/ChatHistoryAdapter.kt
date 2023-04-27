@@ -32,7 +32,7 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                 tvTimestamp.text = time
                 tvMessage.text = conversation.lastMessage
                 tvUserName.text = conversation.interlocutor?.name
-                if (!conversation.interlocutor?.avatarUrl.isNullOrBlank()){
+                if (conversation.interlocutor?.avatarUrl != null && conversation.interlocutor?.avatarUrl != ""){
                     Glide.with(itemView.context)
                         .load(conversation.interlocutor?.avatarUrl).into(binding.ivUserAvatar)
                 }
@@ -45,9 +45,9 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                         itemView.context,
                         ChatActivity::class.java
                     )
-                        .putExtra(ChatActivity.EXTRA_INTENT_RECEIVER_ID, conversation.interlocutor?.userId)
-                        .putExtra(ChatActivity.EXTRA_INTENT_RECEIVER_AVATAR, conversation.interlocutor?.avatarUrl)
-                        .putExtra(ChatActivity.EXTRA_INTENT_RECEIVER_NAME, conversation.interlocutor?.name)
+                        .putExtra(ChatActivity.EXTRA_INTENT_OPENED_USER_ID, conversation.interlocutor?.userId)
+                        .putExtra(ChatActivity.EXTRA_INTENT_OPENED_USER_AVATAR, conversation.interlocutor?.avatarUrl)
+                        .putExtra(ChatActivity.EXTRA_INTENT_OPENED_USER_NAME, conversation.interlocutor?.name)
                 )
             }
         }

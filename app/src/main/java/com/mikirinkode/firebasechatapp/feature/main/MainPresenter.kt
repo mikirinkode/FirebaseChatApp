@@ -23,11 +23,7 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
 
     override fun onDataChangeReceived(conversations: List<Conversation>) {
         mView?.onChatHistoryReceived(conversations)
-        Log.e("MainPresenter", "chat history received")
-        Log.e("MainPresenter", "${conversations.size}")
-        for (conversation in conversations) {
-            Log.e("MainPresenter", "${conversation.conversationId}")
-        }
+            Log.e("MainPresenter", "on chat history data change received")
     }
 
     override fun attachView(view: MainView) {

@@ -50,8 +50,6 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
 
                 if(chat.senderId == loggedUserId) {
 
-                    Log.e("ChatAdapter", "beenRead: ${chat.beenRead}, message: ${chat.message}")
-
                     params.setMargins(192, 32, 32, 0)
                     view.layoutParams = params
                     view.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_sender_message_card)
