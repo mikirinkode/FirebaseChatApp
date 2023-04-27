@@ -48,6 +48,12 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                         .load(conversation.interlocutor?.avatarUrl).into(binding.ivUserAvatar)
                 }
 
+                if (conversation.unreadMessages > 0){
+                    // if there are unread messages
+                    tvMessageStatus.visibility = View.GONE
+                    tvUnreadMessages.visibility = View.VISIBLE
+                    tvUnreadMessages.text = conversation.unreadMessages.toString()
+                }
                 if (latestMessage?.senderId == loggedUserId){
                     if (latestMessage.beenRead){
                         tvMessageStatus.visibility = View.VISIBLE
@@ -81,6 +87,8 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                         tvMessageStatus.visibility = View.VISIBLE
                         tvMessageStatus.text = "✓"
                     }
+                } else {
+                    tvMessageStatus.visibility = View.GONE
                 }
             }
             itemView.setOnClickListener {

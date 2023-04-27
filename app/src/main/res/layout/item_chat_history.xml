@@ -57,8 +57,8 @@
         android:id="@+id/tvTimestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
         android:layout_marginEnd="8dp"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/tvMessageStatus"
         app:layout_constraintTop_toTopOf="parent"
@@ -68,10 +68,27 @@
         android:id="@+id/tvMessageStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tvTimestamp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tvUnreadMessages"
+        app:layout_constraintTop_toTopOf="@id/tvTimestamp"
         tools:text=" been read"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/tvUnreadMessages"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_unread_message_number_card"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="0dp"
+        android:textColor="@color/white"
+        android:textSize="12sp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/tvTimestamp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tvTimestamp"
+        tools:text="1"
         tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

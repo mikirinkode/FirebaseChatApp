@@ -48,38 +48,59 @@ class MainHelper(
                     if (firstUserId == currentUser?.uid) {
                         val conversation = snapshot.getValue(Conversation::class.java)
                         Log.e("ChatHistoryHelper", "total messages : ${conversation?.messages?.size}")
+
                         runBlocking {
                             val documents = secondUserId?.let { getUserById(it) }
                             val userAccount: UserAccount? = documents?.first()?.toObject()
-                            conversation?.interlocutor = userAccount
-                            if (conversation != null) {
-                                conversations.add(conversation)
-                            }
+                            var unreadMessageCounter = 0
 
                             conversation?.messages?.forEach { (key, message) ->
-                                if (message.deliveredTimestamp == 0L && message.receiverId == currentUser?.uid){
-                                    if (conversation.conversationId != null){
-                                        updateMessageDeliveredTime(conversation.conversationId!!, message.messageId)
+                                if (message.receiverId == currentUser?.uid){
+                                    if (!message.beenRead){
+                                        unreadMessageCounter = unreadMessageCounter.plus(1)
+                                    }
+                                    if (message.deliveredTimestamp == 0L){
+                                        if (conversation.conversationId != null){
+                                            updateMessageDeliveredTime(conversation.conversationId!!, message.messageId)
+                                        }
                                     }
                                 }
+                            }
+
+                            conversation?.interlocutor = userAccount
+                            conversation?.unreadMessages = unreadMessageCounter
+
+                            if (conversation != null) {
+                                conversations.add(conversation)
                             }
                         }
                     } else if (secondUserId == currentUser?.uid) {
                         val conversation = snapshot.getValue(Conversation::class.java)
                         Log.e("ChatHistoryHelper", "total messages : ${conversation?.messages?.size}")
+
                         runBlocking {
                             val documents = firstUserId?.let { getUserById(it) }
                             val userAccount: UserAccount? = documents?.first()?.toObject()
-                            conversation?.interlocutor = userAccount
-                            if (conversation != null) {
-                                conversations.add(conversation)
-                            }
+                            var unreadMessageCounter = 0
+
                             conversation?.messages?.forEach { (key, message) ->
-                                if (message.deliveredTimestamp == 0L && message.receiverId == currentUser?.uid){
-                                    if (conversation.conversationId != null){
-                                        updateMessageDeliveredTime(conversation.conversationId!!, message.messageId)
+                                if (message.receiverId == currentUser?.uid){
+                                    if (!message.beenRead){
+                                        unreadMessageCounter = unreadMessageCounter.plus(1)
+                                    }
+                                    if (message.deliveredTimestamp == 0L){
+                                        if (conversation.conversationId != null){
+                                            updateMessageDeliveredTime(conversation.conversationId!!, message.messageId)
+                                        }
                                     }
                                 }
+                            }
+
+                            conversation?.interlocutor = userAccount
+                            conversation?.unreadMessages = unreadMessageCounter
+
+                            if (conversation != null) {
+                                conversations.add(conversation)
                             }
                         }
                     }

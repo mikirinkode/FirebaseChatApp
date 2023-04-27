@@ -5,5 +5,6 @@ data class Conversation(
     var userIdList: List<String> = listOf(),
     var messages: Map<String, ChatMessage> = mapOf(),
 
+    var unreadMessages: Int = 0,
     var interlocutor: UserAccount? = null,
 )
