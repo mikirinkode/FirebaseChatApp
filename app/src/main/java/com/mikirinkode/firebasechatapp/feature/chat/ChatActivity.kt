@@ -2,6 +2,7 @@ package com.mikirinkode.firebasechatapp.feature.chat
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -10,6 +11,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -196,6 +198,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
 
     override fun updateMessages(messages: List<ChatMessage>) {
         chatAdapter.setData(messages)
+        binding.rvMessages.smoothScrollToPosition(chatAdapter.itemCount - 1)
     }
 
     override fun updateReceiverOnlineStatus(status: UserOnlineStatus) {
@@ -243,6 +246,16 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
             }
 
             btnSend.setOnClickListener {
+                // Get a reference to the InputMethodManager
+                val imm =
+                    this@ChatActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+                // Check if the keyboard is currently open
+                if (imm.isAcceptingText) {
+                    // If the keyboard is open, hide it
+                    imm.hideSoftInputFromWindow(binding.root.windowToken, 0)
+                }
+
                 val message = etMessage.text.toString().trim()
                 if (message.isNotBlank()) {
                     val senderId =
