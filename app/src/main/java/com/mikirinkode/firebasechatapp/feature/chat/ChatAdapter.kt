@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.databinding.ItemMessageBinding
+import com.mikirinkode.firebasechatapp.helper.DateHelper
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,73 +25,68 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
     private var loggedUserId: String = ""
     var chatClickListener: ChatClickListener? = null
 
-    inner class ViewHolder(private val binding: ItemMessageBinding) :
+    private val dateType = 0
+    private val messageType = 1
+
+    inner class ViewHolder(val binding: ItemMessageBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(chat: ChatMessage) {
             binding.apply {
-                // TODO: create date helper
-                val timestamp = Timestamp(chat.timestamp)
-                val date = Date(timestamp.time)
-                val dateFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-                val time = dateFormat.format(date)
 
-                tvMessage.text = chat.message
-                tvTimestamp.text = time
+                if (chat.senderId == loggedUserId) {
+                    loggedUserMessageCard.visibility = View.VISIBLE
+                    interlocutorMessageCard.visibility = View.GONE
 
-                if (chat.imageUrl != ""){
-                    ivMessageExtraImage.visibility = View.VISIBLE
-                    Glide.with(itemView.context)
-                        .load(chat.imageUrl)
-                        .into(ivMessageExtraImage)
-                }
+                    tvloggedUserMessage.text = chat.message
+                    tvloggedUserTimestamp.text = DateHelper.messageTimeFormat(chat.timestamp)
 
-                val view = itemView.findViewById<View>(R.id.cardItemMessage)
-                val params = view.layoutParams as ViewGroup.MarginLayoutParams
-
-                if(chat.senderId == loggedUserId) {
-
-                    params.setMargins(192, 32, 32, 0)
-                    view.layoutParams = params
-                    view.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_sender_message_card)
-//                    view.setBackgroundResource(R.drawable.bg_sender_message_card)
+                    if (chat.imageUrl != "") {
+                        ivloggedUserExtraImage.visibility = View.VISIBLE
+                        Glide.with(itemView.context)
+                            .load(chat.imageUrl)
+                            .into(ivloggedUserExtraImage)
+                    }
 
                     if (chat.beenRead){
-                        tvMessageStatus.visibility = View.VISIBLE
-                        tvMessageStatus.text = "✓✓"
-                        tvMessageStatus.setTextColor(ResourcesCompat.getColor(itemView.resources, R.color.message_been_read_color, null))
+                        tvloggedUserMessageStatus.visibility = View.VISIBLE
+                        tvloggedUserMessageStatus.text = "✓✓"
+                        tvloggedUserMessageStatus.setTextColor(ResourcesCompat.getColor(itemView.resources, R.color.message_been_read_color, null))
                     }
                     if (!chat.beenRead && chat.deliveredTimestamp != 0L){
-                        tvMessageStatus.visibility = View.VISIBLE
-                        tvMessageStatus.text = "✓✓"
+                        tvloggedUserMessageStatus.visibility = View.VISIBLE
+                        tvloggedUserMessageStatus.text = "✓✓"
                     }
 
                     if (!chat.beenRead && chat.deliveredTimestamp == 0L && chat.timestamp != 0L){
-                        tvMessageStatus.visibility = View.VISIBLE
-                        tvMessageStatus.text = "✓"
+                        tvloggedUserMessageStatus.visibility = View.VISIBLE
+                        tvloggedUserMessageStatus.text = "✓"
                     }
 
                     if (!chat.beenRead && chat.deliveredTimestamp == 0L && chat.timestamp == 0L){
-                        tvMessageStatus.visibility = View.VISIBLE
-                        tvMessageStatus.text = "sending"
+                        tvloggedUserMessageStatus.visibility = View.VISIBLE
+                        tvloggedUserMessageStatus.text = "sending"
                     }
 
                 } else {
-                    tvMessageStatus.visibility = View.GONE
-//                    ivMessageStatus.visibility = View.GONE
-//                    ivBeenRead.visibility = View.GONE
-//                    ivUnread.visibility = View.GONE
+                    loggedUserMessageCard.visibility = View.GONE
+                    interlocutorMessageCard.visibility = View.VISIBLE
 
-                    params.setMargins(32, 32, 128, 0)
-                    view.layoutParams = params
-                    view.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_receiver_message_card)
-//                    view.setBackgroundResource(R.drawable.bg_receiver_message_card)
+                    tvInterlocutorMessage.text = chat.message
+                    tvInterlocutorTimestamp.text = DateHelper.messageTimeFormat(chat.timestamp)
+
+                    if (chat.imageUrl != "") {
+                        ivInterlocutorExtraImage.visibility = View.VISIBLE
+                        Glide.with(itemView.context)
+                            .load(chat.imageUrl)
+                            .into(ivInterlocutorExtraImage)
+                    }
                 }
-            }
 
-            itemView.setOnLongClickListener {
-                chatClickListener?.onLongClick(chat)
-                true
+                itemView.setOnLongClickListener {
+                    chatClickListener?.onLongClick(chat)
+                    true
+                }
             }
         }
     }
@@ -100,12 +96,55 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
         return ViewHolder(binding)
     }
 
+//    override fun getItemViewType(position: Int): Int {
+//        return super.getItemViewType(position)
+//    }
+
     override fun getItemCount(): Int {
         return messages.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(messages[position])
+        val message = messages[position]
+
+        var headerTimestamp: Long? = null
+
+        if (position == 0){
+            Log.e("ChatAdapter", "first message: $message")
+            headerTimestamp = message.timestamp
+        }
+
+        if (position > 1 && position + 1 < messages.size -1){
+            val prevMessage = messages[position -1]
+
+            val calendar = GregorianCalendar.getInstance()
+            
+            calendar.time = DateHelper.formatTimestampToDate(message.timestamp)
+            val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+            
+            calendar.time = DateHelper.formatTimestampToDate(prevMessage.timestamp)
+            val prevDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+
+            // if day in this message and day in previous message is different
+            // then show the header
+            if (prevDayOfYear != dayOfYear){
+                headerTimestamp = message.timestamp
+            }
+        }
+        if (headerTimestamp != null){
+            holder.binding.cardDateHeader.visibility = View.VISIBLE
+            holder.binding.tvDateHeader.text = DateHelper.regularFormat(headerTimestamp)
+        } else {
+            holder.binding.cardDateHeader.visibility = View.GONE
+        }
+
+//        headerDate?.let {
+//            holder.binding.tvDateHeader.visibility = View.VISIBLE
+//            holder.binding.tvDateHeader.text = it.toString()
+//        } ?: run {
+//            holder.binding.tvDateHeader.visibility = View.GONE
+//        }
     }
 
     fun setLoggedUserId(userId: String){

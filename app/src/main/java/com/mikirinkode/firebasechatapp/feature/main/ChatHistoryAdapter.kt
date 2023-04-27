@@ -13,6 +13,7 @@ import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.databinding.ItemChatHistoryBinding
 import com.mikirinkode.firebasechatapp.feature.chat.ChatActivity
+import com.mikirinkode.firebasechatapp.helper.DateHelper
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -32,14 +33,7 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                 val latestMessage: ChatMessage? =
                     conversation.messages.values.first { it.timestamp == latestTimestamp }
 
-                // TODO: create date helper
-                val timestamp = Timestamp(latestMessage?.timestamp ?: 0)
-                val date = Date(timestamp.time)
-                val dateFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-                val time = dateFormat.format(date)
-
-
-                tvTimestamp.text = time
+                tvTimestamp.text = DateHelper.messageTimeFormat(latestMessage?.timestamp ?: 0)
                 tvMessage.text = latestMessage?.message
                 tvUserName.text = conversation.interlocutor?.name
 
