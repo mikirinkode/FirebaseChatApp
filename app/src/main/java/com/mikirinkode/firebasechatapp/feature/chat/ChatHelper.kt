@@ -2,10 +2,16 @@ package com.mikirinkode.firebasechatapp.feature.chat
 
 import android.net.Uri
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.NotificationParams
+import com.google.firebase.messaging.RemoteMessage
 import com.google.firebase.storage.StorageReference
+import com.mikirinkode.firebasechatapp.BaseApplication
+import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
 
@@ -79,11 +85,50 @@ class ChatHelper(
             )
             conversationsRef?.child(conversationId)?.child("messages")?.child(newMessageKey)
                 ?.setValue(chatMessage)
+            database?.getReference("messages")?.push()?.setValue(chatMessage)
+            sendNotificationToUser(receiverId, message)
         }
 
 //        val ref = firestore?.collection("conversations")?.document(conversationId)
 
 //        ref?.set(conversation, SetOptions.merge())
+    }
+
+
+    private fun sendNotificationToUser(userId: String, message: String) {
+        Log.e("ChatHelper", "sendNotificationToUser")
+        val tokenRef = database?.getReference("users/$userId/fcmToken")
+        tokenRef?.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val token = snapshot.getValue(String::class.java)
+        Log.e("ChatHelper", "token: ${token}")
+        Log.e("ChatHelper", "userId: ${userId}}")
+
+//                val notification = NotificationCompat.Builder(BaseApplication().applicationContext, "channel id")
+//                    .setContentTitle("sent from chat helper")
+//                    .setContentText("message sent from chat helper")
+//                    .setSmallIcon(R.drawable.ic_notification)
+//                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                    .build()
+
+                val fcmInstance = FirebaseMessaging.getInstance()
+                val data = hashMapOf(
+                    "title" to "titel",
+                    "message" to "sent from chat helper",
+                )
+                val remoteMessage = RemoteMessage.Builder(token!!)
+                    .setMessageId("message id")
+                    .setTtl(0)
+                    .setData(data)
+                    .build()
+                fcmInstance.send(remoteMessage)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+//                TODO("Not yet implemented")
+            }
+
+        })
     }
 
     fun sendMessage(
@@ -121,6 +166,8 @@ class ChatHelper(
                     )
                     conversationsRef?.child(conversationId)?.child("messages")?.child(newMessageKey)
                         ?.setValue(chatMessage)
+
+                    database?.getReference("messages")?.push()?.setValue(chatMessage)
                 }
 
 //                val ref = firestore?.collection("conversations")?.document(conversationId)

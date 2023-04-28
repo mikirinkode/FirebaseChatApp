@@ -29,12 +29,18 @@ class FirebaseHelper {
     }
 
     fun observeToken(){
+        val currentUserId = firebaseAuth?.currentUser?.uid
+        val userRef = firebaseDatabase?.getReference("users")
+
         firebaseMessaging?.token?.addOnCompleteListener { task ->
             if (task.isSuccessful){
                 val token = task.result
                 Log.d("FirebaseHelper", "Token: $token")
 
                 // Todo: Save token to server if use a server
+                if (currentUserId != null){
+                    userRef?.child(currentUserId)?.child("fcmToken")?.setValue(token)
+                }
             }
         }
     }
