@@ -53,6 +53,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-database-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+
 
     //----- Google play services auth for login using google account
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
