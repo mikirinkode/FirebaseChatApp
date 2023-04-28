@@ -96,6 +96,15 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible">
 
+        <View
+            android:layout_width="2dp"
+            android:layout_height="16dp"
+            android:id="@+id/separator"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
         <Button
             android:id="@+id/btnImportFromGallery"
             style="@style/Widget.Material3.Button.IconButton"
@@ -108,7 +117,7 @@
             app:icon="@drawable/ic_gallery"
             app:iconPadding="8dp"
             app:iconSize="24dp"
-            app:layout_constraintEnd_toStartOf="@id/btnCamera"
+            app:layout_constraintEnd_toStartOf="@id/separator"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -125,9 +134,40 @@
             app:iconPadding="8dp"
             app:iconSize="24dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btnImportFromGallery"
+            app:layout_constraintStart_toEndOf="@id/separator"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <Button
+            android:id="@+id/btnVideo"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:padding="0dp"
+            android:text="Video"
+            android:textColor="?android:attr/textColor"
+            app:icon="@drawable/ic_video"
+            app:iconPadding="8dp"
+            app:iconSize="24dp"
+            app:layout_constraintEnd_toStartOf="@id/separator"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnImportFromGallery"/>
+
+        <Button
+            android:id="@+id/btnLocation"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:padding="0dp"
+            android:text="Location"
+            android:textColor="?android:attr/textColor"
+            app:icon="@drawable/ic_location"
+            app:iconPadding="8dp"
+            app:iconSize="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/separator"
+            app:layout_constraintTop_toBottomOf="@id/btnCamera"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -142,7 +182,7 @@
         app:layout_constraintBottom_toTopOf="@id/layoutSendMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <Button
             android:id="@+id/btnRemoveSelectedFile"
@@ -179,16 +219,31 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/btnAddExtras"
+            android:id="@+id/btnEmoji"
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="0dp"
             android:padding="0dp"
-            app:icon="@drawable/ic_attach_file"
-            app:iconSize="32dp"
+            app:icon="@drawable/ic_emoji"
+            app:iconSize="24dp"
             app:layout_constraintBottom_toBottomOf="@id/tilMessage"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tilMessage"
+            app:tint="?android:attr/textColor" />
+
+        <Button
+            android:id="@+id/btnAddExtras"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:padding="0dp"
+            app:icon="@drawable/ic_attach_file"
+            app:iconSize="24dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/tilMessage"
+            app:layout_constraintStart_toEndOf="@id/btnEmoji"
             app:layout_constraintTop_toTopOf="@id/tilMessage"
             app:tint="?android:attr/textColor" />
 
@@ -223,7 +278,7 @@
             android:layout_margin="0dp"
             android:padding="0dp"
             app:icon="@drawable/ic_send"
-            app:iconSize="32dp"
+            app:iconSize="24dp"
             app:layout_constraintBottom_toBottomOf="@id/tilMessage"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tilMessage"

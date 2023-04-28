@@ -96,9 +96,6 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
         return ViewHolder(binding)
     }
 
-//    override fun getItemViewType(position: Int): Int {
-//        return super.getItemViewType(position)
-//    }
 
     override fun getItemCount(): Int {
         return messages.size
@@ -111,7 +108,6 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
         var headerTimestamp: Long? = null
 
         if (position == 0){
-            Log.e("ChatAdapter", "first message: $message")
             headerTimestamp = message.timestamp
         }
 
