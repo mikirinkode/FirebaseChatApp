@@ -6,6 +6,8 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.functions.ktx.functions
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.NotificationParams
 import com.google.firebase.messaging.RemoteMessage
@@ -86,7 +88,7 @@ class ChatHelper(
             conversationsRef?.child(conversationId)?.child("messages")?.child(newMessageKey)
                 ?.setValue(chatMessage)
             database?.getReference("messages")?.push()?.setValue(chatMessage)
-            sendNotificationToUser(receiverId, message)
+//            sendNotificationToUser(receiverId, message)
         }
 
 //        val ref = firestore?.collection("conversations")?.document(conversationId)
