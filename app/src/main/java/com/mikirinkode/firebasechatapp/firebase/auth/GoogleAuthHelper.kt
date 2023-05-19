@@ -11,7 +11,6 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.ktx.Firebase
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
@@ -80,7 +79,7 @@ class GoogleAuthHelper(
 
                         val documentRef =
                             loggedUser?.uid?.let { fireStore?.collection("users")?.document(it) }
-                        val date = DateHelper.getCurrentDate()
+                        val date = DateHelper.getCurrentDateTime()
                         val user = hashMapOf(
                             "userId" to loggedUser?.uid,
                             "email" to googleAccount.email,

@@ -22,7 +22,7 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
         chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName)
     }
 
-    fun sendMessage( // TODO: add name
+    fun sendMessage(
         message: String,
         senderId: String,
         receiverId: String,

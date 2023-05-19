@@ -1,33 +1,32 @@
 package com.mikirinkode.firebasechatapp.feature.chat
 
 import android.app.Activity
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Settings
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.km4quest.wafa.data.local.prefs.DataConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.databinding.ActivityChatBinding
+import com.mikirinkode.firebasechatapp.utils.PermissionManager
+import java.io.File
+import java.io.IOException
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -49,10 +48,14 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
     private lateinit var presenter: ChatPresenter
     private var openedUserId: String? = null
     private var openedUserName: String? = null
-    private var selectedFile: Uri? = null
+
+    private var capturedImage: Uri? = null
+//    private var photoUri: Uri? = null
+
+    private var currentMessageType = MessageType.TEXT
 
     companion object {
-        private const val CAMERA_REQUEST_CODE = 1
+        private const val REQUEST_IMAGE_CAPTURE = 1
         private const val GALLERY_REQUEST_CODE = 2
         const val EXTRA_INTENT_OPENED_USER_ID = "key_opened_id"
         const val EXTRA_INTENT_OPENED_USER_AVATAR = "key_opened_avatar"
@@ -108,7 +111,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
     private fun observeMessage() {
         val userId = pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
         if (userId != null && openedUserId != null) {
-            presenter.receiveMessage(loggedUserId = userId, openedUserId =  openedUserId!!)
+            presenter.receiveMessage(loggedUserId = userId, openedUserId = openedUserId!!)
         }
     }
 
@@ -131,69 +134,65 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
         }
     }
 
-    // TODO: try to move this function to presenter
-    private fun checkGalleryPermission() {
-        Dexter.withContext(this).withPermission(
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
-        ).withListener(object : PermissionListener {
-            override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
-                gallery()
+    // Open Camera
+    private fun dispatchTakePictureIntent() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (takePictureIntent.resolveActivity(packageManager) != null) {
+            // Create a file to save the image
+            val photoFile: File? = try {
+                createImageFile()
+            } catch (ex: IOException) {
+                // Handle the error
+                null
             }
 
-            override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
-                Toast.makeText(
-                    this@ChatActivity,
-                    "Anda belum memberikan perizinan untuk mengambil gambar",
-                    Toast.LENGTH_SHORT
-                ).show()
-                showRotationalDialogForPermission()
-            }
+            // Continue only if the file was successfully created
+            photoFile?.let {
+                // Get the content URI for the file using FileProvider
+                capturedImage = FileProvider.getUriForFile(this, "com.mikirinkode.firebasechatapp.fileprovider", it)
 
-            override fun onPermissionRationaleShouldBeShown(
-                p0: PermissionRequest?, p1: PermissionToken?
-            ) {
-                showRotationalDialogForPermission()
-            }
-        }).onSameThread().check()
-    }
+                // Set the output file URI for the camera intent
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImage)
 
-    private fun showRotationalDialogForPermission() {
-        AlertDialog.Builder(this)
-            .setMessage("Sepertinya anda belum memberikan izin kamera atau galeri. Cek dan aktifkan perizinan dari pengaturan aplikasi.")
-
-            .setPositiveButton("Setting") { _, _ ->
-
-                try {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    val uri = Uri.fromParts("package", packageName, null)
-                    intent.data = uri
-                    startActivity(intent)
-
-                } catch (e: ActivityNotFoundException) {
-                    e.printStackTrace()
+                // Grant permission to the camera app to write to the URI
+                val cameraActivity = takePictureIntent.resolveActivity(packageManager)
+                val cameraPermission = cameraActivity?.let {
+                    packageManager.checkPermission(
+                        android.Manifest.permission.CAMERA,
+                        it.packageName
+                    )
+                }
+                if (cameraPermission == PackageManager.PERMISSION_GRANTED) {
+                    // Launch the camera intent
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
                 }
             }
-
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-            }.show()
+//            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE) // TODO: remove
+        }
     }
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir: File = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
 
-    // open gallery
-    private fun gallery() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startActivityForResult(intent, GALLERY_REQUEST_CODE)
+        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
-
     private fun showOnLongChatClickDialog() {
-        Toast.makeText(this, "on long press", Toast.LENGTH_SHORT).show()
-
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Choose Action")
+            .setMessage("This is my dialog.")
+            .setPositiveButton("OK") { dialog, which ->
+                // Handle OK button click
+            }
+            .setNegativeButton("Cancel") { dialog, which ->
+                // Handle Cancel button click
+            }
+            .show()
     }
 
     override fun updateMessages(messages: List<ChatMessage>) {
         chatAdapter.setData(messages)
-        if (messages.isNotEmpty()){
+        if (messages.isNotEmpty()) {
             binding.rvMessages.smoothScrollToPosition(chatAdapter.itemCount - 1)
         }
     }
@@ -227,6 +226,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
 
     private fun onActionClicked() {
         binding.apply {
+
             btnBack.setOnClickListener {
                 onBackPressed()
                 finish()
@@ -260,48 +260,86 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
 
                     if (senderId != null && openedUserId != null) {
                         etMessage.setText("")
-                        if (selectedFile != null) {
-                            val imageExtension = MimeTypeMap.getSingleton()
-                                .getExtensionFromMimeType(
-                                    contentResolver.getType(
-                                        selectedFile!!
-                                    )
+                        when (currentMessageType) {
+                            MessageType.TEXT -> {
+                                presenter.sendMessage(
+                                    message,
+                                    senderId,
+                                    openedUserId!!,
+                                    senderName!!,
+                                    openedUserName!!
                                 )
+                            }
+                            MessageType.IMAGE -> {
+                                if (capturedImage != null) {
+                                    val imageExtension = MimeTypeMap.getSingleton()
+                                        .getExtensionFromMimeType(
+                                            contentResolver.getType(
+                                                capturedImage!!
+                                            )
+                                        )
 
-                            val path =
-                                "messages/images-" + System.currentTimeMillis() + "." + imageExtension
-                            presenter.sendMessage(
-                                message,
-                                senderId,
-                                openedUserId!!,
-                                senderName!!,
-                                openedUserName!!,
-                                selectedFile!!,
-                                path
-                            )
-                            binding.layoutSelectExtras.visibility = View.GONE
-                            binding.layoutSelectedImage.visibility = View.GONE
-                            selectedFile = null
-                        } else {
-                            presenter.sendMessage(message, senderId, openedUserId!!, senderName!!, openedUserName!!)
+                                    val path =
+                                        "messages/images-" + System.currentTimeMillis() + "." + imageExtension
+                                    presenter.sendMessage(
+                                        message,
+                                        senderId,
+                                        openedUserId!!,
+                                        senderName!!,
+                                        openedUserName!!,
+                                        capturedImage!!,
+                                        path
+                                    )
+                                    binding.layoutSelectExtras.visibility = View.GONE
+                                    binding.layoutSelectedImage.visibility = View.GONE
+                                    capturedImage = null
+                                }
+                            }
+                            MessageType.VIDEO -> {}
+                            MessageType.AUDIO -> {}
                         }
                     }
                 }
             }
 
             btnCamera.setOnClickListener {
-                // TODO: Handle later
-                Toast.makeText(this@ChatActivity, "Unimplemented", Toast.LENGTH_SHORT)
-                    .show() // TODO: Remove later
-            }
-
-            btnCamera.setOnLongClickListener {
-                showOnLongChatClickDialog()
-                true
+                if (PermissionManager.isCameraPermissionGranted(this@ChatActivity)) {
+                    // Open Camera
+                    dispatchTakePictureIntent()
+                } else {
+                    PermissionManager.requestCameraPermission(this@ChatActivity)
+                }
             }
 
             btnImportFromGallery.setOnClickListener {
-                checkGalleryPermission()
+                if (PermissionManager.isReadExternalPermissionGranted(this@ChatActivity)) {
+
+                } else {
+                    PermissionManager.requestReadExternalPermission(this@ChatActivity)
+                }
+            }
+
+            btnEmoji.setOnClickListener {
+            }
+
+            btnRemoveCapturedImage.setOnClickListener {
+                capturedImage = null
+                layoutSelectedImage.visibility = View.GONE
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PermissionManager.CAMERA_REQUEST_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty()) {
+                for (result in grantResults) {
+                    Toast.makeText(this, "Camera Permission is Granted", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -310,29 +348,22 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
-                CAMERA_REQUEST_CODE -> {
-                    val bitmap = data?.extras?.get("data") as Bitmap
+                REQUEST_IMAGE_CAPTURE -> {
+//                    val imageBitmap = data?.extras?.get("data") as Bitmap
+//                    capturedImage = imageBitmap
+                    if (capturedImage != null){
+                        currentMessageType = MessageType.IMAGE
 
-                    Glide.with(this)
-                        .load(bitmap)
-                        .into(binding.ivSelectedImage)
-
-                    // TODO: SAVE BITMAP TO DEVICE AND GET THE URI
-                }
-
-                GALLERY_REQUEST_CODE -> {
-                    if (data?.data != null) {
-                        val file: Uri? = data.data
-                        selectedFile = data.data
-
+                        // show image
                         binding.layoutSelectExtras.visibility = View.GONE
                         binding.layoutSelectedImage.visibility = View.VISIBLE
 
                         Glide.with(this)
-                            .load(data.data)
+                            .load(capturedImage)
                             .into(binding.ivSelectedImage)
                     }
                 }
+
             }
         }
     }

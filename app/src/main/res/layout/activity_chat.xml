@@ -173,19 +173,20 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutSelectedImage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_margin="16dp"
         android:background="@drawable/bg_rounded_card"
         android:elevation="8dp"
         android:padding="8dp"
         android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
         app:layout_constraintBottom_toTopOf="@id/layoutSendMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:visibility="gone">
 
         <Button
-            android:id="@+id/btnRemoveSelectedFile"
+            android:id="@+id/btnRemoveCapturedImage"
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -200,9 +201,10 @@
         <ImageView
             android:id="@+id/ivSelectedImage"
             android:layout_width="0dp"
-            android:layout_height="150dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/btnRemoveSelectedFile"
+            app:layout_constraintStart_toEndOf="@+id/btnRemoveCapturedImage"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@tools:sample/backgrounds/scenic" />
 
@@ -266,7 +268,7 @@
                 android:id="@+id/etMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
+                android:inputType="textMultiLine" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

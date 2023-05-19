@@ -64,38 +64,46 @@ class ChatHelper(
             if (senderId < receiverId) "$senderId-$receiverId" else "$receiverId-$senderId"
         val timeStamp = System.currentTimeMillis()
 
-        val conversation = hashMapOf(
-            "conversationId" to conversationId,
-            "userIdList" to listOf(senderId, receiverId),
-        )
-
-        // TODO: it is still 2x write, try to make it 1x write
-        conversationsRef?.child(conversationId)?.updateChildren(conversation)
-//        conversationsRef?.child(conversationId)?.child("lastMessage")?.setValue(message)
-
         val newMessageKey = conversationsRef?.child(conversationId)?.child("messages")?.push()?.key
         if (newMessageKey != null) {
-            val chatMessage = ChatMessage(
-                messageId = newMessageKey,
-                message = message,
-                timestamp = timeStamp,
-                type = "text",
-                senderId = senderId,
-                senderName = senderName,
-                receiverId = receiverId,
-                receiverName = receiverName,
-                deliveredTimestamp = 0L,
-                readTimestamp = 0L,
-                beenRead = false,
+//            val chatMessage = ChatMessage(
+//                messageId = newMessageKey,
+//                message = message,
+//                timestamp = timeStamp,
+//                type = MessageType.TEXT.toString(),
+//                senderId = senderId,
+//                senderName = senderName,
+//                receiverId = receiverId,
+//                receiverName = receiverName,
+//                deliveredTimestamp = 0L,
+//                readTimestamp = 0L,
+//                beenRead = false,
+//            )
+
+            val chatMessage = hashMapOf<String, Any>(
+                "messageId" to newMessageKey,
+                "message" to message,
+                "timestamp" to timeStamp,
+                "type" to MessageType.TEXT.toString(),
+                "senderId" to senderId,
+                "senderName" to senderName,
+                "receiverId" to receiverId,
+                "receiverName" to receiverName,
+                "deliveredTimestamp" to 0L,
+                "readTimestamp" to 0L,
+                "beenRead" to false,
             )
-            conversationsRef?.child(conversationId)?.child("messages")?.child(newMessageKey)
-                ?.setValue(chatMessage)
-//            database?.getReference("messages")?.push()?.setValue(chatMessage)
+            val conversation = hashMapOf<String, Any>(
+                "conversationId" to conversationId,
+                "userIdList" to listOf(senderId, receiverId),
+                "messages/$newMessageKey" to chatMessage
+            )
+            conversationsRef?.child(conversationId)?.updateChildren(conversation)
         }
 
     }
 
-    fun sendMessage( // TODO: add name
+    fun sendMessage(
         message: String,
         senderId: String,
         receiverId: String, senderName: String, receiverName: String,
@@ -109,37 +117,45 @@ class ChatHelper(
         sRef?.putFile(file)?.addOnSuccessListener {
             it.metadata?.reference?.downloadUrl?.addOnSuccessListener { uri ->
                 val timeStamp = System.currentTimeMillis()
-                val conversation = hashMapOf(
-                    "conversationId" to conversationId,
-                    "userIdList" to listOf(senderId, receiverId),
-                )
-                conversationsRef?.child(conversationId)?.updateChildren(conversation)
+
                 val newMessageKey =
                     conversationsRef?.child(conversationId)?.child("messages")?.push()?.key
                 if (newMessageKey != null) {
-                    val chatMessage = ChatMessage(
-                        messageId = newMessageKey,
-                        message = message,
-                        imageUrl = uri.toString(),
-                        timestamp = timeStamp,
-                        type = "image",
-                        senderId = senderId,
-                        receiverId = receiverId,
-                        senderName = senderName,
-                        receiverName = receiverName,
-                        deliveredTimestamp = 0L,
-                        readTimestamp = 0L,
-                        beenRead = false,
+//                    val chatMessage = ChatMessage(
+//                        messageId = newMessageKey,
+//                        message = message,
+//                        imageUrl = uri.toString(),
+//                        timestamp = timeStamp,
+//                        type = MessageType.IMAGE.toString(),
+//                        senderId = senderId,
+//                        receiverId = receiverId,
+//                        senderName = senderName,
+//                        receiverName = receiverName,
+//                        deliveredTimestamp = 0L,
+//                        readTimestamp = 0L,
+//                        beenRead = false,
+//                    )
+                    val chatMessage = hashMapOf<String, Any>(
+                        "messageId" to newMessageKey,
+                        "message" to message,
+                        "imageUrl" to uri.toString(),
+                        "timestamp" to timeStamp,
+                        "type" to MessageType.IMAGE.toString(),
+                        "senderId" to senderId,
+                        "senderName" to senderName,
+                        "receiverId" to receiverId,
+                        "receiverName" to receiverName,
+                        "deliveredTimestamp" to 0L,
+                        "readTimestamp" to 0L,
+                        "beenRead" to false,
                     )
-                    conversationsRef?.child(conversationId)?.child("messages")?.child(newMessageKey)
-                        ?.setValue(chatMessage)
-
-//                    database?.getReference("messages")?.push()?.setValue(chatMessage)
+                    val conversation = hashMapOf(
+                        "conversationId" to conversationId,
+                        "userIdList" to listOf(senderId, receiverId),
+                        "messages/$newMessageKey" to chatMessage
+                    )
+                    conversationsRef?.child(conversationId)?.updateChildren(conversation)
                 }
-
-//                val ref = firestore?.collection("conversations")?.document(conversationId)
-//
-//                ref?.set(conversation, SetOptions.merge())
             }
         }
 

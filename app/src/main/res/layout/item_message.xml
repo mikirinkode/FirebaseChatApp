@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="12dp"
-        android:background="@drawable/bg_rounded_card"
+        android:background="@drawable/bg_receiver_message_card"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"
@@ -56,9 +56,7 @@
             android:id="@+id/tvInterlocutorMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tvInterlocutorTimestamp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ivInterlocutorExtraImage"
             tools:text="some messagess" />
@@ -67,10 +65,9 @@
             android:id="@+id/tvInterlocutorTimestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tvInterlocutorMessage"
+            app:layout_constraintTop_toBottomOf="@+id/tvInterlocutorMessage"
             tools:text="20:15" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -83,7 +80,7 @@
         android:layout_height="wrap_content"
         android:padding="12dp"
         android:backgroundTint="?android:attr/colorPrimary"
-        android:background="@drawable/bg_rounded_card"
+        android:background="@drawable/bg_sender_message_card"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"
@@ -104,9 +101,7 @@
             android:id="@+id/tvloggedUserMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tvloggedUserTimestamp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ivloggedUserExtraImage"
             tools:text="some messagess" />
@@ -118,7 +113,7 @@
             android:layout_marginEnd="8dp"
             android:textSize="12sp"
             app:layout_constraintEnd_toStartOf="@+id/tvloggedUserMessageStatus"
-            app:layout_constraintTop_toTopOf="@id/tvloggedUserMessage"
+            app:layout_constraintTop_toBottomOf="@+id/tvloggedUserMessage"
             tools:text="20:15" />
         <TextView
             android:id="@+id/tvloggedUserMessageStatus"
