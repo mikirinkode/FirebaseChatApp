@@ -94,25 +94,39 @@
 
 
         <ImageView
+            android:id="@+id/iv_email"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/ic_email"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/tvUserEmail"
             app:layout_constraintTop_toTopOf="@id/tvUserEmail"
             app:tint="?android:attr/textColor" />
 
         <TextView
             android:id="@+id/tvUserEmail"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iv_email"
             app:layout_constraintTop_toBottomOf="@+id/tvUserFullName"
             tools:text="EMAIL@EMAIL.COM" />
 
+        <Button
+            android:id="@+id/btnLogout"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logout"
+            app:layout_constraintTop_toBottomOf="@id/tvUserEmail"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

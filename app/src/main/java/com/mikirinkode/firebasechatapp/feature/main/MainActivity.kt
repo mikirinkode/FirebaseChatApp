@@ -3,9 +3,11 @@ package com.mikirinkode.firebasechatapp.feature.main
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.km4quest.wafa.data.local.prefs.DataConstant
@@ -62,8 +64,6 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private fun initView() {
-        Log.e("Main", "user: $user")
-        Log.e("Main", "user: ${user?.avatarUrl}")
         binding.apply {
             if (user != null) {
                 if (user!!.avatarUrl != null && user!!.avatarUrl != "") {
@@ -87,7 +87,9 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun onChatHistoryReceived(conversations: List<Conversation>) {
-        chatHistoryAdapter.setData(conversations)
+        if (conversations.isNotEmpty()){
+            chatHistoryAdapter.setData(conversations)
+        }
     }
 
     override fun showLoading() {}
@@ -106,13 +108,6 @@ class MainActivity : AppCompatActivity(), MainView {
 
             btnNewChat.setOnClickListener {
                 startActivity(Intent(this@MainActivity, UserListActivity::class.java))
-            }
-
-            btnLogout.setOnClickListener {
-                pref?.clearSession()
-                Firebase.auth.signOut()
-                startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-                finishAffinity()
             }
         }
     }

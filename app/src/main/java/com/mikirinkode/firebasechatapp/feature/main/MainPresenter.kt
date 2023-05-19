@@ -20,7 +20,9 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     }
 
     override fun onDataChangeReceived(conversations: List<Conversation>) {
-        mView?.onChatHistoryReceived(conversations)
+        if (conversations.isNotEmpty()){
+            mView?.onChatHistoryReceived(conversations)
+        }
             Log.e("MainPresenter", "on chat history data change received")
     }
 

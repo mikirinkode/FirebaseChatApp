@@ -6,5 +6,7 @@
         android:color="?attr/background"/>
 
     <corners
-        android:radius="16dp"/>
+        android:topRightRadius="16dp"
+        android:bottomLeftRadius="16dp"
+        android:bottomRightRadius="16dp"/>
 </shape>

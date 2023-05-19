@@ -1,16 +1,25 @@
 package com.mikirinkode.firebasechatapp.feature.profile
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.mikirinkode.firebasechatapp.R
+import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityProfileBinding
+import com.mikirinkode.firebasechatapp.feature.login.LoginActivity
 
 class ProfileActivity : AppCompatActivity(), ProfileView {
 
     private val binding: ActivityProfileBinding by lazy {
         ActivityProfileBinding.inflate(layoutInflater)
+    }
+
+    private val pref: LocalSharedPref? by lazy {
+        LocalSharedPref.instance()
     }
 
     private lateinit var presenter: ProfilePresenter
@@ -62,5 +71,14 @@ class ProfileActivity : AppCompatActivity(), ProfileView {
     override fun showLoading() {}
     override fun hideLoading() {}
 
-    private fun onActionClicked() {}
+    private fun onActionClicked() {
+        binding.apply {
+            btnLogout.setOnClickListener {
+                pref?.clearSession()
+                Firebase.auth.signOut()
+                startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
+                finishAffinity()
+            }
+        }
+    }
 }

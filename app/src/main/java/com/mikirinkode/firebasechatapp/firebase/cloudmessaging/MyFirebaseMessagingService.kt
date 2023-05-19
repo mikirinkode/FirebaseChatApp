@@ -15,8 +15,8 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         Log.e("MessagingServiece", "onMessageReceived")
 
-        val title = message.data["title"]
-        val messageText = message.data["message"]
+        val title = message.notification?.title
+        val messageText = message.notification?.body
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "ChitChatChannel"
 
