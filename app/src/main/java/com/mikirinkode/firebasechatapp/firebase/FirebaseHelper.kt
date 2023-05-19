@@ -18,6 +18,7 @@ class FirebaseHelper {
     private var firebaseMessaging: FirebaseMessaging? = null
 
     fun initialize(context: Context?) {
+        Log.e("FirebaseHelper", "initialize() called")
         if (context != null) {
             firebaseAuth = FirebaseAuth.getInstance()
             firebaseDatabase = FirebaseDatabase.getInstance()
@@ -29,13 +30,14 @@ class FirebaseHelper {
     }
 
     fun observeToken(){
+        Log.e("FirebaseHelper", "observeToken() called")
         val currentUserId = firebaseAuth?.currentUser?.uid
         val userRef = firebaseDatabase?.getReference("users")
 
         firebaseMessaging?.token?.addOnCompleteListener { task ->
             if (task.isSuccessful){
                 val token = task.result
-                Log.d("FirebaseHelper", "Token: $token")
+                Log.e("FirebaseHelper", "Token: $token")
 
                 // Todo: Save token to server if use a server
                 if (currentUserId != null){

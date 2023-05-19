@@ -1,10 +1,9 @@
 package com.mikirinkode.firebasechatapp.feature.chat
 
 import android.net.Uri
-import android.util.Log
 import com.mikirinkode.firebasechatapp.base.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
-import com.mikirinkode.firebasechatapp.data.model.UserOnlineStatus
+import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.firebase.FirebaseUserOnlineStatusHelper
 import com.mikirinkode.firebasechatapp.firebase.UserOnlineStatusEventListener
 
@@ -13,18 +12,26 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
     private var chatHelper: ChatHelper? = null
     private val userOnlineStatusHelper = FirebaseUserOnlineStatusHelper(this)
 
-    fun sendMessage(message: String, senderId: String, receiverId: String) {
-        chatHelper?.sendMessage(message, senderId, receiverId)
-    }
-
     fun sendMessage(
         message: String,
         senderId: String,
         receiverId: String,
+        senderName: String,
+        receiverName: String
+    ) {
+        chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName)
+    }
+
+    fun sendMessage( // TODO: add name
+        message: String,
+        senderId: String,
+        receiverId: String,
+        senderName: String,
+        receiverName: String,
         file: Uri,
         path: String
     ) {
-        chatHelper?.sendMessage(message, senderId, receiverId, file, path)
+        chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName, file, path)
     }
 
     fun receiveMessage(loggedUserId: String, openedUserId: String) {
@@ -40,7 +47,7 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
         userOnlineStatusHelper.getUserOnlineStatus(userId)
     }
 
-    override fun onUserOnlineStatusReceived(status: UserOnlineStatus) {
+    override fun onUserOnlineStatusReceived(status: UserRTDB) {
         mView?.updateReceiverOnlineStatus(status)
     }
 

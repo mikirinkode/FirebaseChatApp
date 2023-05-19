@@ -9,7 +9,6 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
@@ -27,7 +26,7 @@ import com.km4quest.wafa.data.local.prefs.DataConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.data.model.UserOnlineStatus
+import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.databinding.ActivityChatBinding
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
@@ -49,6 +48,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
 
     private lateinit var presenter: ChatPresenter
     private var openedUserId: String? = null
+    private var openedUserName: String? = null
     private var selectedFile: Uri? = null
 
     companion object {
@@ -85,9 +85,9 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
     private fun handleIntent() {
         openedUserId = intent.getStringExtra(EXTRA_INTENT_OPENED_USER_ID)
         val openedAvatar = intent.getStringExtra(EXTRA_INTENT_OPENED_USER_AVATAR)
-        val openedName = intent.getStringExtra(EXTRA_INTENT_OPENED_USER_NAME)
+        openedUserName = intent.getStringExtra(EXTRA_INTENT_OPENED_USER_NAME)
 
-        setupReceiverProfile(openedName, openedAvatar)
+        setupReceiverProfile(openedUserName, openedAvatar)
     }
 
 
@@ -198,7 +198,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
         }
     }
 
-    override fun updateReceiverOnlineStatus(status: UserOnlineStatus) {
+    override fun updateReceiverOnlineStatus(status: UserRTDB) {
 
         val timestamp = Timestamp(status.lastOnlineTimestamp)
         val date = Date(timestamp.time)
@@ -255,6 +255,9 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
                 if (message.isNotBlank()) {
                     val senderId =
                         pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
+                    val senderName =
+                        pref?.getObject(DataConstant.USER, UserAccount::class.java)?.name
+
                     if (senderId != null && openedUserId != null) {
                         etMessage.setText("")
                         if (selectedFile != null) {
@@ -271,6 +274,8 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
                                 message,
                                 senderId,
                                 openedUserId!!,
+                                senderName!!,
+                                openedUserName!!,
                                 selectedFile!!,
                                 path
                             )
@@ -278,7 +283,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
                             binding.layoutSelectedImage.visibility = View.GONE
                             selectedFile = null
                         } else {
-                            presenter.sendMessage(message, senderId, openedUserId!!)
+                            presenter.sendMessage(message, senderId, openedUserId!!, senderName!!, openedUserName!!)
                         }
                     }
                 }

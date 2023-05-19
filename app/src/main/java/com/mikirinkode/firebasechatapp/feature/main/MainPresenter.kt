@@ -3,10 +3,7 @@ package com.mikirinkode.firebasechatapp.feature.main
 import android.util.Log
 import com.mikirinkode.firebasechatapp.base.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.Conversation
-import com.mikirinkode.firebasechatapp.data.model.UserOnlineStatus
 import com.mikirinkode.firebasechatapp.firebase.CommonFirebaseTaskHelper
-import com.mikirinkode.firebasechatapp.firebase.FirebaseUserOnlineStatusHelper
-import com.mikirinkode.firebasechatapp.firebase.UserOnlineStatusEventListener
 
 class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     private var mView: MainView? = null

@@ -1,6 +1,6 @@
 package com.mikirinkode.firebasechatapp.firebase
 
-import com.mikirinkode.firebasechatapp.data.model.UserOnlineStatus
+import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 
 /**
  * common task that don't need listener
@@ -9,10 +9,11 @@ import com.mikirinkode.firebasechatapp.data.model.UserOnlineStatus
 class CommonFirebaseTaskHelper {
     private val auth = FirebaseHelper.instance().getFirebaseAuth()
     private val database = FirebaseHelper.instance().getDatabase()
-    private val userOnlineStatusRef = database?.getReference("userOnlineStatus")
+    private val usersRef = database?.getReference("users")
 
     private val currentUser = auth?.currentUser
 
+    // TODO: check the logic again later
     fun updateUserOnlineStatus(){
         auth?.addAuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser
@@ -20,20 +21,24 @@ class CommonFirebaseTaskHelper {
                 val userId = user.uid
                 val timestamp = System.currentTimeMillis()
 
-                val model = UserOnlineStatus(
+                val model = UserRTDB(
                     userId = userId,
                     online = true,
                     lastOnlineTimestamp = timestamp
                 )
-
-                userOnlineStatusRef?.child(userId)?.setValue(model)
+                val newUpdate = hashMapOf<String, Any>(
+                    "userId" to userId,
+                    "online" to true,
+                    "lastOnlineTimestamp" to timestamp
+                )
+//                usersRef?.child(userId)?.setValue(model)
+                usersRef?.child(userId)?.updateChildren(newUpdate)
             } else {
                 // User is signed out
                 val userId = currentUser?.uid
                 if (userId != null) {
-
                     // Update the user's online status
-                    userOnlineStatusRef?.child(userId)?.child("online")?.setValue(false)
+                    usersRef?.child(userId)?.child("online")?.setValue(false)
                 }
             }
         }

@@ -110,6 +110,7 @@ class GoogleAuthHelper(
                             )
                         }?.addOnFailureListener {
                             Log.e("googleAuthHelper", "firestore failed")
+                            Log.e("googleAuthHelper", "${it.message}")
                             mListener?.onGoogleAuthSignInFailed("Registration failed: ${it.message}")
                         }
                     }

@@ -59,7 +59,7 @@ class ChatHelper(
     }
 
 
-    fun sendMessage(message: String, senderId: String, receiverId: String) {
+    fun sendMessage(message: String, senderId: String, receiverId: String, senderName: String, receiverName: String) {
         val conversationId =
             if (senderId < receiverId) "$senderId-$receiverId" else "$receiverId-$senderId"
         val timeStamp = System.currentTimeMillis()
@@ -79,64 +79,26 @@ class ChatHelper(
                 messageId = newMessageKey,
                 message = message,
                 timestamp = timeStamp,
+                type = "text",
                 senderId = senderId,
+                senderName = senderName,
                 receiverId = receiverId,
+                receiverName = receiverName,
                 deliveredTimestamp = 0L,
                 readTimestamp = 0L,
                 beenRead = false,
             )
             conversationsRef?.child(conversationId)?.child("messages")?.child(newMessageKey)
                 ?.setValue(chatMessage)
-            database?.getReference("messages")?.push()?.setValue(chatMessage)
-//            sendNotificationToUser(receiverId, message)
+//            database?.getReference("messages")?.push()?.setValue(chatMessage)
         }
 
-//        val ref = firestore?.collection("conversations")?.document(conversationId)
-
-//        ref?.set(conversation, SetOptions.merge())
     }
 
-
-    private fun sendNotificationToUser(userId: String, message: String) {
-        Log.e("ChatHelper", "sendNotificationToUser")
-        val tokenRef = database?.getReference("users/$userId/fcmToken")
-        tokenRef?.addListenerForSingleValueEvent(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val token = snapshot.getValue(String::class.java)
-        Log.e("ChatHelper", "token: ${token}")
-        Log.e("ChatHelper", "userId: ${userId}}")
-
-//                val notification = NotificationCompat.Builder(BaseApplication().applicationContext, "channel id")
-//                    .setContentTitle("sent from chat helper")
-//                    .setContentText("message sent from chat helper")
-//                    .setSmallIcon(R.drawable.ic_notification)
-//                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-//                    .build()
-
-                val fcmInstance = FirebaseMessaging.getInstance()
-                val data = hashMapOf(
-                    "title" to "titel",
-                    "message" to "sent from chat helper",
-                )
-                val remoteMessage = RemoteMessage.Builder(token!!)
-                    .setMessageId("message id")
-                    .setTtl(0)
-                    .setData(data)
-                    .build()
-                fcmInstance.send(remoteMessage)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-            }
-
-        })
-    }
-
-    fun sendMessage(
+    fun sendMessage( // TODO: add name
         message: String,
         senderId: String,
-        receiverId: String,
+        receiverId: String, senderName: String, receiverName: String,
         file: Uri,
         path: String
     ) {
@@ -160,8 +122,11 @@ class ChatHelper(
                         message = message,
                         imageUrl = uri.toString(),
                         timestamp = timeStamp,
+                        type = "image",
                         senderId = senderId,
                         receiverId = receiverId,
+                        senderName = senderName,
+                        receiverName = receiverName,
                         deliveredTimestamp = 0L,
                         readTimestamp = 0L,
                         beenRead = false,
@@ -169,7 +134,7 @@ class ChatHelper(
                     conversationsRef?.child(conversationId)?.child("messages")?.child(newMessageKey)
                         ?.setValue(chatMessage)
 
-                    database?.getReference("messages")?.push()?.setValue(chatMessage)
+//                    database?.getReference("messages")?.push()?.setValue(chatMessage)
                 }
 
 //                val ref = firestore?.collection("conversations")?.document(conversationId)
