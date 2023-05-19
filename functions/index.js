@@ -29,34 +29,33 @@ admin.initializeApp();
 //   return admin.messaging().sendToTopic('messages', payload);
 //});
 
-exports.sendNotification = functions.database.ref('messages/{messageId}')
+exports.sendNotification = functions.database.ref('conversations/{conversationId}/messages/{messageId}')
 .onCreate((snapshot, context) => {
 
 
     const messageData = snapshot.val();
-  console.log('fun FCM on Create New message:', messageData);
+
     const receiverId = messageData.receiverId;
     const senderId = messageData.senderId;
-    const senderName = messageData.senderId;
+    const senderName = messageData.senderName;
     const message = messageData.message;
+
     const tokenRef = "/users/" + receiverId + "/fcmToken";
 
     // Lookup the receiver user's FCM registration token
     return admin.database().ref(tokenRef).once('value')
         .then( tokenSnapshot => {
             const fcmToken = tokenSnapshot.val();
-            const token = 'cgSLkkrjRqWJOSP5-KajXK:APA91bHKM1jqKSb7BG4npMKY9GWxkUrsI9xgPYlwqMmKGwDSUw2maSVBB-pbXKE4sRsknO-VfcdPfcIt8jykUI43d470J4KYHk7xrnOOR9O6gWkDv5S3KIC0DeiyZWCaZLHkPtNHTm7r';
 
-            const messageTitle = "token: " + fcmToken + " You Have new message.";
             // send a push notification
             const payload = {
                 notification: {
-                    title: messageTitle,
+                    title: senderName,
                     body: message,
                     click_action: "OPEN_CHAT_ACTIVITY"
                 },
                 data: {
-                    senderName: "",
+                    senderName: senderName,
                     message: message
                 }
             };
@@ -64,6 +63,41 @@ exports.sendNotification = functions.database.ref('messages/{messageId}')
             return admin.messaging().sendToDevice(fcmToken, payload);
         });
 });
+
+//exports.sendNotification = functions.database.ref('messages/{messageId}')
+//.onCreate((snapshot, context) => {
+//
+//
+//    const messageData = snapshot.val();
+//
+//    const receiverId = messageData.receiverId;
+//    const senderId = messageData.senderId;
+//    const senderName = messageData.senderName;
+//    const message = "messages/ " + messageData.message;
+//
+//    const tokenRef = "/users/" + receiverId + "/fcmToken";
+//
+//    // Lookup the receiver user's FCM registration token
+//    return admin.database().ref(tokenRef).once('value')
+//        .then( tokenSnapshot => {
+//            const fcmToken = tokenSnapshot.val();
+//
+//            // send a push notification
+//            const payload = {
+//                notification: {
+//                    title: senderName,
+//                    body: message,
+//                    click_action: "OPEN_CHAT_ACTIVITY"
+//                },
+//                data: {
+//                    senderName: senderName,
+//                    message: message
+//                }
+//            };
+//
+//            return admin.messaging().sendToDevice(fcmToken, payload);
+//        });
+//});
 
 //exports.myTestingFunction = functions.database.ref('/messages/{messageId}').onCreate((snapshot, context) => {
 //  const message = snapshot.val();
