@@ -9,7 +9,7 @@ object DateHelper {
     const val DATE_PICKER_FORMAT = "MMM dd, yyyy" // Aug 12, 2022
     const val DATE_DISPLAY_FORMAT = "EEEE, dd MMM yyyy" // Friday, 12 Aug 2022
     const val DATE_REGULAR_FORMAT = "dd MMMM yyyy" // 30 August 2023
-    const val DATE_CHAT_HISTORY_FORMAT = "dd/MM/yyyy" // 30 August 2023
+    const val DATE_CHAT_HISTORY_FORMAT = "dd/MM/yyyy" // 30/August/2023
     const val TIME_MESSAGE_FORMAT = "hh:mm a" // 08:20 PM
     const val DATE_TIME_LAST_ONLINE_FORMAT = "dd MMMM yyyy hh:mm a"
 
@@ -57,6 +57,17 @@ object DateHelper {
         val date = Date(timestampObj.time)
         return dateFormat.format(date)
 
+    }
+
+    /**
+     * @param timestamp
+     * @return date time string: 30 May 2014, 18:30
+     */
+    fun getRegularFormattedDateTimeFromTimestamp(timestamp: Long): String {
+        val timestampObj = Timestamp(timestamp)
+        val dateFormat = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault())
+        val date = Date(timestampObj.time)
+        return dateFormat.format(date)
     }
 
     /**

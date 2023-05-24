@@ -174,12 +174,9 @@
         android:id="@+id/layoutSelectedImage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="16dp"
         android:background="@drawable/bg_rounded_card"
-        android:elevation="8dp"
-        android:padding="8dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/layoutSendMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -204,8 +201,8 @@
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/btnRemoveCapturedImage"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnRemoveCapturedImage"
             tools:src="@tools:sample/backgrounds/scenic" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -239,7 +236,6 @@
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:padding="0dp"
             app:icon="@drawable/ic_attach_file"
             app:iconSize="24dp"
@@ -287,5 +283,13 @@
             app:tint="?android:attr/textColor" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/layoutDetailImage"
+        layout="@layout/layout_detail_image"
+        android:visibility="gone"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="64dp"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -158,7 +158,8 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
         if (status.online) {
             binding.tvUserStatus.text = "Online"
         } else {
-            binding.tvUserStatus.text = "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
+            binding.tvUserStatus.text =
+                "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
         }
     }
 
@@ -166,25 +167,51 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
         this.capturedImage = capturedImage
 
         currentMessageType = MessageType.IMAGE
-        binding.layoutSelectExtras.visibility = View.GONE
-        binding.layoutSelectedImage.visibility = View.VISIBLE
+        binding.apply {
+            btnAddExtras.visibility = View.GONE
+            layoutSelectExtras.visibility = View.GONE
+            layoutSelectedImage.visibility = View.VISIBLE
+            Glide.with(this@ChatActivity)
+                .load(capturedImage)
+                .into(ivSelectedImage)
+        }
 
-        Glide.with(this)
-            .load(capturedImage)
-            .into(binding.ivSelectedImage)
     }
 
     override fun showLoading() {}
 
     override fun hideLoading() {}
 
+    override fun onBackPressed() {
+        if (binding.layoutDetailImage.root.visibility == View.VISIBLE) {
+            binding.layoutDetailImage.root.visibility = View.GONE
+        } else {
+            super.onBackPressed()
+            finish()
+        }
+    }
+
     override fun onLongClick(chat: ChatMessage) {
         showOnLongChatClickDialog()
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finish()
+    override fun onImageClick(chat: ChatMessage) {
+        binding.apply {
+            layoutDetailImage.root.visibility = View.VISIBLE
+            layoutDetailImage.tvMessageOnDetailImage.text = chat.message
+
+            layoutDetailImage.tvUserName.text = chat.senderName
+            layoutDetailImage.tvDate.text =
+                DateHelper.getRegularFormattedDateTimeFromTimestamp(chat.timestamp)
+
+            Glide.with(this@ChatActivity)
+                .load(chat.imageUrl)
+                .into(layoutDetailImage.ivDetailImage)
+
+            layoutDetailImage.btnBack.setOnClickListener {
+                layoutDetailImage.root.visibility = View.GONE
+            }
+        }
     }
 
     private fun onActionClicked() {
@@ -234,7 +261,8 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
                             }
                             MessageType.IMAGE -> {
                                 if (capturedImage != null) {
-                                    val path = ImageHelper.getPathForMessages(contentResolver,
+                                    val path = ImageHelper.getPathForMessages(
+                                        contentResolver,
                                         capturedImage!!
                                     )
                                     presenter.sendMessage(
@@ -246,7 +274,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
                                         capturedImage!!,
                                         path
                                     )
-                                    binding.layoutSelectExtras.visibility = View.GONE
+                                    btnAddExtras.visibility = View.VISIBLE
                                     binding.layoutSelectedImage.visibility = View.GONE
                                     capturedImage = null
                                 }
@@ -281,6 +309,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
 
             btnRemoveCapturedImage.setOnClickListener {
                 capturedImage = null
+                btnAddExtras.visibility = View.VISIBLE
                 layoutSelectedImage.visibility = View.GONE
             }
         }

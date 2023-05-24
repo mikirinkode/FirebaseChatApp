@@ -98,6 +98,14 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
                     chatClickListener?.onLongClick(chat)
                     true
                 }
+
+                ivInterlocutorExtraImage.setOnClickListener {
+                    chatClickListener?.onImageClick(chat)
+                }
+
+                ivloggedUserExtraImage.setOnClickListener {
+                    chatClickListener?.onImageClick(chat)
+                }
             }
         }
     }
@@ -166,5 +174,6 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
 
     interface ChatClickListener {
         fun onLongClick(chat: ChatMessage)
+        fun onImageClick(chat: ChatMessage)
     }
 }
