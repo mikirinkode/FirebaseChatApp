@@ -1,5 +1,9 @@
 package com.mikirinkode.firebasechatapp.firebase
 
+import android.util.Log
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 
 /**
@@ -10,37 +14,42 @@ class CommonFirebaseTaskHelper {
     private val auth = FirebaseHelper.instance().getFirebaseAuth()
     private val database = FirebaseHelper.instance().getDatabase()
     private val usersRef = database?.getReference("users")
+    fun updateOnlineStatus() {
+        val userId = auth?.currentUser?.uid
+        val ref = database?.getReference(".info/connected")
+        ref?.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val isConnected = snapshot.value
 
-    private val currentUser = auth?.currentUser
-
-    // TODO: check the logic again later
-    fun updateUserOnlineStatus(){
-        auth?.addAuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            if (user != null){
-                val userId = user.uid
-                val timestamp = System.currentTimeMillis()
-
-                val model = UserRTDB(
-                    userId = userId,
-                    online = true,
-                    lastOnlineTimestamp = timestamp
-                )
-                val newUpdate = hashMapOf<String, Any>(
-                    "userId" to userId,
-                    "online" to true,
-                    "lastOnlineTimestamp" to timestamp
-                )
-//                usersRef?.child(userId)?.setValue(model)
-                usersRef?.child(userId)?.updateChildren(newUpdate)
-            } else {
-                // User is signed out
-                val userId = currentUser?.uid
+                // set to db
                 if (userId != null) {
-                    // Update the user's online status
-                    usersRef?.child(userId)?.child("online")?.setValue(false)
+                    if (isConnected == true) {
+                        val timestamp = System.currentTimeMillis()
+                        val newUpdate = hashMapOf<String, Any>(
+                            "userId" to userId,
+                            "online" to true,
+                            "lastOnlineTimestamp" to timestamp
+                        )
+                        usersRef?.child(userId)?.updateChildren(newUpdate)
+                    } else {
+
+                        val timestamp = System.currentTimeMillis()
+                        val newUpdate = hashMapOf<String, Any>(
+                            "userId" to userId,
+                            "online" to false,
+                            "lastOnlineTimestamp" to timestamp
+                        )
+//                        usersRef?.child(userId)?.onDisconnect()?.updateChildren(mapOf( "online" to false ))
+                        usersRef?.child(userId)?.onDisconnect()?.updateChildren(newUpdate)
+                    }
                 }
             }
-        }
+
+            override fun onCancelled(error: DatabaseError) {
+//                TODO("Not yet implemented")
+            }
+
+        })
     }
+
 }

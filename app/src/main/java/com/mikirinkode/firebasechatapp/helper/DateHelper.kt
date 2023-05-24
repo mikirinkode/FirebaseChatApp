@@ -8,20 +8,20 @@ object DateHelper {
     const val DATE_ALARM_FORMAT = "yyyy-MM-dd" // 2022-08-12
     const val DATE_PICKER_FORMAT = "MMM dd, yyyy" // Aug 12, 2022
     const val DATE_DISPLAY_FORMAT = "EEEE, dd MMM yyyy" // Friday, 12 Aug 2022
-    const val DATE_REGULAR_FORMAT = "dd MMMM yyyy" // 30 August 203
-    const val DATE_CHAT_HISTORY_FORMAT = "dd/MM/yyyy" // 30 August 203
+    const val DATE_REGULAR_FORMAT = "dd MMMM yyyy" // 30 August 2023
+    const val DATE_CHAT_HISTORY_FORMAT = "dd/MM/yyyy" // 30 August 2023
     const val TIME_MESSAGE_FORMAT = "hh:mm a" // 08:20 PM
+    const val DATE_TIME_LAST_ONLINE_FORMAT = "dd MMMM yyyy hh:mm a"
 
     fun formatTimestampToDate(timestamp: Long): Date {
         val timestampObj = Timestamp(timestamp)
         return Date(timestampObj.time)
     }
 
-    fun regularFormat(date: Date): String {
-        val dateFormat = SimpleDateFormat(DATE_REGULAR_FORMAT, Locale.getDefault())
-        return dateFormat.format(date)
-    }
-
+    /**
+     * @param timestamp
+     * @return string date: 20 August 2015
+     */
     fun regularFormat(timestamp: Long): String {
         val timestampObj = Timestamp(timestamp)
         val dateFormat = SimpleDateFormat(DATE_REGULAR_FORMAT, Locale.getDefault())
@@ -59,6 +59,10 @@ object DateHelper {
 
     }
 
+    /**
+     * @param Timestamp
+     * @return Date: 30 August 2023
+     */
     fun getFormattedDateFromTimestamp(timestamp: Long): String {
             val timestampObj = Timestamp(timestamp)
             val dateFormat = SimpleDateFormat(DATE_CHAT_HISTORY_FORMAT, Locale.getDefault())
@@ -67,12 +71,25 @@ object DateHelper {
 
     }
 
+    fun getFormattedLastOnline(timestamp: Long): String {
+        val timestampObj = Timestamp(timestamp)
+        val date = Date(timestampObj.time)
+        val dateFormat = SimpleDateFormat("dd MMMM yyyy hh:mm a", Locale.getDefault())
+        return dateFormat.format(date)
+    }
+
+    /**
+     * @return Date Time: 30/01/2022 20:42:23
+     */
     fun getCurrentDateTime(): String {
         val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
         val date = Date()
         return dateFormat.format(date)
     }
 
+    /**
+     * @return Date: 30
+     */
     fun getCurrentDate(): String {
         val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
         val date = Date()

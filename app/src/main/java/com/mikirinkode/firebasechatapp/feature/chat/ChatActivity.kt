@@ -24,6 +24,8 @@ import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.databinding.ActivityChatBinding
+import com.mikirinkode.firebasechatapp.helper.DateHelper
+import com.mikirinkode.firebasechatapp.helper.ImageHelper
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 import java.io.File
 import java.io.IOException
@@ -50,13 +52,11 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
     private var openedUserName: String? = null
 
     private var capturedImage: Uri? = null
-//    private var photoUri: Uri? = null
-
     private var currentMessageType = MessageType.TEXT
 
     companion object {
-        private const val REQUEST_IMAGE_CAPTURE = 1
-        private const val GALLERY_REQUEST_CODE = 2
+        const val REQUEST_IMAGE_CAPTURE = 1
+        const val GALLERY_REQUEST_CODE = 2
         const val EXTRA_INTENT_OPENED_USER_ID = "key_opened_id"
         const val EXTRA_INTENT_OPENED_USER_AVATAR = "key_opened_avatar"
         const val EXTRA_INTENT_OPENED_USER_NAME = "key_opened_name"
@@ -109,10 +109,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
     }
 
     private fun observeMessage() {
-        val userId = pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
-        if (userId != null && openedUserId != null) {
-            presenter.receiveMessage(loggedUserId = userId, openedUserId = openedUserId!!)
-        }
+        presenter.receiveMessage()
     }
 
     private fun setupReceiverProfile(openedName: String?, openedAvatar: String?) {
@@ -127,56 +124,16 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
     }
 
     private fun setupPresenter() {
+        val userId = pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
+
         presenter = ChatPresenter()
         presenter.attachView(this)
-        if (openedUserId != null) {
+        if (userId != null && openedUserId != null) {
+            presenter.onInit(this, userId, openedUserId!!)
             presenter.getUserOnlineStatus(openedUserId!!)
         }
     }
 
-    // Open Camera
-    private fun dispatchTakePictureIntent() {
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (takePictureIntent.resolveActivity(packageManager) != null) {
-            // Create a file to save the image
-            val photoFile: File? = try {
-                createImageFile()
-            } catch (ex: IOException) {
-                // Handle the error
-                null
-            }
-
-            // Continue only if the file was successfully created
-            photoFile?.let {
-                // Get the content URI for the file using FileProvider
-                capturedImage = FileProvider.getUriForFile(this, "com.mikirinkode.firebasechatapp.fileprovider", it)
-
-                // Set the output file URI for the camera intent
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImage)
-
-                // Grant permission to the camera app to write to the URI
-                val cameraActivity = takePictureIntent.resolveActivity(packageManager)
-                val cameraPermission = cameraActivity?.let {
-                    packageManager.checkPermission(
-                        android.Manifest.permission.CAMERA,
-                        it.packageName
-                    )
-                }
-                if (cameraPermission == PackageManager.PERMISSION_GRANTED) {
-                    // Launch the camera intent
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-                }
-            }
-//            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE) // TODO: remove
-        }
-    }
-    private fun createImageFile(): File {
-        // Create an image file name
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val storageDir: File = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-
-        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
-    }
     private fun showOnLongChatClickDialog() {
         MaterialAlertDialogBuilder(this)
             .setTitle("Choose Action")
@@ -198,17 +155,23 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
     }
 
     override fun updateReceiverOnlineStatus(status: UserRTDB) {
+        if (status.online) {
+            binding.tvUserStatus.text = "Online"
+        } else {
+            binding.tvUserStatus.text = "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
+        }
+    }
 
-        val timestamp = Timestamp(status.lastOnlineTimestamp)
-        val date = Date(timestamp.time)
-        val dateFormat = SimpleDateFormat("dd MMMM yyyy hh:mm a", Locale.getDefault())
-        val formattedDate = dateFormat.format(date)
+    override fun onImageCaptured(capturedImage: Uri?) {
+        this.capturedImage = capturedImage
 
-        binding.tvUserStatus.text = "Last Online at $formattedDate"
-//        if (status.online){
-//            binding.tvUserStatus.text = "Online"
-//        } else {
-//        }
+        currentMessageType = MessageType.IMAGE
+        binding.layoutSelectExtras.visibility = View.GONE
+        binding.layoutSelectedImage.visibility = View.VISIBLE
+
+        Glide.with(this)
+            .load(capturedImage)
+            .into(binding.ivSelectedImage)
     }
 
     override fun showLoading() {}
@@ -226,7 +189,6 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
 
     private fun onActionClicked() {
         binding.apply {
-
             btnBack.setOnClickListener {
                 onBackPressed()
                 finish()
@@ -272,15 +234,9 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
                             }
                             MessageType.IMAGE -> {
                                 if (capturedImage != null) {
-                                    val imageExtension = MimeTypeMap.getSingleton()
-                                        .getExtensionFromMimeType(
-                                            contentResolver.getType(
-                                                capturedImage!!
-                                            )
-                                        )
-
-                                    val path =
-                                        "messages/images-" + System.currentTimeMillis() + "." + imageExtension
+                                    val path = ImageHelper.getPathForMessages(contentResolver,
+                                        capturedImage!!
+                                    )
                                     presenter.sendMessage(
                                         message,
                                         senderId,
@@ -305,7 +261,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
             btnCamera.setOnClickListener {
                 if (PermissionManager.isCameraPermissionGranted(this@ChatActivity)) {
                     // Open Camera
-                    dispatchTakePictureIntent()
+                    presenter.takePicture()
                 } else {
                     PermissionManager.requestCameraPermission(this@ChatActivity)
                 }
@@ -320,6 +276,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
             }
 
             btnEmoji.setOnClickListener {
+                // TODO
             }
 
             btnRemoveCapturedImage.setOnClickListener {
@@ -346,25 +303,6 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                REQUEST_IMAGE_CAPTURE -> {
-//                    val imageBitmap = data?.extras?.get("data") as Bitmap
-//                    capturedImage = imageBitmap
-                    if (capturedImage != null){
-                        currentMessageType = MessageType.IMAGE
-
-                        // show image
-                        binding.layoutSelectExtras.visibility = View.GONE
-                        binding.layoutSelectedImage.visibility = View.VISIBLE
-
-                        Glide.with(this)
-                            .load(capturedImage)
-                            .into(binding.ivSelectedImage)
-                    }
-                }
-
-            }
-        }
+        presenter.onActivityResult(requestCode, resultCode, data)
     }
 }

@@ -16,7 +16,7 @@ class LoginPresenter(): BasePresenter<LoginView>, EmailLoginListener, GoogleAuth
     private val commonFirebaseTaskHelper = CommonFirebaseTaskHelper()
 
     fun updateUserOnlineStatus(){
-        commonFirebaseTaskHelper.updateUserOnlineStatus()
+        commonFirebaseTaskHelper.updateOnlineStatus()
     }
 
     fun performSignIn(email: String, password: String) {

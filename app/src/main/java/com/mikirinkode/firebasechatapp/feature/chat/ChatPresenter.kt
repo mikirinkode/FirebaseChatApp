@@ -1,17 +1,30 @@
 package com.mikirinkode.firebasechatapp.feature.chat
 
+import android.app.Activity
+import android.content.Intent
 import android.net.Uri
 import com.mikirinkode.firebasechatapp.base.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.firebase.FirebaseUserOnlineStatusHelper
 import com.mikirinkode.firebasechatapp.firebase.UserOnlineStatusEventListener
+import com.mikirinkode.firebasechatapp.helper.CameraHelper
+import com.mikirinkode.firebasechatapp.helper.CameraListener
 
-class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStatusEventListener {
+class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStatusEventListener, CameraListener {
     private var mView: ChatView? = null
     private var chatHelper: ChatHelper? = null
+    private var cameraHelper: CameraHelper? = null
     private val userOnlineStatusHelper = FirebaseUserOnlineStatusHelper(this)
 
+    fun onInit(mActivity: Activity, loggedUserId: String, openedUserId: String){
+        chatHelper = ChatHelper(this, loggedUserId, openedUserId)
+        cameraHelper = CameraHelper(mActivity, this)
+    }
+
+    /**
+     * MESSAGING
+     */
     fun sendMessage(
         message: String,
         senderId: String,
@@ -21,7 +34,6 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
     ) {
         chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName)
     }
-
     fun sendMessage(
         message: String,
         senderId: String,
@@ -33,23 +45,38 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
     ) {
         chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName, file, path)
     }
-
-    fun receiveMessage(loggedUserId: String, openedUserId: String) {
-        chatHelper = ChatHelper(this, loggedUserId, openedUserId)
+    fun receiveMessage() {
         chatHelper?.receiveMessages()
     }
-
     override fun onDataChangeReceived(messages: List<ChatMessage>) {
         mView?.updateMessages(messages)
     }
 
+    /**
+     * USER ONLINE STATUS
+     */
     fun getUserOnlineStatus(userId: String) {
         userOnlineStatusHelper.getUserOnlineStatus(userId)
     }
-
     override fun onUserOnlineStatusReceived(status: UserRTDB) {
         mView?.updateReceiverOnlineStatus(status)
     }
+
+    /**
+     * CAMERA
+     */
+    fun takePicture(){
+        cameraHelper?.dispatchTakePictureIntent()
+    }
+
+    override fun onImageCaptured(capturedImage: Uri?) {
+        mView?.onImageCaptured(capturedImage)
+    }
+
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?){
+        cameraHelper?.onActivityResult(requestCode, resultCode, data)
+    }
+
 
     override fun attachView(view: ChatView) {
         mView = view
@@ -58,6 +85,7 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
     override fun detachView() {
         chatHelper?.deactivateListener()
         chatHelper = null
+        cameraHelper = null
         mView = null
     }
 }

@@ -70,6 +70,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
 
     private fun goToMainView(){
         startActivity(Intent(this, MainActivity::class.java))
+        finishAffinity()
     }
     override fun onLoginSuccess() {
         Log.e("LoginActivity", "login onLoginSuccess")

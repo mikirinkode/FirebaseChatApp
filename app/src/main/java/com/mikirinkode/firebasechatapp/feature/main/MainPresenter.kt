@@ -11,7 +11,7 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     private val mainHelper = MainHelper(this)
 
     fun updateUserOnlineStatus() {
-        mCommonHelper.updateUserOnlineStatus()
+        mCommonHelper.updateOnlineStatus()
     }
 
     fun getMessageHistory() {
