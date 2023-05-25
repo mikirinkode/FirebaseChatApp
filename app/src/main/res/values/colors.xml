@@ -14,6 +14,7 @@
     <color name="red">#df2951</color>
     <color name="gray">#878787</color>
 
+    <color name="online_status_indicator_color">#00B307</color>
     <color name="message_been_read_color">#00BCD4</color>
 
     <color name="light_window_background">#F0F6FF</color>

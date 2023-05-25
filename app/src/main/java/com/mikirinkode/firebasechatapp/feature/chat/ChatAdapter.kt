@@ -1,5 +1,6 @@
 package com.mikirinkode.firebasechatapp.feature.chat
 
+import android.content.res.Configuration
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,9 +19,6 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
     private val messages: ArrayList<ChatMessage> = ArrayList()
     private var loggedUserId: String = ""
     var chatClickListener: ChatClickListener? = null
-
-    private val dateType = 0
-    private val messageType = 1
 
     inner class ViewHolder(val binding: ItemMessageBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -52,14 +50,24 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
                     MessageType.AUDIO.toString() -> {}
                 }
 
-                // common adjustments
+                // show message
                 if (chat.senderId == loggedUserId) {
-                    loggedUserMessageCard.visibility = View.VISIBLE
-                    interlocutorMessageCard.visibility = View.GONE
+                    layoutLoggedUserMessage.visibility = View.VISIBLE
+                    layoutInterlocutorMessage.visibility = View.GONE
 
                     tvloggedUserMessage.text = chat.message
-                    tvloggedUserTimestamp.text = DateHelper.getTimeFromTimestamp(chat.timestamp)
+                    tvloggedUserTimestamp.text =
+                        DateHelper.getTimeFromTimestamp(chat.timestamp)
+                } else {
+                    layoutLoggedUserMessage.visibility = View.GONE
+                    layoutInterlocutorMessage.visibility = View.VISIBLE
 
+                    tvInterlocutorMessage.text = chat.message
+                    tvInterlocutorTimestamp.text = DateHelper.getTimeFromTimestamp(chat.timestamp)
+                }
+
+                // update message status
+                if (chat.senderId == loggedUserId) {
                     if (chat.beenRead) {
                         tvloggedUserMessageStatus.visibility = View.VISIBLE
                         tvloggedUserMessageStatus.text = "✓✓"
@@ -70,41 +78,101 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
                                 null
                             )
                         )
-                    }
-                    if (!chat.beenRead && chat.deliveredTimestamp != 0L) {
-                        tvloggedUserMessageStatus.visibility = View.VISIBLE
-                        tvloggedUserMessageStatus.text = "✓✓"
-                    }
+                    } else {
+                        // if chat hasn't been read
+                        if (chat.deliveredTimestamp != 0L) {
+                            tvloggedUserMessageStatus.visibility = View.VISIBLE
+                            tvloggedUserMessageStatus.text = "✓✓"
+                        }
 
-                    if (!chat.beenRead && chat.deliveredTimestamp == 0L && chat.timestamp != 0L) {
-                        tvloggedUserMessageStatus.visibility = View.VISIBLE
-                        tvloggedUserMessageStatus.text = "✓"
+                        if (chat.deliveredTimestamp == 0L && chat.timestamp != 0L) {
+                            tvloggedUserMessageStatus.visibility = View.VISIBLE
+                            tvloggedUserMessageStatus.text = "✓"
+                        }
+
+                        if (chat.deliveredTimestamp == 0L && chat.timestamp == 0L) {
+                            tvloggedUserMessageStatus.visibility = View.VISIBLE
+                            tvloggedUserMessageStatus.text = "sending"
+                        }
+
+                        // update the status color
+                        when (itemView.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                            Configuration.UI_MODE_NIGHT_YES -> {
+                                // The system is currently in night mode
+                                tvloggedUserMessageStatus.setTextColor(
+                                    ResourcesCompat.getColor(
+                                        itemView.resources,
+                                        R.color.night_theme_text_color,
+                                        null
+                                    )
+                                )
+                            }
+                            Configuration.UI_MODE_NIGHT_NO -> {
+                                // The system is currently in day mode
+                                tvloggedUserMessageStatus.setTextColor(
+                                    ResourcesCompat.getColor(
+                                        itemView.resources,
+                                        R.color.light_theme_text_color,
+                                        null
+                                    )
+                                )
+                            }
+                            Configuration.UI_MODE_NIGHT_UNDEFINED -> {
+                                // We don't know what mode we're in, assume day mode
+                                tvloggedUserMessageStatus.setTextColor(
+                                    ResourcesCompat.getColor(
+                                        itemView.resources,
+                                        R.color.light_theme_text_color,
+                                        null
+                                    )
+                                )
+                            }
+                        }
                     }
-
-                    if (!chat.beenRead && chat.deliveredTimestamp == 0L && chat.timestamp == 0L) {
-                        tvloggedUserMessageStatus.visibility = View.VISIBLE
-                        tvloggedUserMessageStatus.text = "sending"
-                    }
-
-                } else {
-                    loggedUserMessageCard.visibility = View.GONE
-                    interlocutorMessageCard.visibility = View.VISIBLE
-
-                    tvInterlocutorMessage.text = chat.message
-                    tvInterlocutorTimestamp.text = DateHelper.getTimeFromTimestamp(chat.timestamp)
                 }
 
-                itemView.setOnLongClickListener {
-                    chatClickListener?.onLongClick(chat)
-                    true
-                }
-
+                /**
+                 * Interlocutor On click Listener
+                 */
                 ivInterlocutorExtraImage.setOnClickListener {
                     chatClickListener?.onImageClick(chat)
                 }
+                layoutInterlocutorMessage.setOnClickListener {
+                    if (layoutIntercolucatorOnSelected.visibility == View.VISIBLE) {
+                        layoutIntercolucatorOnSelected.visibility = View.GONE
+                        chatClickListener?.onMessageDeselect()
+                    }
 
+                }
+                layoutInterlocutorMessage.setOnLongClickListener {
+                    if (layoutIntercolucatorOnSelected.visibility == View.GONE) {
+                        layoutIntercolucatorOnSelected.visibility = View.VISIBLE
+                        chatClickListener?.onLongClick(chat)
+                        chatClickListener?.onMessageSelected()
+                    }
+                    true
+                }
+
+                /**
+                 * Logged User On Click Listener
+                 */
                 ivloggedUserExtraImage.setOnClickListener {
                     chatClickListener?.onImageClick(chat)
+                }
+
+                layoutLoggedUserMessage.setOnClickListener {
+                    if (layoutLoggedUserOnSelected.visibility == View.VISIBLE) {
+                        layoutLoggedUserOnSelected.visibility = View.GONE
+                        chatClickListener?.onMessageDeselect()
+                    }
+                }
+                layoutLoggedUserMessage.setOnLongClickListener {
+                    if (layoutLoggedUserOnSelected.visibility == View.GONE) {
+                        layoutLoggedUserOnSelected.visibility = View.VISIBLE
+                        chatClickListener?.onMessageSelected()
+                        chatClickListener?.onLongClick(chat)
+                    }
+                    true
                 }
             }
         }
@@ -175,5 +243,8 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
     interface ChatClickListener {
         fun onLongClick(chat: ChatMessage)
         fun onImageClick(chat: ChatMessage)
+
+        fun onMessageSelected()
+        fun onMessageDeselect()
     }
 }

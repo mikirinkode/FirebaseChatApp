@@ -32,12 +32,16 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                 val latestMessage: ChatMessage? =
                     conversation.messages.values.first { it.timestamp == latestTimestamp }
 
+//                val latestMessage: ChatMessage? = conversation.lastMessage
+
                 val todayDate = DateHelper.getCurrentDate()
+                val startDate = DateHelper.getThisWeekStartDate()
+                val endDate = DateHelper.getThisWeekEndDate()
                 val timestampDate = DateHelper.getDateFromTimestamp(latestMessage?.timestamp ?: 0)
 
                 if (todayDate.equals(timestampDate, ignoreCase = true)) { // today
                     tvTimestamp.text = DateHelper.getTimeFromTimestamp(latestMessage?.timestamp ?: 0)
-                } else if (true) { // still this week
+                } else if (timestampDate in startDate..endDate) { // still this week
                     tvTimestamp.text = DateHelper.getDayNameFromTimestamp(latestMessage?.timestamp ?: 0)
                 } else {
                     tvTimestamp.text = DateHelper.getFormattedDateFromTimestamp(latestMessage?.timestamp ?: 0)
@@ -55,8 +59,11 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                 }
 
 
+
+
                 if (latestMessage?.senderId == loggedUserId) {
                     // the logged user is the sender
+
                     if (latestMessage.beenRead) {
                         tvMessageStatus.visibility = View.VISIBLE
                         tvMessageStatus.text = "✓✓"
@@ -67,12 +74,20 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                                 null
                             )
                         )
-                    }
-                    if (!latestMessage.beenRead && latestMessage.deliveredTimestamp != 0L) {
-                        val currentNightMode =
-                            itemView.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                    } else {
+                        // if hasn't been read'
+                        if (latestMessage.deliveredTimestamp != 0L) {
+                            tvMessageStatus.visibility = View.VISIBLE
+                            tvMessageStatus.text = "✓✓"
+                        }
 
-                        when (currentNightMode) {
+                        if (latestMessage.deliveredTimestamp == 0L && latestMessage.timestamp != 0L) {
+                            tvMessageStatus.visibility = View.VISIBLE
+                            tvMessageStatus.text = "✓"
+                        }
+
+                        // update the color
+                        when (itemView.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
                             Configuration.UI_MODE_NIGHT_YES -> {
                                 // The system is currently in night mode
                                 tvMessageStatus.setTextColor(
@@ -104,51 +119,6 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                                 )
                             }
                         }
-
-                        tvMessageStatus.visibility = View.VISIBLE
-                        tvMessageStatus.text = "✓✓"
-
-                    }
-
-                    if (!latestMessage.beenRead && latestMessage.deliveredTimestamp == 0L && latestMessage.timestamp != 0L) {
-                        // TODO: redundant
-                        val currentNightMode =
-                            itemView.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-
-                        when (currentNightMode) {
-                            Configuration.UI_MODE_NIGHT_YES -> {
-                                // The system is currently in night mode
-                                tvMessageStatus.setTextColor(
-                                    ResourcesCompat.getColor(
-                                        itemView.resources,
-                                        R.color.night_theme_text_color,
-                                        null
-                                    )
-                                )
-                            }
-                            Configuration.UI_MODE_NIGHT_NO -> {
-                                // The system is currently in day mode
-                                tvMessageStatus.setTextColor(
-                                    ResourcesCompat.getColor(
-                                        itemView.resources,
-                                        R.color.light_theme_text_color,
-                                        null
-                                    )
-                                )
-                            }
-                            Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                                // We don't know what mode we're in, assume day mode
-                                tvMessageStatus.setTextColor(
-                                    ResourcesCompat.getColor(
-                                        itemView.resources,
-                                        R.color.light_theme_text_color,
-                                        null
-                                    )
-                                )
-                            }
-                        }
-                        tvMessageStatus.visibility = View.VISIBLE
-                        tvMessageStatus.text = "✓"
                     }
                 } else {
                     // the interlocutor is the sender and the logged user is the receiver

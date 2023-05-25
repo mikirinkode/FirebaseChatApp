@@ -41,56 +41,42 @@ class MainHelper(
                 Log.e("ChatHistoryHelper", "receiveMessageHistory listener on data change")
                 conversations.clear()
                 for (snapshot in dataSnapshot.children) {
-                    val userIds = snapshot.key?.split("-")
-                    val firstUserId = userIds?.first()
-                    val secondUserId = userIds?.last()
+                    val conversationId = snapshot.key?.split("-")
 
-                    if (firstUserId == currentUser?.uid) {
+                    if (conversationId?.contains(currentUser?.uid) == true) {
                         val conversation = snapshot.getValue(Conversation::class.java)
-                        Log.e("ChatHistoryHelper", "total messages : ${conversation?.messages?.size}")
+                        val firstUserId = conversationId.first()
+                        val secondUserId = conversationId.last()
+
+                        val interlocutorId = if (firstUserId == currentUser?.uid) secondUserId else firstUserId
 
                         runBlocking {
-                            val documents = secondUserId?.let { getUserById(it) }
-                            val userAccount: UserAccount? = documents?.first()?.toObject()
+
+                            val userDoc = getUserById(interlocutorId)
+                            val userAccount: UserAccount? = userDoc?.first()?.toObject()
                             var unreadMessageCounter = 0
 
                             conversation?.messages?.forEach { (key, message) ->
-                                if (message.receiverId == currentUser?.uid){
-                                    if (!message.beenRead){
+                                if (message.receiverId == currentUser?.uid) {
+                                    if (!message.beenRead) {
                                         unreadMessageCounter = unreadMessageCounter.plus(1)
                                     }
-                                    if (message.deliveredTimestamp == 0L){
-                                        if (conversation.conversationId != null){
-                                            updateMessageDeliveredTime(conversation.conversationId!!, message.messageId)
-                                        }
-                                    }
-                                }
-                            }
+                                    if (message.deliveredTimestamp == 0L) {
+                                        val timestamp = System.currentTimeMillis()
 
-                            conversation?.interlocutor = userAccount
-                            conversation?.unreadMessages = unreadMessageCounter
+                                        if (conversation.conversationId != null) {
+                                            updateMessageDeliveredTime(
+                                                conversation.conversationId!!,
+                                                message.messageId,
+                                                timestamp
+                                            )
 
-                            if (conversation != null) {
-                                conversations.add(conversation)
-                            }
-                        }
-                    } else if (secondUserId == currentUser?.uid) {
-                        val conversation = snapshot.getValue(Conversation::class.java)
-                        Log.e("ChatHistoryHelper", "total messages : ${conversation?.messages?.size}")
-
-                        runBlocking {
-                            val documents = firstUserId?.let { getUserById(it) }
-                            val userAccount: UserAccount? = documents?.first()?.toObject()
-                            var unreadMessageCounter = 0
-
-                            conversation?.messages?.forEach { (key, message) ->
-                                if (message.receiverId == currentUser?.uid){
-                                    if (!message.beenRead){
-                                        unreadMessageCounter = unreadMessageCounter.plus(1)
-                                    }
-                                    if (message.deliveredTimestamp == 0L){
-                                        if (conversation.conversationId != null){
-                                            updateMessageDeliveredTime(conversation.conversationId!!, message.messageId)
+//                                            if (message.messageId == conversation.lastMessage?.messageId){
+//                                                val messageRef =
+//                                                    conversationsRef?.child(
+//                                                        conversation.conversationId!!)?.child("lastMessage")?.ref
+//                                                messageRef?.child("deliveredTimestamp")?.setValue(timestamp)
+//                                            }
                                         }
                                     }
                                 }
@@ -114,12 +100,11 @@ class MainHelper(
         })
     }
 
-    private fun updateMessageDeliveredTime(conversationId: String, messageId: String) {
-        val timeStamp = System.currentTimeMillis()
+    private fun updateMessageDeliveredTime(conversationId: String, messageId: String, timestamp: Long) {
 
         val messageRef =
             conversationsRef?.child(conversationId)?.child("messages")?.child(messageId)?.ref
-        messageRef?.child("deliveredTimestamp")?.setValue(timeStamp)
+        messageRef?.child("deliveredTimestamp")?.setValue(timestamp)
     }
 }
 

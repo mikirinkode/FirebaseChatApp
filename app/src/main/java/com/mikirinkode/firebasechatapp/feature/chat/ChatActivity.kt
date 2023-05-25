@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
@@ -53,6 +54,7 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
 
     private var capturedImage: Uri? = null
     private var currentMessageType = MessageType.TEXT
+    private var totalSelectedMessages: Int = 0
 
     companion object {
         const val REQUEST_IMAGE_CAPTURE = 1
@@ -138,6 +140,9 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
         MaterialAlertDialogBuilder(this)
             .setTitle("Choose Action")
             .setMessage("This is my dialog.")
+            .setItems(arrayOf("test", "help"), { dialog, which ->
+
+            })
             .setPositiveButton("OK") { dialog, which ->
                 // Handle OK button click
             }
@@ -157,7 +162,9 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
     override fun updateReceiverOnlineStatus(status: UserRTDB) {
         if (status.online) {
             binding.tvUserStatus.text = "Online"
+            binding.ivOnlineStatusIndicator.visibility = View.VISIBLE
         } else {
+            binding.ivOnlineStatusIndicator.visibility = View.GONE
             binding.tvUserStatus.text =
                 "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
         }
@@ -191,8 +198,35 @@ class ChatActivity : AppCompatActivity(), ChatView, ChatAdapter.ChatClickListene
         }
     }
 
+    override fun onMessageSelected() {
+        totalSelectedMessages += 1
+        Log.e("ChatActivity", "on message selected: $totalSelectedMessages")
+        binding.apply {
+            if (totalSelectedMessages > 0) {
+                appBarLayoutOnItemSelected.visibility = View.VISIBLE
+                tvTotalSelectedMessages.text = totalSelectedMessages.toString()
+            } else {
+                appBarLayoutOnItemSelected.visibility = View.GONE
+            }
+        }
+    }
+    override fun onMessageDeselect() {
+        totalSelectedMessages -= 1
+        Log.e("ChatActivity", "on message deselected: $totalSelectedMessages")
+        binding.apply {
+            if (totalSelectedMessages > 0) {
+                appBarLayoutOnItemSelected.visibility = View.VISIBLE
+                tvTotalSelectedMessages.text = totalSelectedMessages.toString()
+            } else {
+                appBarLayoutOnItemSelected.visibility = View.GONE
+            }
+        }
+    }
+
     override fun onLongClick(chat: ChatMessage) {
-        showOnLongChatClickDialog()
+//        showOnLongChatClickDialog()
+        Log.e("ChatActivity", "on long click: $totalSelectedMessages")
+
     }
 
     override fun onImageClick(chat: ChatMessage) {

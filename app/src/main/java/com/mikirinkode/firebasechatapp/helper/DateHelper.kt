@@ -107,6 +107,44 @@ object DateHelper {
         return dateFormat.format(date)
     }
 
+
+    /**
+     * @return Date: 30
+     */
+    fun getThisWeekStartDate(): String {
+        val calendar = Calendar.getInstance()
+        calendar.firstDayOfWeek = Calendar.MONDAY
+
+        // Set the calendar to the current date
+        calendar.time = Calendar.getInstance().time
+
+        // Get the start date of the week (Monday)
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        val startDate = calendar.time
+
+        val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
+        return dateFormat.format(startDate)
+    }
+
+
+    /**
+     * @return Date: 30
+     */
+    fun getThisWeekEndDate(): String {
+        val calendar = Calendar.getInstance()
+        calendar.firstDayOfWeek = Calendar.MONDAY
+
+        // Set the calendar to the current date
+        calendar.time = Calendar.getInstance().time
+
+        // Get the end date of the week (Sunday)
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+        val endDate = calendar.time
+
+        val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
+        return dateFormat.format(endDate)
+    }
+
     fun getCurrentHour(): String {
         val dateFormat = SimpleDateFormat("HH", Locale.getDefault())
         val date = Date()
