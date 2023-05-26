@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chat_room_navigation"
+    app:startDestination="@id/chatRoomFragment">
+
+    <fragment
+        android:id="@+id/chatRoomFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.chat.ChatRoomFragment"
+        android:label="ChatRoomFragment" >
+        <action
+            android:id="@+id/action_open_image"
+            app:destination="@id/fullScreenImage"
+            />
+        <argument
+            android:name="openedUserId"
+            android:defaultValue=""
+            app:argType="string"/>
+
+        <argument
+            android:name="openedUserName"
+            android:defaultValue=""
+            app:argType="string"/>
+
+        <argument
+            android:name="openedUserAvatar"
+            android:defaultValue=""
+            app:argType="string"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/fullScreenImage"
+        android:name="com.mikirinkode.firebasechatapp.feature.chat.FullScreenImageFragment"
+        android:label="fragment_full_screen_image"
+        tools:layout="@layout/fragment_full_screen_image" >
+
+        <argument
+            android:name="imageUrl"
+            app:argType="string" />
+        <argument
+            android:name="messageOnImage"
+            app:argType="string" />
+        <argument
+            android:name="dateSent"
+            app:argType="long" />
+        <argument
+            android:name="senderName"
+            app:argType="string" />
+    </fragment>
+</navigation>
