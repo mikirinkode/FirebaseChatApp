@@ -31,7 +31,6 @@ class LoginActivity : AppCompatActivity(), LoginView {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        checkPermission()
         checkLoggedUser()
         initView()
         setupPresenter()
@@ -48,9 +47,6 @@ class LoginActivity : AppCompatActivity(), LoginView {
         presenter.detachView()
     }
 
-    private fun checkPermission(){
-        // TODO: handle notification permission
-    }
 
     private fun checkLoggedUser() {
         val isLoggedIn: Boolean? = pref?.getBoolean(DataConstant.IS_LOGGED_IN)
@@ -62,16 +58,17 @@ class LoginActivity : AppCompatActivity(), LoginView {
 
 
     private fun initView() {}
-    private fun setupPresenter(){
+    private fun setupPresenter() {
         presenter = LoginPresenter()
         presenter.attachView(this)
         presenter.updateUserOnlineStatus()
     }
 
-    private fun goToMainView(){
+    private fun goToMainView() {
         startActivity(Intent(this, MainActivity::class.java))
         finishAffinity()
     }
+
     override fun onLoginSuccess() {
         Log.e("LoginActivity", "login onLoginSuccess")
         goToMainView()
@@ -112,7 +109,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (data != null){
+        if (data != null) {
             presenter.onActivityResult(this, requestCode, resultCode, data)
         }
     }

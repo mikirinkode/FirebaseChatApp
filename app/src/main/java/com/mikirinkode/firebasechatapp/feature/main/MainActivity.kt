@@ -18,6 +18,7 @@ import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
 import com.mikirinkode.firebasechatapp.feature.login.LoginActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.feature.userlist.UserListActivity
+import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
 class MainActivity : AppCompatActivity(), MainView {
 
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity(), MainView {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        checkPermission()
         setupPresenter()
         initView()
         onActionClick()
@@ -86,6 +88,16 @@ class MainActivity : AppCompatActivity(), MainView {
         presenter.updateUserOnlineStatus()
     }
 
+    private fun checkPermission() {
+        if (!PermissionManager.isNotificationPermissionGranted(this)) {
+            Toast.makeText(this, "Notification Permission Not Granted", Toast.LENGTH_SHORT).show()
+            PermissionManager.requestNotificationPermission(this)
+        } else {
+            Toast.makeText(this, "Notification Permission Already Granted", Toast.LENGTH_SHORT).show()
+
+        }
+    }
+
     override fun onChatHistoryReceived(conversations: List<Conversation>) {
         if (conversations.isNotEmpty()){
             chatHistoryAdapter.setData(conversations)
@@ -108,6 +120,21 @@ class MainActivity : AppCompatActivity(), MainView {
 
             btnNewChat.setOnClickListener {
                 startActivity(Intent(this@MainActivity, UserListActivity::class.java))
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PermissionManager.NOTIFICATION_REQUEST_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty()) {
+                for (result in grantResults) {
+                    Toast.makeText(this, "Notification Permission Granted", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ package com.mikirinkode.firebasechatapp.utils
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
 
@@ -10,7 +11,43 @@ object PermissionManager {
 
     const val CAMERA_REQUEST_PERMISSION_CODE = 9001
     const val READ_EXTERNAL_REQUEST_PERMISSION_CODE = 9002
+    const val NOTIFICATION_REQUEST_PERMISSION_CODE = 9003
 
+    /**
+     * NOTIFICATION
+     */
+    fun requestNotificationPermission(activity: Activity){
+        val requestPermissions = mutableListOf<String>()
+
+        if (!isNotificationPermissionGranted(activity)){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                requestPermissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        if (requestPermissions.isNotEmpty()){
+            ActivityCompat.requestPermissions(activity, requestPermissions.toTypedArray(), NOTIFICATION_REQUEST_PERMISSION_CODE)
+        }
+    }
+
+    fun isNotificationPermissionGranted(context: Context): Boolean{
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            ActivityCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ActivityCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.VIBRATE
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+
+    /**
+     * CAMERA
+     */
     fun requestCameraPermission(activity: Activity){
         val requestPermissions = mutableListOf<String>()
 
@@ -30,6 +67,10 @@ object PermissionManager {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+
+    /**
+     * READ EXTERNAL
+     */
     fun requestReadExternalPermission(activity: Activity){
         val requestPermissions = mutableListOf<String>()
 
@@ -49,6 +90,10 @@ object PermissionManager {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+
+    /**
+     * LOCATION
+     */
     private fun isLocationPermissionGranted(context: Context): Boolean {
         val fineLocation = ActivityCompat.checkSelfPermission(
             context,

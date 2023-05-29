@@ -87,4 +87,19 @@ class ChatActivity : AppCompatActivity() {
 
         navController.setGraph(R.navigation.chat_room_navigation, bundle)
     }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PermissionManager.CAMERA_REQUEST_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty()) {
+                for (result in grantResults) {
+                    Toast.makeText(this, "Camera Permission is Granted", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 }
