@@ -13,4 +13,6 @@
     <string name="txt_hint_password_confirmation">Konfirmasi Password</string>
     <string name="txt_hint_name">Nama</string>
     <string name="default_notification_channel_id">chitchatchannelid</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
