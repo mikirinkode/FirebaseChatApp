@@ -8,8 +8,8 @@ import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 class FirebaseUserOnlineStatusHelper(
     private val mListener: UserOnlineStatusEventListener
 ) {
-    private val auth = FirebaseHelper.instance().getFirebaseAuth()
-    private val database = FirebaseHelper.instance().getDatabase()
+    private val auth = FirebaseProvider.instance().getFirebaseAuth()
+    private val database = FirebaseProvider.instance().getDatabase()
     private val usersRef = database?.getReference("users")
 
     fun getUserOnlineStatus(userId: String) {
