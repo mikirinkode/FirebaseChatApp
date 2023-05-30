@@ -72,7 +72,7 @@ object DateHelper {
 
     /**
      * @param Timestamp
-     * @return Date: 30 August 2023
+     * @return Date: 30/August/2023
      */
     fun getFormattedDateFromTimestamp(timestamp: Long): String {
             val timestampObj = Timestamp(timestamp)
@@ -142,7 +142,37 @@ object DateHelper {
         val endDate = calendar.time
 
         val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
-        return dateFormat.format(endDate)
+        val date = dateFormat.format(endDate)
+
+        val thisMonthEndDate = getThisMonthEndDate()
+
+        return if (date in "1"..thisMonthEndDate) {
+            date
+        } else {
+            thisMonthEndDate
+        }
+    }
+
+    /**
+     * @return Date in String: 31 atau 30 atau 29 atau 38
+     */
+    fun getThisMonthEndDate(): String {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+
+        val monthEndDate = calendar.get(Calendar.DATE)
+
+        return monthEndDate.toString()
+    }
+
+    fun isYesterdayDate(timestamp: Long): Boolean {
+        val todayDate: Int = getCurrentDate().toInt()
+        val timestampDate: Int = getDateFromTimestamp(timestamp).toInt()
+        val thisMonthEndDate: Int = getThisMonthEndDate().toInt()
+
+        return if (todayDate == 1 && timestampDate == thisMonthEndDate){
+            true
+        } else todayDate - timestampDate == 1
     }
 
     fun getCurrentHour(): String {

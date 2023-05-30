@@ -41,7 +41,10 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
 
                 if (todayDate.equals(timestampDate, ignoreCase = true)) { // today
                     tvTimestamp.text = DateHelper.getTimeFromTimestamp(latestMessage?.timestamp ?: 0)
-                } else if (timestampDate in startDate..endDate) { // still this week
+                } else if (DateHelper.isYesterdayDate(latestMessage?.timestamp ?: 0)){
+                    tvTimestamp.text = "Yesterday"
+                }
+                else if (timestampDate in startDate..endDate) { // still this week
                     tvTimestamp.text = DateHelper.getDayNameFromTimestamp(latestMessage?.timestamp ?: 0)
                 } else {
                     tvTimestamp.text = DateHelper.getFormattedDateFromTimestamp(latestMessage?.timestamp ?: 0)
