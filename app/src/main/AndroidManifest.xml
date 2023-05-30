@@ -23,7 +23,7 @@
             android:exported="false" />
         <activity
             android:name=".feature.chat.ChatActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".feature.userlist.UserListActivity"
             android:exported="false" />
@@ -74,6 +74,10 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <service
+            android:name=".service.UpdateDeliveredTimeService"
+            android:stopWithTask="true" />
     </application>
 
 </manifest>

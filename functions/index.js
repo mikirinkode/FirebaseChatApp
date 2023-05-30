@@ -39,6 +39,8 @@ exports.sendNotification = functions.database.ref('conversations/{conversationId
     const senderId = messageData.senderId;
     const senderName = messageData.senderName;
     const message = messageData.message;
+    const messageId = context.params.messageId;
+    const conversationId = context.params.conversationId;
 
     const tokenRef = "/users/" + receiverId + "/fcmToken";
 
@@ -56,11 +58,45 @@ exports.sendNotification = functions.database.ref('conversations/{conversationId
                 },
                 data: {
                     senderName: senderName,
-                    message: message
+                    message: message,
+                    "conversationId": conversationId,
+                    "messageId": messageId,
+                    "receiverId": receiverId
                 }
             };
 
-            return admin.messaging().sendToDevice(fcmToken, payload);
+            // TODO
+            return admin.messaging().sendToDevice(fcmToken, payload)
+              .then((response) => {
+                // Messages were sent successfully
+                console.log("Messages sent:", message);
+                console.log("fcm :", fcmToken);
+                console.log("receiver id :", receiverId);
+
+                console.log("Action response:", response);
+//
+//                const timestamp = admin.database.ServerValue.TIMESTAMP;
+//
+//                const path = "conversations/" + conversationId + "/messages/" + messageId;
+////                const path = "conversations/${conversationId}/messages/${messageId}";
+//
+//
+//
+//                const newTest = admin.database().ref("test").child("deliveredTimestamp");
+//
+//                const messageRef = admin.database().ref(path).child("deliveredTimestamp");
+//                return messageRef.set(timestamp);
+//
+////                return newTest.set(timestamp);
+////                   const testLagi = admin.database().ref(ref).child("deliveredTimestamp");
+////                   return testLagi.set(9999);
+              })
+              .catch((error) => {
+                // An error occurred while sending messages
+                console.error("Error sending messages:", error);
+                // Return an error response or handle the error
+                throw error;
+              });
         });
 });
 
