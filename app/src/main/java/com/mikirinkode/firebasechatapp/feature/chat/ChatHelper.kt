@@ -1,33 +1,26 @@
 package com.mikirinkode.firebasechatapp.feature.chat
 
 import android.net.Uri
-import android.util.Log
-import androidx.core.app.NotificationCompat
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.functions.ktx.functions
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.NotificationParams
-import com.google.firebase.messaging.RemoteMessage
 import com.google.firebase.storage.StorageReference
-import com.mikirinkode.firebasechatapp.BaseApplication
-import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
-import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
+import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
 class ChatHelper(
     private val mListener: ChatEventListener,
     private val loggedUserId: String,
     private val openedChatUserId: String,
 ) {
-    private val auth = FirebaseHelper.instance().getFirebaseAuth()
-    private val database = FirebaseHelper.instance().getDatabase()
-    private val storage = FirebaseHelper.instance().getStorage()
-    private val firestore = FirebaseHelper.instance().getFirestore()
+    private val auth = FirebaseProvider.instance().getFirebaseAuth()
+    private val database = FirebaseProvider.instance().getDatabase()
+    private val storage = FirebaseProvider.instance().getStorage()
+    private val firestore = FirebaseProvider.instance().getFirestore()
 
     private val conversationsRef = database?.getReference("conversations")
+    private val messagesRef = database?.getReference("messages")
+    private val usersRef = database?.getReference("users")
 
     private val receiveListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -93,17 +86,30 @@ class ChatHelper(
                 "readTimestamp" to 0L,
                 "beenRead" to false,
             )
+
+            // push conversation id
+            val isFirstTime = true // TODO
+            if (isFirstTime){
+                usersRef?.child(receiverId)?.child("conversationIdList")?.setValue(mapOf(conversationId to true))
+                usersRef?.child(senderId)?.child("conversationIdList")?.setValue(mapOf(conversationId to true))
+            }
+
             val conversation = hashMapOf<String, Any>(
                 "conversationId" to conversationId,
-                "userIdList" to listOf(senderId, receiverId),
-                "messages/$newMessageKey" to chatMessage
+                "participants" to listOf(senderId, receiverId),
+                "lastMessage" to chatMessage
             )
+
+            // push last message
             conversationsRef?.child(conversationId)?.updateChildren(conversation)
+
+            // push message
+            messagesRef?.child(conversationId)?.child(newMessageKey)?.setValue(chatMessage)
         }
 
     }
 
-    fun sendMessage(
+    fun sendMessage( // TODO: later
         message: String,
         senderId: String,
         receiverId: String, senderName: String, receiverName: String,
@@ -135,6 +141,13 @@ class ChatHelper(
 //                        readTimestamp = 0L,
 //                        beenRead = false,
 //                    )
+
+                    val isFirstTime = true
+                    if (isFirstTime){
+                        usersRef?.child(receiverId)?.child("conversationIdList")?.setValue(mapOf(conversationId to true))
+                        usersRef?.child(senderId)?.child("conversationIdList")?.setValue(mapOf(conversationId to true))
+                    }
+
                     val chatMessage = hashMapOf<String, Any>(
                         "messageId" to newMessageKey,
                         "message" to message,
@@ -151,10 +164,15 @@ class ChatHelper(
                     )
                     val conversation = hashMapOf(
                         "conversationId" to conversationId,
-                        "userIdList" to listOf(senderId, receiverId),
-                        "messages/$newMessageKey" to chatMessage
+                        "participants" to listOf(senderId, receiverId),
+                        "lastMessage" to chatMessage
                     )
+
+                    // push last message
                     conversationsRef?.child(conversationId)?.updateChildren(conversation)
+
+                    // push message
+                    messagesRef?.child(conversationId)?.child(newMessageKey)?.setValue(chatMessage)
                 }
             }
         }
@@ -165,16 +183,14 @@ class ChatHelper(
         val conversationId =
             if (openedChatUserId < loggedUserId) "$openedChatUserId-$loggedUserId" else "$loggedUserId-$openedChatUserId"
 
-        conversationsRef?.child(conversationId)?.child("messages")
-            ?.addValueEventListener(receiveListener)
+        messagesRef?.child(conversationId)?.addValueEventListener(receiveListener)
     }
 
     fun deactivateListener() {
         val conversationId =
             if (openedChatUserId < loggedUserId) "$openedChatUserId-$loggedUserId" else "$loggedUserId-$openedChatUserId"
 
-        conversationsRef?.child(conversationId)?.child("messages")
-            ?.removeEventListener(receiveListener)
+        messagesRef?.child(conversationId)?.removeEventListener(receiveListener)
     }
 
 
@@ -185,7 +201,7 @@ class ChatHelper(
         val timeStamp = System.currentTimeMillis()
 
         val messageRef =
-            conversationsRef?.child(conversationId)?.child("messages")?.child(messageId)?.ref
+            messagesRef?.child(conversationId)?.child(messageId)?.ref
         messageRef?.child("readTimestamp")?.setValue(timeStamp)
         messageRef?.child("beenRead")?.setValue(true)
 

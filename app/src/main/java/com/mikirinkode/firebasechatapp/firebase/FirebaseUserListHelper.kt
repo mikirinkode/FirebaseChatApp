@@ -5,10 +5,10 @@ import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 
 class FirebaseUserListHelper(
-    val mListener: FirebaseUserListener
+    val mListener: FirebaseUserListListener
 ) {
-    private val auth = FirebaseHelper.instance().getFirebaseAuth()
-    private val firestore = FirebaseHelper.instance().getFirestore()
+    private val auth = FirebaseProvider.instance().getFirebaseAuth()
+    private val firestore = FirebaseProvider.instance().getFirestore()
 
 
     fun getUserList() {

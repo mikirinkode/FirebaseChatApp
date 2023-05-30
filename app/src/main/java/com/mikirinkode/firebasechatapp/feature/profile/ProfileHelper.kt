@@ -1,16 +1,14 @@
 package com.mikirinkode.firebasechatapp.feature.profile
 
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
-import kotlinx.coroutines.tasks.await
+import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
 class ProfileHelper(
     private val mListener: ProfileEventListener
 ) {
 
-    private val firestore = FirebaseHelper.instance().getFirestore()
+    private val firestore = FirebaseProvider.instance().getFirestore()
 
     fun getUserById(userId: String) {
         firestore?.collection("users")

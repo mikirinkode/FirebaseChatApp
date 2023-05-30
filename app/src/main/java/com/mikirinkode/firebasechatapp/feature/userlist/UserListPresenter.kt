@@ -4,9 +4,9 @@ import android.util.Log
 import com.mikirinkode.firebasechatapp.base.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListHelper
-import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListener
+import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListListener
 
-class UserListPresenter: BasePresenter<UserListView>, FirebaseUserListener {
+class UserListPresenter: BasePresenter<UserListView>, FirebaseUserListListener {
     private var mView: UserListView? = null
     private val mHelper: FirebaseUserListHelper = FirebaseUserListHelper(this)
 

@@ -2,15 +2,13 @@ package com.mikirinkode.firebasechatapp.firebase
 
 import android.content.Context
 import android.util.Log
-import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
-import com.mikirinkode.firebasechatapp.R
 
-class FirebaseHelper {
+class FirebaseProvider {
     private var firebaseAuth: FirebaseAuth? = null
     private var firebaseDatabase: FirebaseDatabase? = null
     private var firebaseFirestore: FirebaseFirestore? = null
@@ -69,13 +67,13 @@ class FirebaseHelper {
 
     companion object {
 
-        private var sHelper: FirebaseHelper? = null
+        private var sHelper: FirebaseProvider? = null
 
-        fun instance(): FirebaseHelper {
+        fun instance(): FirebaseProvider {
             if (sHelper == null) {
-                sHelper = FirebaseHelper()
+                sHelper = FirebaseProvider()
             }
-            return sHelper as FirebaseHelper
+            return sHelper as FirebaseProvider
         }
     }
 }

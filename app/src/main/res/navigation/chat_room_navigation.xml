@@ -14,19 +14,10 @@
             app:destination="@id/fullScreenImage"
             />
         <argument
-            android:name="openedUserId"
+            android:name="interlocutorId"
             android:defaultValue=""
             app:argType="string"/>
 
-        <argument
-            android:name="openedUserName"
-            android:defaultValue=""
-            app:argType="string"/>
-
-        <argument
-            android:name="openedUserAvatar"
-            android:defaultValue=""
-            app:argType="string"/>
     </fragment>
 
     <fragment

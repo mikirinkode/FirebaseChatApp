@@ -14,7 +14,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.km4quest.wafa.data.local.prefs.DataConstant
-import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
@@ -33,18 +32,17 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         LocalSharedPref.instance()
     }
 
-    private val loggedUserId: String? by lazy {
-        pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
-    }
-
     private val chatAdapter: ChatAdapter by lazy {
         ChatAdapter()
     }
 
-    private lateinit var presenter: ChatPresenter
-    private var openedUserId: String? = null
-    private var openedUserName: String? = null
+    private val loggedUser: UserAccount? by lazy {
+        pref?.getObject(DataConstant.USER, UserAccount::class.java)
+    }
 
+    private var interlocutor: UserAccount? = null
+
+    private lateinit var presenter: ChatPresenter
     private var capturedImage: Uri? = null
     private var currentMessageType = MessageType.TEXT
     private var totalSelectedMessages: Int = 0
@@ -67,13 +65,6 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         onActionClicked()
     }
 
-//    override fun onResume() {
-//        super.onResume()
-//        if (openedUserId != null) {
-//            presenter.getUserOnlineStatus(openedUserId!!)
-//        }
-//    }
-
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
@@ -86,39 +77,27 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
             rvMessages.adapter = chatAdapter
             chatAdapter.chatClickListener = this@ChatRoomFragment
 
-            if (loggedUserId != null) {
-                chatAdapter.setLoggedUserId(loggedUserId!!)
+            if (loggedUser?.userId != null) {
+                chatAdapter.setLoggedUserId(loggedUser?.userId!!)
             }
         }
     }
 
     private fun handleBundleArgs() {
         val args: ChatRoomFragmentArgs by navArgs()
-        openedUserId = args.openedUserId
-        openedUserName = args.openedUserName
-        val openedAvatar = args.openedUserAvatar
-
-        setupPresenter() // call setup presenter after get the opened user id
-        setupInterlocutorProfile(openedUserName, openedAvatar)
+        val interlocutorId = args.interlocutorId
+        val loggedUserId = loggedUser?.userId
+        setupPresenter(loggedUserId, interlocutorId) // call setup presenter after get the interlocutor user id
     }
 
-    private fun setupInterlocutorProfile(openedName: String?, openedAvatar: String?) {
-        binding.apply {
-            tvName.text = openedName
-            if (openedAvatar != null && openedAvatar != "") {
-                Glide.with(requireContext())
-                    .load(openedAvatar)
-                    .into(ivUserAvatar)
-            }
-        }
-    }
-
-    private fun setupPresenter() {
+    private fun setupPresenter(loggedUserId: String?, interlocutorId: String?) {
         presenter = ChatPresenter()
         presenter.attachView(this)
-        if (loggedUserId != null && openedUserId != null) {
-            presenter.onInit(requireActivity(), loggedUserId!!, openedUserId!!)
-            presenter.getUserOnlineStatus(openedUserId!!)
+
+        if (loggedUserId != null && interlocutorId != null) {
+            presenter.onInit(requireActivity(), loggedUserId, interlocutorId)
+            presenter.getUserOnlineStatus(interlocutorId)
+            presenter.getInterlocutorData(interlocutorId)
         }
     }
 
@@ -126,21 +105,36 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         presenter.receiveMessage()
     }
 
-    override fun updateMessages(messages: List<ChatMessage>) {
+    override fun onMessagesReceived(messages: List<ChatMessage>) {
         chatAdapter.setData(messages)
         if (messages.isNotEmpty()) {
             binding.rvMessages.smoothScrollToPosition(chatAdapter.itemCount - 1)
         }
     }
 
+    override fun onGetInterlocutorProfileSuccess(user: UserAccount) {
+        binding.apply {
+            interlocutor = user
+
+            tvName.text = user.name
+            if (user.avatarUrl != null && user.avatarUrl != "") {
+                Glide.with(requireContext())
+                    .load(user.avatarUrl)
+                    .into(ivUserAvatar)
+            }
+        }
+    }
+
     override fun updateReceiverOnlineStatus(status: UserRTDB) {
-        if (status.online) {
-            binding.tvUserStatus.text = "Online"
-            binding.ivOnlineStatusIndicator.visibility = View.VISIBLE
-        } else {
-            binding.ivOnlineStatusIndicator.visibility = View.GONE
-            binding.tvUserStatus.text =
-                "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
+        binding.apply {
+            if (status.online) {
+                tvUserStatus.text = "Online"
+                ivOnlineStatusIndicator.visibility = View.VISIBLE
+            } else {
+                ivOnlineStatusIndicator.visibility = View.GONE
+                tvUserStatus.text =
+                    "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
+            }
         }
     }
 
@@ -165,24 +159,10 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     /**
      * Chat Click Listener
      */
-    override fun onImageClick(chat: ChatMessage) { // OPEN FRAGMENT
+    override fun onImageClick(chat: ChatMessage) {
         binding.apply {
             val action = ChatRoomFragmentDirections.actionOpenImage(chat.imageUrl, chat.message, chat.timestamp, chat.senderName)
             Navigation.findNavController(binding.root).navigate(action)
-//            layoutDetailImage.root.visibility = View.VISIBLE
-//            layoutDetailImage.tvMessageOnDetailImage.text = chat.message
-//
-//            layoutDetailImage.tvUserName.text = chat.senderName
-//            layoutDetailImage.tvDate.text =
-//                DateHelper.getRegularFormattedDateTimeFromTimestamp(chat.timestamp)
-//
-//            Glide.with(requireContext())
-//                .load(chat.imageUrl)
-//                .into(layoutDetailImage.ivDetailImage)
-//
-//            layoutDetailImage.btnBack.setOnClickListener {
-//                layoutDetailImage.root.visibility = View.GONE
-//            }
         }
     }
 
@@ -246,21 +226,26 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
 
                 val message = etMessage.text.toString().trim()
                 if (message.isNotBlank()) {
-                    val senderId =
-                        pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
-                    val senderName =
-                        pref?.getObject(DataConstant.USER, UserAccount::class.java)?.name
+                    val senderId = loggedUser?.userId
+                    val senderName = loggedUser?.name
 
-                    if (senderId != null && openedUserId != null) {
+                    val interlocutorId = interlocutor?.userId
+                    val interlocutorName = interlocutor?.name
+
+                    val isValid: Boolean = senderId != null && senderName != null && interlocutorId != null && interlocutorName != null
+
+                    Log.e("ChatRoom", "isValid: $isValid")
+
+                    if (senderId != null && senderName != null && interlocutorId != null && interlocutorName != null) {
                         etMessage.setText("")
                         when (currentMessageType) {
                             MessageType.TEXT -> {
                                 presenter.sendMessage(
                                     message,
                                     senderId,
-                                    openedUserId!!,
-                                    senderName!!,
-                                    openedUserName!!
+                                    interlocutorId,
+                                    senderName,
+                                    interlocutorName
                                 )
                             }
                             MessageType.IMAGE -> {
@@ -272,9 +257,9 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
                                     presenter.sendMessage(
                                         message,
                                         senderId,
-                                        openedUserId!!,
-                                        senderName!!,
-                                        openedUserName!!,
+                                        interlocutorId,
+                                        senderName,
+                                        interlocutorName,
                                         capturedImage!!,
                                         path
                                     )

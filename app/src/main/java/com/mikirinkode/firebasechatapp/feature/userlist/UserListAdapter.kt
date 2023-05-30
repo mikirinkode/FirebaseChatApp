@@ -31,9 +31,7 @@ class UserListAdapter : RecyclerView.Adapter<UserListAdapter.ViewHolder>() {
                         itemView.context,
                         ChatActivity::class.java
                     )
-                        .putExtra(ChatActivity.EXTRA_INTENT_OPENED_USER_ID, user.userId)
-                        .putExtra(ChatActivity.EXTRA_INTENT_OPENED_USER_AVATAR, user.avatarUrl)
-                        .putExtra(ChatActivity.EXTRA_INTENT_OPENED_USER_NAME, user.name)
+                        .putExtra(ChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID, user.userId)
                 )
             }
         }

@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "903732674782-9i30qfu63hu4qbfs3muetq9gsscusk75.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mikirinkode.firebasechatapp",
+            "certificate_hash": "df2d432fdffecb92c84c017e0e31b052ddb371a1"
+          }
+        },
+        {
           "client_id": "903732674782-rn2169rufjngvrjopg5ps9mr9pi71mmv.apps.googleusercontent.com",
           "client_type": 3
         }

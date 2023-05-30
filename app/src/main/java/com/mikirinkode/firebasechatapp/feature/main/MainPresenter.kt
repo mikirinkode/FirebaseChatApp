@@ -14,6 +14,7 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
         mCommonHelper.updateOnlineStatus()
     }
 
+    // TODO: show loading
     fun getMessageHistory() {
         Log.e("MainPresenter", "getMessageHistory called")
         mainHelper.receiveMessageHistory()
@@ -28,6 +29,7 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
 
     override fun attachView(view: MainView) {
         mView = view
+        mCommonHelper.observeToken()
     }
 
     override fun detachView() {

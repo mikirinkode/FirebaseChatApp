@@ -5,15 +5,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
+import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
 class EmailLoginHelper(
     private val mListener: EmailLoginListener,
 ) {
 
-    private val auth: FirebaseAuth? = FirebaseHelper.instance().getFirebaseAuth()
+    private val auth: FirebaseAuth? = FirebaseProvider.instance().getFirebaseAuth()
     private val pref = LocalSharedPref.instance()
-    private val fireStore = FirebaseHelper.instance().getFirestore()
+    private val fireStore = FirebaseProvider.instance().getFirestore()
 
     fun performLogin(
         email: String,

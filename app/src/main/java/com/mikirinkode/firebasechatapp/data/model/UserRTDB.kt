@@ -7,5 +7,5 @@ data class UserRTDB(
     val userId: String = "",
     val online: Boolean = false,
     val lastOnlineTimestamp: Long = 0L,
-    val fcmToken: String = "",
+    val conversationIdList: Map<String, Boolean> = mapOf()
 )

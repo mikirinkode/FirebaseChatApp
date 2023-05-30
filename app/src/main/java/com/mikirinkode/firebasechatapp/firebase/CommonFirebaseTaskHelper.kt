@@ -4,16 +4,18 @@ import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.mikirinkode.firebasechatapp.data.model.UserRTDB
+import com.mikirinkode.firebasechatapp.helper.DateHelper
 
 /**
  * common task that don't need listener
  * example: update user online status
  */
 class CommonFirebaseTaskHelper {
-    private val auth = FirebaseHelper.instance().getFirebaseAuth()
-    private val database = FirebaseHelper.instance().getDatabase()
+    private val auth = FirebaseProvider.instance().getFirebaseAuth()
+    private val database = FirebaseProvider.instance().getDatabase()
+    private val messaging = FirebaseProvider.instance().getMessaging()
     private val usersRef = database?.getReference("users")
+
     fun updateOnlineStatus() {
         val userId = auth?.currentUser?.uid
         val ref = database?.getReference(".info/connected")
@@ -52,4 +54,23 @@ class CommonFirebaseTaskHelper {
         })
     }
 
+    fun observeToken(){
+        Log.e("FirebaseHelper", "observeToken() called")
+        val currentUserId = auth?.currentUser?.uid
+        val userRef = database?.getReference("users")
+
+        messaging?.token?.addOnCompleteListener { task ->
+            if (task.isSuccessful){
+                val token = task.result
+                Log.e("FirebaseHelper", "Token: $token")
+
+                // Todo: Save token to server if use a server
+                if (currentUserId != null){
+                    val currentDate = DateHelper.getCurrentDateTime()
+                    userRef?.child(currentUserId)?.child("fcmToken")?.setValue(token)
+                    userRef?.child(currentUserId)?.child("fcmTokenUpdatedAt")?.setValue(currentDate)
+                }
+            }
+        }
+    }
 }

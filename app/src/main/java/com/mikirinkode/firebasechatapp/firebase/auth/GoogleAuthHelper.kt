@@ -13,7 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
+import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import com.mikirinkode.firebasechatapp.helper.DateHelper
 import com.mikirinkode.firebasechatapp.utils.Constants
 
@@ -25,14 +25,14 @@ class GoogleAuthHelper(
     private var mGoogleSignInClient: GoogleSignInClient? = null
     private var mAuth: FirebaseAuth? = null
     private var pref: LocalSharedPref? = null
-    private val fireStore = FirebaseHelper.instance().getFirestore()
+    private val fireStore = FirebaseProvider.instance().getFirestore()
 
     init {
         if (mListener == null) {
             throw RuntimeException("GoogleAuthResponse listener cannot be null.")
         }
         buildSignInOptions()
-        mAuth = FirebaseHelper.instance().getFirebaseAuth()
+        mAuth = FirebaseProvider.instance().getFirebaseAuth()
         pref = LocalSharedPref.instance()
     }
 

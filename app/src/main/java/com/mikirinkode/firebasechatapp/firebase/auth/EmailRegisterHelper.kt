@@ -5,16 +5,16 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.firebase.FirebaseHelper
+import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import com.mikirinkode.firebasechatapp.helper.DateHelper
 
 class EmailRegisterHelper(
     private val mListener: EmailRegisterListener
 ) {
 
-    private val auth: FirebaseAuth? = FirebaseHelper.instance().getFirebaseAuth()
+    private val auth: FirebaseAuth? = FirebaseProvider.instance().getFirebaseAuth()
     private val pref = LocalSharedPref.instance()
-    private val fireStore = FirebaseHelper.instance().getFirestore()
+    private val fireStore = FirebaseProvider.instance().getFirestore()
 
     fun performRegister(
         name: String,

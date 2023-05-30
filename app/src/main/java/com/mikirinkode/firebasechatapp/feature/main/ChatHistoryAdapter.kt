@@ -2,7 +2,6 @@ package com.mikirinkode.firebasechatapp.feature.main
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,12 +26,13 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
 
         fun bind(conversation: Conversation) {
             binding.apply {
-                val latestTimestamp: Long? =
-                    conversation.messages.maxByOrNull { it.value.timestamp }?.value?.timestamp
-                val latestMessage: ChatMessage? =
-                    conversation.messages.values.first { it.timestamp == latestTimestamp }
+//                val latestTimestamp: Long? =
+//                    conversation.messages.maxByOrNull { it.value.timestamp }?.value?.timestamp
+//                val latestMessage: ChatMessage? =
+//                    conversation.messages.values.first { it.timestamp == latestTimestamp }
 
-//                val latestMessage: ChatMessage? = conversation.lastMessage
+                val latestMessage: ChatMessage? = conversation.lastMessage
+//                val latestMessage: ChatMessage? = ChatMessage()
 
                 val todayDate = DateHelper.getCurrentDate()
                 val startDate = DateHelper.getThisWeekStartDate()
@@ -66,6 +66,7 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
 
                 if (latestMessage?.senderId == loggedUserId) {
                     // the logged user is the sender
+                    tvMessage.text = "You: ${latestMessage.message}"
 
                     if (latestMessage.beenRead) {
                         tvMessageStatus.visibility = View.VISIBLE
@@ -142,16 +143,8 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
                         ChatActivity::class.java
                     )
                         .putExtra(
-                            ChatActivity.EXTRA_INTENT_OPENED_USER_ID,
+                            ChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID,
                             conversation.interlocutor?.userId
-                        )
-                        .putExtra(
-                            ChatActivity.EXTRA_INTENT_OPENED_USER_AVATAR,
-                            conversation.interlocutor?.avatarUrl
-                        )
-                        .putExtra(
-                            ChatActivity.EXTRA_INTENT_OPENED_USER_NAME,
-                            conversation.interlocutor?.name
                         )
                 )
             }
