@@ -89,10 +89,6 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
         mView?.onImageCaptured(capturedImage)
     }
 
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?){
-        cameraHelper?.onActivityResult(requestCode, resultCode, data)
-    }
-
 
     override fun attachView(view: ChatView) {
         mView = view

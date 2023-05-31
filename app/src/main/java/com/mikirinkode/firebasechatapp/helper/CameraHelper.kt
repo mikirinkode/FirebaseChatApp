@@ -2,11 +2,11 @@ package com.mikirinkode.firebasechatapp.helper
 
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.FileProvider
 import com.mikirinkode.firebasechatapp.feature.chat.ChatActivity
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
@@ -19,7 +19,6 @@ class CameraHelper(
     private val mActivity: Activity,
     private val mListener: CameraListener
 ) {
-
     private var capturedImage: Uri? = null
 
     fun dispatchTakePictureIntent() {
@@ -48,6 +47,9 @@ class CameraHelper(
                 if (PermissionManager.isCameraPermissionGranted(mActivity)) {
                     // Launch the camera intent
                     mActivity.startActivityForResult(takePictureIntent, ChatActivity.REQUEST_IMAGE_CAPTURE)
+                    if (capturedImage != null){
+                        mListener.onImageCaptured(capturedImage)
+                    }
                 } else {
                     PermissionManager.requestCameraPermission(mActivity)
                 }
@@ -62,21 +64,6 @@ class CameraHelper(
         val storageDir: File = mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
 
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
-    }
-
-    fun onActivityResult(
-        requestCode: Int, resultCode: Int, data: Intent?,
-    ) {
-
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                ChatActivity.REQUEST_IMAGE_CAPTURE -> {
-                    if (capturedImage != null) {
-                        mListener.onImageCaptured(capturedImage)
-                    }
-                }
-            }
-        }
     }
 }
 
