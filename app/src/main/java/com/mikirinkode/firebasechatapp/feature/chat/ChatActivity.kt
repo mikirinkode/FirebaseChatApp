@@ -2,6 +2,7 @@ package com.mikirinkode.firebasechatapp.feature.chat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.navigation.findNavController
 import com.mikirinkode.firebasechatapp.R
@@ -20,6 +21,7 @@ class ChatActivity : AppCompatActivity() {
         const val EXTRA_INTENT_INTERLOCUTOR_ID = "key_interlocutor_id"
 
         const val BUNDLE_INTERLOCUTOR_ID = "interlocutorId"
+        const val BUNDLE_NAVIGATE_FROM = "navigateFrom"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,15 +33,26 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun handleIntent() {
-        val interlocutorId = intent.getStringExtra(EXTRA_INTENT_INTERLOCUTOR_ID)
+        // data from previous activity
+        val idFromActivity = intent.getStringExtra(EXTRA_INTENT_INTERLOCUTOR_ID)
+        if (idFromActivity != null) {
+            setupNavigation(idFromActivity, "MainActivity")
+        }
+
+        // data from notification that sent from system tray
+        val extras = intent?.extras
+        val idFromFCM = extras?.getString("senderId")
+        if (idFromFCM != null) {
+            setupNavigation(idFromFCM, null)
+        }
+    }
 
 
+    private fun setupNavigation(interlocutorId: String, navigateFrom: String?) {
         val navController = findNavController(R.id.nav_host_chat_room)
-
         val bundle = Bundle()
-
-        bundle.putString(BUNDLE_INTERLOCUTOR_ID, "$interlocutorId")
-
+        bundle.putString(BUNDLE_INTERLOCUTOR_ID, interlocutorId)
+        bundle.putString(BUNDLE_NAVIGATE_FROM, navigateFrom)
         navController.setGraph(R.navigation.chat_room_navigation, bundle)
     }
 

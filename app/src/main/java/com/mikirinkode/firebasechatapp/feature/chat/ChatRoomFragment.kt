@@ -5,13 +5,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +21,7 @@ import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.databinding.FragmentChatRoomBinding
+import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.helper.DateHelper
 import com.mikirinkode.firebasechatapp.helper.ImageHelper
@@ -44,6 +44,7 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         pref?.getObject(DataConstant.USER, UserAccount::class.java)
     }
 
+    private var navigateFrom: String? = null // used to navigate back
     private var interlocutor: UserAccount? = null
 
     private lateinit var presenter: ChatPresenter
@@ -88,9 +89,13 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     }
 
     private fun handleBundleArgs() {
+        Log.e("ChatRoom", "handleBundleArgs")
         val args: ChatRoomFragmentArgs by navArgs()
         val interlocutorId = args.interlocutorId
         val loggedUserId = loggedUser?.userId
+        navigateFrom = args.navigateFrom
+        Log.e("ChatRoom", "interlocutorId: ${interlocutorId}")
+        Log.e("ChatRoom", "loggedUserId: ${loggedUserId}")
         setupPresenter(
             loggedUserId,
             interlocutorId
@@ -242,7 +247,13 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     private fun onActionClicked() {
         binding.apply {
             btnBack.setOnClickListener {
-                requireActivity().finish()
+                if (navigateFrom != null){
+                    requireActivity().finish()
+                } else {
+                    val intent = Intent(requireContext(), MainActivity::class.java)
+                    startActivity(intent)
+                    requireActivity().finishAffinity()
+                }
             }
 
             layoutInterlocutorProfile.setOnClickListener {

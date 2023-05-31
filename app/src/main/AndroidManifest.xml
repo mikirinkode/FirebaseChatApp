@@ -23,7 +23,16 @@
             android:exported="false" />
         <activity
             android:name=".feature.chat.ChatActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:parentActivityName=".feature.main.MainActivity">
+            <intent-filter>
+                <action android:name="com.mikirinkode.firebasechatapp.feature.chat.ChatActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.main.MainActivity"/>
+        </activity>
         <activity
             android:name=".feature.userlist.UserListActivity"
             android:exported="false" />
@@ -32,7 +41,8 @@
             android:exported="false" />
         <activity
             android:name=".feature.main.MainActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:launchMode="singleTop"/>
         <activity
             android:name=".feature.login.LoginActivity"
             android:exported="true">
@@ -48,7 +58,7 @@
             android:resource="@array/preloaded_fonts" />
 
         <service android:name=".firebase.cloudmessaging.MyFirebaseMessagingService"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

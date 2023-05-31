@@ -54,14 +54,15 @@ exports.sendNotification = functions.database.ref('messages/{conversationId}/{me
                 notification: {
                     title: senderName,
                     body: message,
-                    click_action: "OPEN_CHAT_ACTIVITY"
+                    click_action: "com.mikirinkode.firebasechatapp.feature.chat.ChatActivity"
                 },
                 data: {
                     senderName: senderName,
                     message: message,
                     "conversationId": conversationId,
                     "messageId": messageId,
-                    "receiverId": receiverId
+                    "receiverId": receiverId,
+                    "senderId": senderId,
                 }
             };
 
@@ -74,7 +75,10 @@ exports.sendNotification = functions.database.ref('messages/{conversationId}/{me
                 console.log("receiver id :", receiverId);
 
                 console.log("Action response:", response);
-//
+                // TODO: Update Delivered Time
+                // tidak bisa handle dari sini
+                // karena response ini hanya menandakan bahwa message berhasil dikirim atau tidak
+                // bukan message sudah diterima atau belum 
 //                const timestamp = admin.database.ServerValue.TIMESTAMP;
 //
 //                const path = "conversations/" + conversationId + "/messages/" + messageId;

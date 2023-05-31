@@ -20,6 +20,10 @@
         <action
             android:id="@+id/actionShowMessageInfo"
             app:destination="@id/messageInfoFragment" />
+        <argument
+            android:name="navigateFrom"
+            app:argType="string"
+            app:nullable="true" />
 
     </fragment>
 

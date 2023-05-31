@@ -1,23 +1,33 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.km4quest.wafa.data.local.prefs.DataConstant
+import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
+import com.mikirinkode.firebasechatapp.feature.chat.ChatActivity
 import com.mikirinkode.firebasechatapp.feature.login.LoginActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.feature.userlist.UserListActivity
+import com.mikirinkode.firebasechatapp.firebase.cloudmessaging.MyFirebaseMessagingService
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
 class MainActivity : AppCompatActivity(), MainView {
@@ -121,7 +131,59 @@ class MainActivity : AppCompatActivity(), MainView {
             btnNewChat.setOnClickListener {
                 startActivity(Intent(this@MainActivity, UserListActivity::class.java))
             }
+
+            tvAppName.setOnClickListener { // TODO: Delete Later
+                showDummyNotification()
+            }
         }
+    }
+
+    companion object {
+        private const val NOTIFICATION_ID = 1
+        private const val CHANNEL_ID = "channel_01"
+        private const val CHANNEL_NAME = "dicoding channel"
+    }
+
+    private fun showDummyNotification(){
+        val intent = Intent(this, ChatActivity::class.java)
+            .putExtra(ChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID, "2dIi2rwPCxMBZewgaYUdl5bj7mB3")
+
+        val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addParentStack(ChatActivity::class.java)
+            addNextIntent(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                getPendingIntent(110, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            } else {
+                getPendingIntent(110, PendingIntent.FLAG_UPDATE_CURRENT)
+            }
+        }
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Build the notification
+        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Dummy Title")
+            .setContentText("Dummy Message")
+            .setSmallIcon(R.drawable.ic_notification)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            /* Create or update. */
+            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+            channel.description = CHANNEL_NAME
+
+            channel.enableVibration(true)
+            channel.vibrationPattern = longArrayOf(1000, 1000, 1000, 1000, 1000)
+
+            notificationBuilder.setChannelId(CHANNEL_ID)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
     override fun onRequestPermissionsResult(

@@ -1,13 +1,18 @@
 package com.mikirinkode.firebasechatapp.firebase.cloudmessaging
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.mikirinkode.firebasechatapp.R
@@ -15,6 +20,7 @@ import com.mikirinkode.firebasechatapp.feature.chat.ChatActivity
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import com.mikirinkode.firebasechatapp.helper.DateHelper
 import com.mikirinkode.firebasechatapp.service.UpdateDeliveredTimeService
+import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -31,33 +37,43 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val messageId = remoteMessage.data["messageId"].toString()
         val conversationId = remoteMessage.data["conversationId"].toString()
         val receiverId = remoteMessage.data["receiverId"]
+        val senderId = remoteMessage.data["senderId"]
+
 
         val title = remoteMessage.notification?.title ?: ""
         val messageText = remoteMessage.notification?.body ?: ""
         val clickAction = remoteMessage.notification?.clickAction
 
-        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
-        serviceIntent.putExtra("message", messageText)
-        startService(serviceIntent)
+        // TODO: update delivered time and on click message
+//        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
+//        serviceIntent.putExtra("message", messageText)
+//        startService(serviceIntent)
 
-        val intent =
-            Intent(this, ChatActivity::class.java)
-                .putExtra(
-                    ChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID,
-                    receiverId
-                )
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT)
+        val intent = Intent(this, ChatActivity::class.java)
+            .putExtra(ChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID, senderId)
 
-        createNotificationChannel(title, messageText)
+        val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addParentStack(ChatActivity::class.java)
+            addNextIntent(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                getPendingIntent(110, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            } else {
+                getPendingIntent(110, PendingIntent.FLAG_UPDATE_CURRENT)
+            }
+        }
+
+        // Need to create notification channel for android Oreo and above
+        createNotificationChannel()
 
         // Build the notification
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(messageText)
+            .setChannelId(CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
 
         // show the notification
         val notificationManager =
@@ -67,14 +83,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
     }
 
-    private fun createNotificationChannel(title: String, messageText: String) {
+    private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelName = CHANNEL_NAME
-            val channelDescription = messageText
             val importance = NotificationManager.IMPORTANCE_DEFAULT
 
-            val channel = NotificationChannel(CHANNEL_ID, channelName, importance)
-            channel.description = channelDescription
+            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance)
+            channel.description = CHANNEL_NAME
 
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
