@@ -1,6 +1,7 @@
 package com.mikirinkode.firebasechatapp.feature.chat
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,6 +22,7 @@ import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.databinding.FragmentChatRoomBinding
+import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.helper.DateHelper
 import com.mikirinkode.firebasechatapp.helper.ImageHelper
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
@@ -46,6 +50,8 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     private var capturedImage: Uri? = null
     private var currentMessageType = MessageType.TEXT
     private var totalSelectedMessages: Int = 0
+    private val listIndexOfSelectedMessages = ArrayList<Int>()
+    private var currentSelectedMessage: ChatMessage? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,6 +69,7 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         handleBundleArgs()
         observeMessage()
         onActionClicked()
+        onAppBatItemSelectedClickListener()
     }
 
     override fun onDestroy() {
@@ -87,7 +94,10 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         val args: ChatRoomFragmentArgs by navArgs()
         val interlocutorId = args.interlocutorId
         val loggedUserId = loggedUser?.userId
-        setupPresenter(loggedUserId, interlocutorId) // call setup presenter after get the interlocutor user id
+        setupPresenter(
+            loggedUserId,
+            interlocutorId
+        ) // call setup presenter after get the interlocutor user id
     }
 
     private fun setupPresenter(loggedUserId: String?, interlocutorId: String?) {
@@ -108,7 +118,9 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     override fun onMessagesReceived(messages: List<ChatMessage>) {
         chatAdapter.setData(messages)
         if (messages.isNotEmpty()) {
-            binding.rvMessages.smoothScrollToPosition(chatAdapter.itemCount - 1)
+            if (chatAdapter.itemCount - 1 != null){
+                binding.rvMessages.smoothScrollToPosition(chatAdapter.itemCount - 1) // TODO: error: NullPointerException
+            }
         }
     }
 
@@ -161,7 +173,12 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
      */
     override fun onImageClick(chat: ChatMessage) {
         binding.apply {
-            val action = ChatRoomFragmentDirections.actionOpenImage(chat.imageUrl, chat.message, chat.timestamp, chat.senderName)
+            val action = ChatRoomFragmentDirections.actionOpenImage(
+                chat.imageUrl,
+                chat.message,
+                chat.timestamp,
+                chat.senderName
+            )
             Navigation.findNavController(binding.root).navigate(action)
         }
     }
@@ -169,28 +186,32 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     override fun onLongClick(chat: ChatMessage) {
 //        showOnLongChatClickDialog()
         Log.e("ChatActivity", "on long click: $totalSelectedMessages")
+        currentSelectedMessage = chat
 
     }
 
     override fun onMessageSelected() {
         totalSelectedMessages += 1
         Log.e("ChatActivity", "on message selected: $totalSelectedMessages")
-        binding.apply {
-            if (totalSelectedMessages > 0) {
-                appBarLayoutOnItemSelected.visibility = View.VISIBLE
-                tvTotalSelectedMessages.text = totalSelectedMessages.toString()
-            } else {
-                appBarLayoutOnItemSelected.visibility = View.GONE
-            }
-        }
+        updateAppBarOnSelectedView()
     }
+
     override fun onMessageDeselect() {
         totalSelectedMessages -= 1
         Log.e("ChatActivity", "on message deselected: $totalSelectedMessages")
+        updateAppBarOnSelectedView()
+    }
+
+    private fun updateAppBarOnSelectedView() {
         binding.apply {
             if (totalSelectedMessages > 0) {
                 appBarLayoutOnItemSelected.visibility = View.VISIBLE
                 tvTotalSelectedMessages.text = totalSelectedMessages.toString()
+                if (totalSelectedMessages == 1) {
+                    btnShowMessageInfo.visibility = View.VISIBLE
+                } else {
+                    btnShowMessageInfo.visibility = View.GONE
+                }
             } else {
                 appBarLayoutOnItemSelected.visibility = View.GONE
             }
@@ -198,6 +219,31 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     }
 
 
+    private fun onAppBatItemSelectedClickListener() {
+        binding.apply {
+            btnBackOnItemSelected.setOnClickListener {
+                appBarLayoutOnItemSelected.visibility = View.GONE
+                totalSelectedMessages = 0
+            }
+
+            btnShowMessageInfo.setOnClickListener { // TODO
+                if (totalSelectedMessages == 1 && loggedUser?.userId != null && currentSelectedMessage != null) {
+                    val action = ChatRoomFragmentDirections.actionShowMessageInfo(
+                        loggedUser?.userId!!,
+                        currentSelectedMessage!!
+                    )
+                    Navigation.findNavController(binding.root).navigate(action)
+                    totalSelectedMessages = 0
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "There is no selected message.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
 
     private fun onActionClicked() {
         binding.apply {
@@ -205,7 +251,16 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
                 requireActivity().finish()
             }
 
-            btnAddExtras.setOnClickListener {
+            layoutInterlocutorProfile.setOnClickListener {
+                startActivity(
+                    Intent(requireActivity(), ProfileActivity::class.java).putExtra(
+                        ProfileActivity.EXTRA_INTENT_USER_ID,
+                        interlocutor?.userId
+                    )
+                )
+            }
+
+            btnAddExtras.setOnClickListener { // TODO
                 if (layoutSelectExtras.visibility == View.GONE) {
                     layoutSelectExtras.visibility = View.VISIBLE
                 } else {
@@ -232,7 +287,8 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
                     val interlocutorId = interlocutor?.userId
                     val interlocutorName = interlocutor?.name
 
-                    val isValid: Boolean = senderId != null && senderName != null && interlocutorId != null && interlocutorName != null
+                    val isValid: Boolean =
+                        senderId != null && senderName != null && interlocutorId != null && interlocutorName != null
 
                     Log.e("ChatRoom", "isValid: $isValid")
 
@@ -277,7 +333,6 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
 
             btnCamera.setOnClickListener {
                 if (PermissionManager.isCameraPermissionGranted(requireContext())) {
-                    // Open Camera
                     presenter.takePicture()
                 } else {
                     PermissionManager.requestCameraPermission(requireActivity())

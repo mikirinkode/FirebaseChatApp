@@ -73,6 +73,10 @@ class ProfileActivity : AppCompatActivity(), ProfileView {
 
     private fun onActionClicked() {
         binding.apply {
+            btnBack.setOnClickListener {
+                onBackPressed()
+            }
+
             btnLogout.setOnClickListener {
                 pref?.clearSession()
                 Firebase.auth.signOut()

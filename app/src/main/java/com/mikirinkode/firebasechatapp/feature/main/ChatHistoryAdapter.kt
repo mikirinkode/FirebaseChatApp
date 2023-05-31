@@ -66,7 +66,7 @@ class ChatHistoryAdapter : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>()
 
                 if (latestMessage?.senderId == loggedUserId) {
                     // the logged user is the sender
-                    tvMessage.text = "You: ${latestMessage.message}"
+                    tvMessage.text = "you: ${latestMessage.message}"
 
                     if (latestMessage.beenRead) {
                         tvMessageStatus.visibility = View.VISIBLE

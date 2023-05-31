@@ -29,6 +29,10 @@ object DateHelper {
         return dateFormat.format(date)
     }
 
+    /**
+     * @param timestamp
+     * @return string date: 20
+     */
     fun getDateFromTimestamp(timestamp: Long): String {
         val timestampObj = Timestamp(timestamp)
         val dateFormat = SimpleDateFormat("dd", Locale.getDefault())

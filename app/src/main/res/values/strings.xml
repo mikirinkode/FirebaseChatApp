@@ -1,18 +1,29 @@
 <resources>
     <string name="app_name">Chit Chat</string>
+
+    <!--  LOGIN ACTIVITY  -->
     <string name="txt_button_login">LOGIN</string>
     <string name="txt_hint_password">Password</string>
     <string name="txt_hint_email">Email</string>
     <string name="txt_welcome_description">Silahkan login terlebih dahulu dengan menggunakan username dan password anda.</string>
     <string name="txt_welcome_back">Selamat Datang Kembali!</string>
     <string name="txt_do_not_have_account">Belum punya akun?</string>
+
+    <!--  REGISTER ACTIVITY  -->
     <string name="txt_button_register">Daftar</string>
     <string name="txt_already_have_account">Sudah punya akun?</string>
     <string name="txt_welcome_newcomer">Halo, Selamat Datang!</string>
     <string name="txt_welcome_register_description">Silahkan buat akun terlebih dahulu sebelum masuk ke aplikasi.</string>
     <string name="txt_hint_password_confirmation">Konfirmasi Password</string>
     <string name="txt_hint_name">Nama</string>
+
+    <!--  MESSAGE INFO FRAGMENT  -->
+    <string name="txt_fragment_message_info">Message Info</string>
+
+    <!--  OTHER  -->
     <string name="default_notification_channel_id">chitchatchannelid</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="txt_read">Read</string>
+    <string name="txt_delivered">Delivered</string>
 </resources>

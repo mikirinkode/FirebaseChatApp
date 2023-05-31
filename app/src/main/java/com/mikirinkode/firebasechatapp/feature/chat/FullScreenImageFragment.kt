@@ -39,6 +39,11 @@ class FullScreenImageFragment : Fragment() {
         onActionClick()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
     private fun initView(args: FullScreenImageFragmentArgs) {
         binding.apply {
             tvMessageOnDetailImage.text = args.messageOnImage
@@ -53,10 +58,6 @@ class FullScreenImageFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
-    }
 
     private fun onActionClick(){
         binding.apply {
