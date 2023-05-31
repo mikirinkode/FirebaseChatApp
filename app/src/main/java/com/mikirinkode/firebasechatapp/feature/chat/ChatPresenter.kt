@@ -21,8 +21,8 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
     private var firebaseUserHelper: FirebaseUserHelper? = null
     private val userOnlineStatusHelper = FirebaseUserOnlineStatusHelper(this)
 
-    fun onInit(mActivity: Activity, loggedUserId: String, openedUserId: String){
-        chatHelper = ChatHelper(this, loggedUserId, openedUserId)
+    fun onInit(mActivity: Activity, loggedUserId: String, interlocutorId: String){
+        chatHelper = ChatHelper(this, loggedUserId, interlocutorId)
         cameraHelper = CameraHelper(mActivity, this)
         firebaseUserHelper = FirebaseUserHelper(this)
     }
@@ -35,9 +35,10 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
         senderId: String,
         receiverId: String,
         senderName: String,
-        receiverName: String
+        receiverName: String,
+        isFirstTime: Boolean
     ) {
-        chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName)
+        chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName, isFirstTime)
     }
     fun sendMessage(
         message: String,
@@ -46,9 +47,10 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
         senderName: String,
         receiverName: String,
         file: Uri,
-        path: String
+        path: String,
+        isFirstTime: Boolean
     ) {
-        chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName, file, path)
+        chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName, file, path, isFirstTime)
     }
     fun receiveMessage() {
         chatHelper?.receiveMessages()

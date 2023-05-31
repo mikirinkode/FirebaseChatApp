@@ -2,9 +2,7 @@ package com.mikirinkode.firebasechatapp.feature.chat
 
 import android.net.Uri
 import android.util.Log
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.google.firebase.storage.StorageReference
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
@@ -12,7 +10,7 @@ import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 class ChatHelper(
     private val mListener: ChatEventListener,
     private val loggedUserId: String,
-    private val openedChatUserId: String,
+    private val interlocutorId: String,
 ) {
     private val auth = FirebaseProvider.instance().getFirebaseAuth()
     private val database = FirebaseProvider.instance().getDatabase()
@@ -26,9 +24,10 @@ class ChatHelper(
     private val receiveListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             val messages = mutableListOf<ChatMessage>()
-            val theLatestMessage = dataSnapshot.children.lastOrNull()?.getValue(ChatMessage::class.java)
+            val theLatestMessage =
+                dataSnapshot.children.lastOrNull()?.getValue(ChatMessage::class.java)
 
-            if (theLatestMessage != null){
+            if (theLatestMessage != null) {
                 Log.e("ChatHelper", "the latest message is ${theLatestMessage.messageId}")
                 Log.e("ChatHelper", "the latest message is ${theLatestMessage.message}")
             } else {
@@ -40,19 +39,20 @@ class ChatHelper(
 
                 if (chatMessage != null) {
 
-                    if (chatMessage.receiverId == loggedUserId && chatMessage.senderId == openedChatUserId) {
+                    if (chatMessage.receiverId == loggedUserId && chatMessage.senderId == interlocutorId) {
 
                         messages.add(chatMessage)
                         if (!chatMessage.beenRead) {
                             val timeStamp = System.currentTimeMillis()
                             updateMessageReadTime(timeStamp, snapshot?.key ?: "")
 
-                            if (chatMessage.messageId == theLatestMessage?.messageId){
+                            if (chatMessage.messageId == theLatestMessage?.messageId) {
                                 updateLastMessageReadTime(timeStamp)
+                                updateTotalUnreadMessages()
                             }
                         }
                     }
-                    if (chatMessage.receiverId == openedChatUserId && chatMessage.senderId == loggedUserId) {
+                    if (chatMessage.receiverId == interlocutorId && chatMessage.senderId == loggedUserId) {
                         messages.add(chatMessage)
                     }
                 }
@@ -72,7 +72,8 @@ class ChatHelper(
         senderId: String,
         receiverId: String,
         senderName: String,
-        receiverName: String
+        receiverName: String,
+        isFirstTime: Boolean
     ) {
         val conversationId =
             if (senderId < receiverId) "$senderId-$receiverId" else "$receiverId-$senderId"
@@ -107,24 +108,60 @@ class ChatHelper(
                 "readTimestamp" to 0L,
                 "beenRead" to false,
             )
-
-            // push conversation id
-            val isFirstTime = true // TODO
-            if (isFirstTime) {
-                usersRef?.child(receiverId)?.child("conversationIdList")
-                    ?.setValue(mapOf(conversationId to true))
-                usersRef?.child(senderId)?.child("conversationIdList")
-                    ?.setValue(mapOf(conversationId to true))
-            }
-
-            val conversation = hashMapOf<String, Any>(
-                "conversationId" to conversationId,
-                "participants" to listOf(senderId, receiverId),
+            val updateLastMessage = mapOf(
                 "lastMessage" to chatMessage
             )
 
+            // push conversation id
+            if (isFirstTime) {
+                usersRef?.child(receiverId)?.child("conversationIdList")?.child(conversationId)
+                    ?.setValue(mapOf(conversationId to true))
+                usersRef?.child(senderId)?.child("conversationIdList")?.child(conversationId)
+                    ?.setValue(mapOf(conversationId to true))
+
+                val initialConversation = mapOf(
+                    "conversationId" to conversationId,
+                    "participants" to listOf(senderId, receiverId),
+                    "unreadMessages" to 0
+                )
+                conversationsRef?.child(conversationId)?.updateChildren(initialConversation)
+            }
+
+            Log.e("ChatHelper", "before on doTransaction")
+            // update total unread messages
+            conversationsRef?.child(conversationId)?.child("unreadMessages")
+                ?.runTransaction(object : Transaction.Handler {
+                    override fun doTransaction(currentData: MutableData): Transaction.Result {
+                        Log.e("ChatHelper", "on doTransaction")
+                        val currentValue = currentData.getValue(Int::class.java)
+                        return if (currentValue != null) {
+                            currentData.value = currentValue + 1
+                            Transaction.success(currentData)
+                        } else {
+                            currentData.value = 1
+                            Transaction.success(currentData)
+                        }
+                    }
+
+                    override fun onComplete(
+                        error: DatabaseError?,
+                        committed: Boolean,
+                        currentData: DataSnapshot?
+                    ) {
+                        if (error != null) {
+                            // Handle the error
+                            Log.e("ChatHelper", "Error incrementing data: ${error.message}")
+                        } else if (committed) {
+                            // Data incremented successfully
+                            Log.e("ChatHelper", "Successfully increment")
+                        } else {
+                            // Transaction was not committed, handle the case if needed
+                        }
+                    }
+                })
+
             // push last message
-            conversationsRef?.child(conversationId)?.updateChildren(conversation)
+            conversationsRef?.child(conversationId)?.updateChildren(updateLastMessage)
 
             // push message
             messagesRef?.child(conversationId)?.child(newMessageKey)?.setValue(chatMessage)
@@ -137,7 +174,8 @@ class ChatHelper(
         senderId: String,
         receiverId: String, senderName: String, receiverName: String,
         file: Uri,
-        path: String
+        path: String,
+        isFirstTime: Boolean
     ) {
         val sRef: StorageReference? = storage?.reference?.child(path)
         val conversationId =
@@ -164,15 +202,6 @@ class ChatHelper(
 //                        readTimestamp = 0L,
 //                        beenRead = false,
 //                    )
-
-                    val isFirstTime = true
-                    if (isFirstTime) {
-                        usersRef?.child(receiverId)?.child("conversationIdList")
-                            ?.setValue(mapOf(conversationId to true))
-                        usersRef?.child(senderId)?.child("conversationIdList")
-                            ?.setValue(mapOf(conversationId to true))
-                    }
-
                     val chatMessage = hashMapOf<String, Any>(
                         "messageId" to newMessageKey,
                         "message" to message,
@@ -187,14 +216,61 @@ class ChatHelper(
                         "readTimestamp" to 0L,
                         "beenRead" to false,
                     )
-                    val conversation = hashMapOf(
-                        "conversationId" to conversationId,
-                        "participants" to listOf(senderId, receiverId),
+                    val updateLastMessage = mapOf(
                         "lastMessage" to chatMessage
                     )
 
+                    // push conversation id
+                    if (isFirstTime) {
+                        usersRef?.child(receiverId)?.child("conversationIdList")?.child(conversationId)
+                            ?.setValue(mapOf(conversationId to true))
+                        usersRef?.child(senderId)?.child("conversationIdList")?.child(conversationId)
+                            ?.setValue(mapOf(conversationId to true))
+
+                        val initialConversation = mapOf(
+                            "conversationId" to conversationId,
+                            "participants" to listOf(senderId, receiverId),
+                            "unreadMessages" to 0
+                        )
+                        conversationsRef?.child(conversationId)?.updateChildren(initialConversation)
+                    }
+
+
+                                    Log.e("ChatHelper", "before on doTransaction")
+                    // update total unread messages
+                    conversationsRef?.child(conversationId)?.child("unreadMessages")
+                        ?.runTransaction(object : Transaction.Handler {
+                            override fun doTransaction(currentData: MutableData): Transaction.Result {
+                                    Log.e("ChatHelper", "on doTransaction")
+                                val currentValue = currentData.getValue(Int::class.java)
+                                return if (currentValue != null) {
+                                    currentData.value = currentValue + 1
+                                    Transaction.success(currentData)
+                                } else {
+                                    currentData.value = 1
+                                    Transaction.success(currentData)
+                                }
+                            }
+
+                            override fun onComplete(
+                                error: DatabaseError?,
+                                committed: Boolean,
+                                currentData: DataSnapshot?
+                            ) {
+                                if (error != null) {
+                                    // Handle the error
+                                    Log.e("ChatHelper", "Error incrementing data: ${error.message}")
+                                } else if (committed) {
+                                    // Data incremented successfully
+                                    Log.e("ChatHelper", "Successfully increment")
+                                } else {
+                                    // Transaction was not committed, handle the case if needed
+                                }
+                            }
+                        })
+
                     // push last message
-                    conversationsRef?.child(conversationId)?.updateChildren(conversation)
+                    conversationsRef?.child(conversationId)?.updateChildren(updateLastMessage)
 
                     // push message
                     messagesRef?.child(conversationId)?.child(newMessageKey)?.setValue(chatMessage)
@@ -206,14 +282,14 @@ class ChatHelper(
 
     fun receiveMessages() {
         val conversationId =
-            if (openedChatUserId < loggedUserId) "$openedChatUserId-$loggedUserId" else "$loggedUserId-$openedChatUserId"
+            if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
 
         messagesRef?.child(conversationId)?.addValueEventListener(receiveListener)
     }
 
     fun deactivateListener() {
         val conversationId =
-            if (openedChatUserId < loggedUserId) "$openedChatUserId-$loggedUserId" else "$loggedUserId-$openedChatUserId"
+            if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
 
         messagesRef?.child(conversationId)?.removeEventListener(receiveListener)
     }
@@ -222,7 +298,7 @@ class ChatHelper(
     private fun updateMessageReadTime(timeStamp: Long, messageId: String) {
 
         val conversationId =
-            if (openedChatUserId < loggedUserId) "$openedChatUserId-$loggedUserId" else "$loggedUserId-$openedChatUserId"
+            if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
 
         val messageRef =
             messagesRef?.child(conversationId)?.child(messageId)?.ref
@@ -232,11 +308,17 @@ class ChatHelper(
 
     private fun updateLastMessageReadTime(timeStamp: Long) {
         val conversationId =
-            if (openedChatUserId < loggedUserId) "$openedChatUserId-$loggedUserId" else "$loggedUserId-$openedChatUserId"
+            if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
 
         val conversationRef = conversationsRef?.child(conversationId)?.child("lastMessage")?.ref
         val update = mapOf("readTimestamp" to timeStamp, "beenRead" to true)
         conversationRef?.updateChildren(update)
+    }
+
+    private fun updateTotalUnreadMessages(){
+        val conversationId =
+            if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
+        conversationsRef?.child(conversationId)?.child("unreadMessages")?.setValue(0)
     }
 }
 

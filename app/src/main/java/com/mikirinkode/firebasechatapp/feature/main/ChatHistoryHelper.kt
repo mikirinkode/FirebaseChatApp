@@ -1,6 +1,7 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
 import android.util.Log
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -73,11 +74,66 @@ class MainHelper(
                         "conversations id list: ${user?.conversationIdList}"
                     )
 
+
+//                    conversations.clear()
                     user?.conversationIdList?.forEach { conversationId, value ->
                         Log.e("ChatHistoryHelper", "conversations id ${conversationId}")
                         val refWithQuery = conversationsRef?.orderByChild("conversationId")
                             ?.equalTo(conversationId) // todo
 
+//                        conversationsRef?.child(conversationId)?.addChildEventListener(object: ChildEventListener {
+//                            override fun onChildAdded(
+//                                snapshot: DataSnapshot,
+//                                previousChildName: String?
+//                            ) {}
+//
+//                            override fun onChildChanged(
+//                                snapshot: DataSnapshot,
+//                                previousChildName: String?
+//                            ) {
+//                                Log.e("CHH", "onChildChanged: ${snapshot}")
+//                                                                    val conversation = snapshot.getValue(Conversation::class.java)
+//                                    val firstUserId = conversation?.participants?.first().toString()
+//                                    val secondUserId =
+//                                        conversation?.participants?.last().toString()
+//
+//                                    Log.e("ChatHistoryHelper", "firstUserId: ${firstUserId}, secondUserId: ${secondUserId}")
+//
+//                                    val interlocutorId =
+//                                        if (firstUserId == currentUser.uid) secondUserId else firstUserId
+//
+//                                    runBlocking {
+//
+//                                        if (interlocutorId != "null") {
+//                                            val userDoc = getUserById(interlocutorId)
+//                                            val userAccount: UserAccount? =
+//                                                userDoc?.first()?.toObject()
+//                                            var unreadMessageCounter = 0
+//
+//                                            conversation?.interlocutor = userAccount
+//                                            conversation?.unreadMessages = unreadMessageCounter
+//                                        }
+//
+//                                        if (conversation != null) {
+////                                            conversations.add(conversation)
+////                                            conversations.contains()
+//                                        }
+//                                    }
+//
+//                            }
+//
+//                            override fun onChildRemoved(snapshot: DataSnapshot) {}
+//
+//                            override fun onChildMoved(
+//                                snapshot: DataSnapshot,
+//                                previousChildName: String?
+//                            ) {}
+//
+//                            override fun onCancelled(error: DatabaseError) {
+//                                Log.e("ChatHistoryHelper", "onCancelled: ${error.message}")
+//                            }
+//
+//                        })
 
                         refWithQuery?.addValueEventListener(object : ValueEventListener {
                             override fun onDataChange(conversationSnapshot: DataSnapshot) {
@@ -86,7 +142,7 @@ class MainHelper(
                                     "ChatHistoryHelper",
                                     "conversationSnapshot: ${conversationSnapshot}"
                                 )
-                                conversations.clear()
+
                                 for (snapshot in conversationSnapshot.children) {
                                     val conversation = snapshot.getValue(Conversation::class.java)
                                     val firstUserId = conversation?.participants?.first().toString()
@@ -104,14 +160,17 @@ class MainHelper(
                                             val userDoc = getUserById(interlocutorId)
                                             val userAccount: UserAccount? =
                                                 userDoc?.first()?.toObject()
-                                            var unreadMessageCounter = 0
 
                                             conversation?.interlocutor = userAccount
-                                            conversation?.unreadMessages = unreadMessageCounter
                                         }
 
                                         if (conversation != null) {
-                                            conversations.add(conversation)
+                                            val index: Int? = conversations.indexOfFirst { it.conversationId == conversation.conversationId }
+                                            if (index != null && index >= 0){
+                                                conversations[index] = conversation
+                                            } else {
+                                                conversations.add(conversation)
+                                            }
                                         }
                                     }
                                 }
