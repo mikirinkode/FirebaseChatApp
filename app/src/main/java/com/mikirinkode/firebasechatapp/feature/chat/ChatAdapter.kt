@@ -18,12 +18,16 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
 
     private val messages: ArrayList<ChatMessage> = ArrayList()
     private var loggedUserId: String = ""
+
+    private val listIndexOfSelectedMessages = ArrayList<Int>()
+    private var currentSelectedMessage: ChatMessage? = null
+
     var chatClickListener: ChatClickListener? = null
 
     inner class ViewHolder(val binding: ItemMessageBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(chat: ChatMessage) {
+        fun bind(chat: ChatMessage, position: Int) {
             binding.apply {
                 when (chat.type.uppercase()) {
                     MessageType.TEXT.toString() -> {
@@ -131,27 +135,47 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
                     }
                 }
 
+
+                // update selected status
+                if (chat.isSelected) {
+                    if (chat.senderId == loggedUserId) {
+                        layoutLoggedUserOnSelected.visibility = View.VISIBLE
+                    } else {
+                        layoutIntercolucatorOnSelected.visibility = View.VISIBLE
+                    }
+                } else {
+                    if (chat.senderId == loggedUserId) {
+                        layoutLoggedUserOnSelected.visibility = View.GONE
+                    } else {
+                        layoutIntercolucatorOnSelected.visibility = View.GONE
+                    }
+                }
+
                 /**
                  * Interlocutor On click Listener
                  */
                 ivInterlocutorExtraImage.setOnClickListener {
                     chatClickListener?.onImageClick(chat)
                 }
-                layoutInterlocutorMessage.setOnClickListener {
-                    if (layoutIntercolucatorOnSelected.visibility == View.VISIBLE) {
-                        layoutIntercolucatorOnSelected.visibility = View.GONE
+                layoutInterlocutorMessage.setOnClickListener {// TODO
+                    if (chat.isSelected){
+                        chat.isSelected = false
+                        listIndexOfSelectedMessages.remove(position)
+                        notifyItemChanged(position)
                         chatClickListener?.onMessageDeselect()
                     }
-
                 }
-                layoutInterlocutorMessage.setOnLongClickListener {
-                    if (layoutIntercolucatorOnSelected.visibility == View.GONE) {
-                        layoutIntercolucatorOnSelected.visibility = View.VISIBLE
-                        chatClickListener?.onLongClick(chat)
+                layoutInterlocutorMessage.setOnLongClickListener {// TODO
+                    if (!chat.isSelected){
+                        chat.isSelected = true
+                        currentSelectedMessage = chat
+                        notifyItemChanged(position)
+                        listIndexOfSelectedMessages.add(position)
                         chatClickListener?.onMessageSelected()
                     }
                     true
                 }
+
 
                 /**
                  * Logged User On Click Listener
@@ -160,17 +184,21 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
                     chatClickListener?.onImageClick(chat)
                 }
 
-                layoutLoggedUserMessage.setOnClickListener {
-                    if (layoutLoggedUserOnSelected.visibility == View.VISIBLE) {
-                        layoutLoggedUserOnSelected.visibility = View.GONE
+                layoutLoggedUserMessage.setOnClickListener {// TODO
+                    if (chat.isSelected){
+                        chat.isSelected = false
+                        listIndexOfSelectedMessages.remove(position)
+                        notifyItemChanged(position)
                         chatClickListener?.onMessageDeselect()
                     }
                 }
-                layoutLoggedUserMessage.setOnLongClickListener {
-                    if (layoutLoggedUserOnSelected.visibility == View.GONE) {
-                        layoutLoggedUserOnSelected.visibility = View.VISIBLE
+                layoutLoggedUserMessage.setOnLongClickListener { // TODO
+                    if (!chat.isSelected){
+                        chat.isSelected = true
+                        currentSelectedMessage = chat
+                        listIndexOfSelectedMessages.add(position)
+                        notifyItemChanged(position)
                         chatClickListener?.onMessageSelected()
-                        chatClickListener?.onLongClick(chat)
                     }
                     true
                 }
@@ -189,7 +217,7 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(messages[position])
+        holder.bind(messages[position], position)
         val message = messages[position]
 
         var headerTimestamp: Long? = null
@@ -240,8 +268,25 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
         notifyDataSetChanged()
     }
 
+    fun onDeselectAllMessage() {
+        listIndexOfSelectedMessages.forEach { index ->
+            val item: ChatMessage? = messages[index]
+            if (item != null) {
+                item.isSelected = false
+                notifyItemChanged(index)
+            }
+        }
+        listIndexOfSelectedMessages.clear()
+    }
+
+    fun getTotalSelectedMessages() = listIndexOfSelectedMessages.size
+
+    fun getCurrentSelectedMessage() = currentSelectedMessage
+
+    fun isChatEmpty() = messages.isEmpty()
+
     interface ChatClickListener {
-        fun onLongClick(chat: ChatMessage)
+
         fun onImageClick(chat: ChatMessage)
 
         fun onMessageSelected()

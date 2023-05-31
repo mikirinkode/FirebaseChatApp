@@ -49,9 +49,6 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     private lateinit var presenter: ChatPresenter
     private var capturedImage: Uri? = null
     private var currentMessageType = MessageType.TEXT
-    private var totalSelectedMessages: Int = 0
-    private val listIndexOfSelectedMessages = ArrayList<Int>()
-    private var currentSelectedMessage: ChatMessage? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -118,8 +115,9 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     override fun onMessagesReceived(messages: List<ChatMessage>) {
         chatAdapter.setData(messages)
         if (messages.isNotEmpty()) {
-            if (chatAdapter.itemCount - 1 != null){
-                binding.rvMessages.smoothScrollToPosition(chatAdapter.itemCount - 1) // TODO: error: NullPointerException
+            if (chatAdapter.itemCount - 1 > 0){
+                // TODO: check again later, error: NullPointerException
+                binding.rvMessages.smoothScrollToPosition(chatAdapter.itemCount - 1)
             }
         }
     }
@@ -183,30 +181,22 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         }
     }
 
-    override fun onLongClick(chat: ChatMessage) {
-//        showOnLongChatClickDialog()
-        Log.e("ChatActivity", "on long click: $totalSelectedMessages")
-        currentSelectedMessage = chat
-
-    }
 
     override fun onMessageSelected() {
-        totalSelectedMessages += 1
-        Log.e("ChatActivity", "on message selected: $totalSelectedMessages")
         updateAppBarOnSelectedView()
     }
 
     override fun onMessageDeselect() {
-        totalSelectedMessages -= 1
-        Log.e("ChatActivity", "on message deselected: $totalSelectedMessages")
         updateAppBarOnSelectedView()
     }
 
     private fun updateAppBarOnSelectedView() {
         binding.apply {
+            val totalSelectedMessages = chatAdapter.getTotalSelectedMessages()
             if (totalSelectedMessages > 0) {
                 appBarLayoutOnItemSelected.visibility = View.VISIBLE
                 tvTotalSelectedMessages.text = totalSelectedMessages.toString()
+
                 if (totalSelectedMessages == 1) {
                     btnShowMessageInfo.visibility = View.VISIBLE
                 } else {
@@ -221,19 +211,23 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
 
     private fun onAppBatItemSelectedClickListener() {
         binding.apply {
+
             btnBackOnItemSelected.setOnClickListener {
                 appBarLayoutOnItemSelected.visibility = View.GONE
-                totalSelectedMessages = 0
+                chatAdapter.onDeselectAllMessage()
             }
 
             btnShowMessageInfo.setOnClickListener { // TODO
+                val totalSelectedMessages = chatAdapter.getTotalSelectedMessages()
+                val currentSelectedMessage = chatAdapter.getCurrentSelectedMessage()
+
                 if (totalSelectedMessages == 1 && loggedUser?.userId != null && currentSelectedMessage != null) {
                     val action = ChatRoomFragmentDirections.actionShowMessageInfo(
                         loggedUser?.userId!!,
-                        currentSelectedMessage!!
+                        currentSelectedMessage
                     )
                     Navigation.findNavController(binding.root).navigate(action)
-                    totalSelectedMessages = 0
+                    chatAdapter.onDeselectAllMessage()
                 } else {
                     Toast.makeText(
                         requireContext(),
@@ -290,7 +284,10 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
                     val isValid: Boolean =
                         senderId != null && senderName != null && interlocutorId != null && interlocutorName != null
 
-                    Log.e("ChatRoom", "isValid: $isValid")
+                    val isFirstTime: Boolean = chatAdapter.isChatEmpty()
+                    if (isFirstTime){
+                        Toast.makeText(requireContext(), "first time chat congrats", Toast.LENGTH_SHORT).show()
+                    }
 
                     if (senderId != null && senderName != null && interlocutorId != null && interlocutorName != null) {
                         etMessage.setText("")
@@ -301,7 +298,8 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
                                     senderId,
                                     interlocutorId,
                                     senderName,
-                                    interlocutorName
+                                    interlocutorName,
+                                    isFirstTime
                                 )
                             }
                             MessageType.IMAGE -> {
@@ -317,7 +315,8 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
                                         senderName,
                                         interlocutorName,
                                         capturedImage!!,
-                                        path
+                                        path,
+                                        isFirstTime
                                     )
                                     btnAddExtras.visibility = View.VISIBLE
                                     binding.layoutSelectedImage.visibility = View.GONE

@@ -16,5 +16,7 @@ data class ChatMessage(
     val receiverName: String = "",
     val deliveredTimestamp: Long = 0L,
     val readTimestamp: Long = 0L,
-    val beenRead: Boolean = false
+    val beenRead: Boolean = false,
+
+    var isSelected: Boolean = false
 ): Parcelable

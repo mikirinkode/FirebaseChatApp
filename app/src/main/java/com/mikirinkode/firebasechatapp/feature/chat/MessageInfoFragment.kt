@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.databinding.FragmentMessageInfoBinding
 import com.mikirinkode.firebasechatapp.helper.DateHelper
@@ -70,6 +71,20 @@ class MessageInfoFragment : Fragment() {
                     layoutItemMessage.apply {
                         tvInterlocutorMessage.text = message.message
                         tvInterlocutorTimestamp.text = DateHelper.getRegularFormattedDateTimeFromTimestamp(message.timestamp)
+                    }
+                }
+
+                if (message.type == MessageType.IMAGE.toString() && message.imageUrl != null && message.imageUrl != ""){
+                    if (message.senderId == args.loggedUserId){
+                        layoutItemMessage.ivloggedUserExtraImage.visibility = View.VISIBLE
+                        Glide.with(requireContext())
+                            .load(message.imageUrl)
+                            .into(layoutItemMessage.ivloggedUserExtraImage)
+                    } else {
+                        layoutItemMessage.ivInterlocutorExtraImage.visibility = View.VISIBLE
+                        Glide.with(requireContext())
+                            .load(message.imageUrl)
+                            .into(layoutItemMessage.ivInterlocutorExtraImage)
                     }
                 }
             }
