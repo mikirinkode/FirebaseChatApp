@@ -286,7 +286,7 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
 
                     val isFirstTime: Boolean = chatAdapter.isChatEmpty()
                     if (isFirstTime){
-                        Toast.makeText(requireContext(), "first time chat congrats", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Chat Room Created", Toast.LENGTH_SHORT).show()
                     }
 
                     if (senderId != null && senderName != null && interlocutorId != null && interlocutorName != null) {

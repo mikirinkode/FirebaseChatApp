@@ -29,7 +29,7 @@ admin.initializeApp();
 //   return admin.messaging().sendToTopic('messages', payload);
 //});
 
-exports.sendNotification = functions.database.ref('conversations/{conversationId}/messages/{messageId}')
+exports.sendNotification = functions.database.ref('messages/{conversationId}/{messageId}')
 .onCreate((snapshot, context) => {
 
 
