@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import com.google.common.reflect.TypeParameter
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
-import com.km4quest.wafa.data.local.prefs.DataConstant
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 
 class LocalSharedPref {

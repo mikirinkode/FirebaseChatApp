@@ -1,17 +1,12 @@
 package com.mikirinkode.firebasechatapp.feature.login
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import com.km4quest.wafa.data.local.prefs.DataConstant
+import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.databinding.ActivityLoginBinding

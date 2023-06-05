@@ -315,6 +315,7 @@ class ChatHelper(
         conversationRef?.updateChildren(update)
     }
 
+    // Reset the total unread message
     private fun updateTotalUnreadMessages(){
         val conversationId =
             if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"

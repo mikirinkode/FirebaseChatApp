@@ -15,7 +15,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.km4quest.wafa.data.local.prefs.DataConstant
+import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount

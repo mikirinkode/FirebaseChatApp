@@ -8,26 +8,21 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-import com.km4quest.wafa.data.local.prefs.DataConstant
+import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
 import com.mikirinkode.firebasechatapp.feature.chat.ChatActivity
-import com.mikirinkode.firebasechatapp.feature.login.LoginActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.feature.userlist.UserListActivity
-import com.mikirinkode.firebasechatapp.firebase.cloudmessaging.MyFirebaseMessagingService
+import com.mikirinkode.firebasechatapp.service.UpdateDeliveredTimeService
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
 class MainActivity : AppCompatActivity(), MainView {
@@ -58,6 +53,8 @@ class MainActivity : AppCompatActivity(), MainView {
         setupPresenter()
         initView()
         onActionClick()
+
+        runService()
     }
 
     override fun onDestroy() {
@@ -73,6 +70,15 @@ class MainActivity : AppCompatActivity(), MainView {
 //        } else {
 //            setupPresenter()
 //        }
+    }
+
+    private fun runService() {
+        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
+        if (Build.VERSION.SDK_INT >= 26) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
     }
 
     private fun initView() {
@@ -103,13 +109,14 @@ class MainActivity : AppCompatActivity(), MainView {
             Toast.makeText(this, "Notification Permission Not Granted", Toast.LENGTH_SHORT).show()
             PermissionManager.requestNotificationPermission(this)
         } else {
-            Toast.makeText(this, "Notification Permission Already Granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Notification Permission Already Granted", Toast.LENGTH_SHORT)
+                .show()
 
         }
     }
 
     override fun onChatHistoryReceived(conversations: List<Conversation>) {
-        if (conversations.isNotEmpty()){
+        if (conversations.isNotEmpty()) {
             chatHistoryAdapter.setData(conversations)
         }
     }
@@ -144,7 +151,7 @@ class MainActivity : AppCompatActivity(), MainView {
         private const val CHANNEL_NAME = "dicoding channel"
     }
 
-    private fun showDummyNotification(){
+    private fun showDummyNotification() {
         val intent = Intent(this, ChatActivity::class.java)
             .putExtra(ChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID, "2dIi2rwPCxMBZewgaYUdl5bj7mB3")
 
@@ -152,7 +159,10 @@ class MainActivity : AppCompatActivity(), MainView {
             addParentStack(ChatActivity::class.java)
             addNextIntent(intent)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                getPendingIntent(110, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                getPendingIntent(
+                    110,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             } else {
                 getPendingIntent(110, PendingIntent.FLAG_UPDATE_CURRENT)
             }
@@ -172,7 +182,11 @@ class MainActivity : AppCompatActivity(), MainView {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             /* Create or update. */
-            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
             channel.description = CHANNEL_NAME
 
             channel.enableVibration(true)
@@ -195,7 +209,8 @@ class MainActivity : AppCompatActivity(), MainView {
         if (requestCode == PermissionManager.NOTIFICATION_REQUEST_PERMISSION_CODE) {
             if (grantResults.isNotEmpty()) {
                 for (result in grantResults) {
-                    Toast.makeText(this, "Notification Permission Granted", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Notification Permission Granted", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }

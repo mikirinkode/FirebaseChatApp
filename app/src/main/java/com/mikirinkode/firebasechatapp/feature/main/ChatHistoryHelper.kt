@@ -7,6 +7,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.toObject
+import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
+import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
@@ -21,6 +23,7 @@ class MainHelper(
     private val database = FirebaseProvider.instance().getDatabase()
     private val storage = FirebaseProvider.instance().getStorage()
     private val firestore = FirebaseProvider.instance().getFirestore()
+    private val pref = LocalSharedPref.instance()
 
     private val conversationsRef = database?.getReference("conversations")
     private val usersRef = database?.getReference("users")
@@ -72,6 +75,15 @@ class MainHelper(
                     Log.e(
                         "ChatHistoryHelper",
                         "conversations id list: ${user?.conversationIdList}"
+                    )
+
+                    val idList = arrayListOf<String>()
+
+                    user?.conversationIdList?.forEach { (id, _) -> idList.add(id) }
+
+                    pref?.saveObjectsList(
+                        DataConstant.CONVERSATION_ID_LIST,
+                        idList
                     )
 
 
@@ -149,7 +161,10 @@ class MainHelper(
                                     val secondUserId =
                                         conversation?.participants?.last().toString()
 
-                                    Log.e("ChatHistoryHelper", "firstUserId: ${firstUserId}, secondUserId: ${secondUserId}")
+                                    Log.e(
+                                        "ChatHistoryHelper",
+                                        "firstUserId: ${firstUserId}, secondUserId: ${secondUserId}"
+                                    )
 
                                     val interlocutorId =
                                         if (firstUserId == currentUser.uid) secondUserId else firstUserId
@@ -165,8 +180,9 @@ class MainHelper(
                                         }
 
                                         if (conversation != null) {
-                                            val index: Int? = conversations.indexOfFirst { it.conversationId == conversation.conversationId }
-                                            if (index != null && index >= 0){
+                                            val index: Int? =
+                                                conversations.indexOfFirst { it.conversationId == conversation.conversationId }
+                                            if (index != null && index >= 0) {
                                                 conversations[index] = conversation
                                             } else {
                                                 conversations.add(conversation)
