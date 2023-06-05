@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
@@ -121,8 +122,12 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
 
-    override fun showLoading() {}
-    override fun hideLoading() {}
+    override fun showLoading() {
+        binding.progressBar.visibility = View.VISIBLE
+    }
+    override fun hideLoading() {
+        binding.progressBar.visibility = View.GONE
+    }
 
     private fun onActionClick() {
         binding.apply {
@@ -138,66 +143,7 @@ class MainActivity : AppCompatActivity(), MainView {
             btnNewChat.setOnClickListener {
                 startActivity(Intent(this@MainActivity, UserListActivity::class.java))
             }
-
-            tvAppName.setOnClickListener { // TODO: Delete Later
-                showDummyNotification()
-            }
         }
-    }
-
-    companion object {
-        private const val NOTIFICATION_ID = 1
-        private const val CHANNEL_ID = "channel_01"
-        private const val CHANNEL_NAME = "dicoding channel"
-    }
-
-    private fun showDummyNotification() {
-        val intent = Intent(this, ChatActivity::class.java)
-            .putExtra(ChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID, "2dIi2rwPCxMBZewgaYUdl5bj7mB3")
-
-        val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
-            addParentStack(ChatActivity::class.java)
-            addNextIntent(intent)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                getPendingIntent(
-                    110,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            } else {
-                getPendingIntent(110, PendingIntent.FLAG_UPDATE_CURRENT)
-            }
-        }
-
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // Build the notification
-        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Dummy Title")
-            .setContentText("Dummy Message")
-            .setSmallIcon(R.drawable.ic_notification)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            /* Create or update. */
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            channel.description = CHANNEL_NAME
-
-            channel.enableVibration(true)
-            channel.vibrationPattern = longArrayOf(1000, 1000, 1000, 1000, 1000)
-
-            notificationBuilder.setChannelId(CHANNEL_ID)
-            notificationManager.createNotificationChannel(channel)
-        }
-
-
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
     override fun onRequestPermissionsResult(

@@ -32,7 +32,7 @@ class UpdateDeliveredTimeService : Service() {
     }
 
     private val serviceJob = Job()
-    private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private val database = FirebaseProvider.instance().getDatabase()
     private val conversationsRef = database?.getReference("conversations")
     private val messagesRef = database?.getReference("messages")
@@ -156,33 +156,4 @@ class UpdateDeliveredTimeService : Service() {
         conversationRef?.updateChildren(update)
     }
 
-
-//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-////        return super.onStartCommand(intent, flags, startId)
-//        if (intent != null){
-//            val message = intent.getStringExtra("message")
-//
-//            // update delivered time
-//            if (message != null){
-//                val data = mapOf(
-//                    "fromService" to true,
-//                    "message" to message,
-//                    "timestamp" to DateHelper.getCurrentDateTime()
-//                )
-//
-//                val database = FirebaseProvider.instance().getDatabase()
-//                val ref = database?.reference?.child("notifications")
-//                val notificationId = ref?.push()?.key ?: ""
-//                ref?.child(notificationId)?.setValue(data)
-//            }
-//        }
-//        // Stop the service once the task is completed
-//        stopSelf()
-//
-//        return START_NOT_STICKY
-//    }
-//
-//    override fun onBind(p0: Intent?): IBinder? {
-//        return null
-//    }
 }

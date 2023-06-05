@@ -21,7 +21,6 @@ class MainHelper(
 ) {
     private val auth = FirebaseProvider.instance().getFirebaseAuth()
     private val database = FirebaseProvider.instance().getDatabase()
-    private val storage = FirebaseProvider.instance().getStorage()
     private val firestore = FirebaseProvider.instance().getFirestore()
     private val pref = LocalSharedPref.instance()
 
@@ -43,39 +42,12 @@ class MainHelper(
 
         val conversations = mutableListOf<Conversation>()
 
-        Log.e("ChatHistoryHelper", "database: ${database}")
-        Log.e("ChatHistoryHelper", "ref: ${usersRef}")
-        Log.e("ChatHistoryHelper", "current user: ${currentUser}")
-        Log.e("ChatHistoryHelper", "current user uid: ${currentUser?.uid}")
-
-//        database?.getReference("users")?.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//        Log.e("ChatHistoryHelper", "onDataChange called")
-//        Log.e("ChatHistoryHelper", "onDataChange called")
-//        Log.e("ChatHistoryHelper", "onDataChange called")
-//
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-////                TODO("Not yet implemented")
-//            }
-//
-//        }
-//        )
-
         currentUser?.uid?.let { userId ->
             usersRef?.child(userId)?.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(userSnapshot: DataSnapshot) {
                     Log.e("ChatHistoryHelper", "onDataChange")
-                    Log.e(
-                        "ChatHistoryHelper",
-                        "userSnapshot: ${userSnapshot}"
-                    )
+
                     val user = userSnapshot.getValue(UserRTDB::class.java)
-                    Log.e(
-                        "ChatHistoryHelper",
-                        "conversations id list: ${user?.conversationIdList}"
-                    )
 
                     val idList = arrayListOf<String>()
 
@@ -86,85 +58,19 @@ class MainHelper(
                         idList
                     )
 
-
-//                    conversations.clear()
-                    user?.conversationIdList?.forEach { conversationId, value ->
-                        Log.e("ChatHistoryHelper", "conversations id ${conversationId}")
+                    // TODO: Check Again, kemungkinan boros memory / tidak optimal
+                    user?.conversationIdList?.forEach { (conversationId, value) ->
                         val refWithQuery = conversationsRef?.orderByChild("conversationId")
-                            ?.equalTo(conversationId) // todo
-
-//                        conversationsRef?.child(conversationId)?.addChildEventListener(object: ChildEventListener {
-//                            override fun onChildAdded(
-//                                snapshot: DataSnapshot,
-//                                previousChildName: String?
-//                            ) {}
-//
-//                            override fun onChildChanged(
-//                                snapshot: DataSnapshot,
-//                                previousChildName: String?
-//                            ) {
-//                                Log.e("CHH", "onChildChanged: ${snapshot}")
-//                                                                    val conversation = snapshot.getValue(Conversation::class.java)
-//                                    val firstUserId = conversation?.participants?.first().toString()
-//                                    val secondUserId =
-//                                        conversation?.participants?.last().toString()
-//
-//                                    Log.e("ChatHistoryHelper", "firstUserId: ${firstUserId}, secondUserId: ${secondUserId}")
-//
-//                                    val interlocutorId =
-//                                        if (firstUserId == currentUser.uid) secondUserId else firstUserId
-//
-//                                    runBlocking {
-//
-//                                        if (interlocutorId != "null") {
-//                                            val userDoc = getUserById(interlocutorId)
-//                                            val userAccount: UserAccount? =
-//                                                userDoc?.first()?.toObject()
-//                                            var unreadMessageCounter = 0
-//
-//                                            conversation?.interlocutor = userAccount
-//                                            conversation?.unreadMessages = unreadMessageCounter
-//                                        }
-//
-//                                        if (conversation != null) {
-////                                            conversations.add(conversation)
-////                                            conversations.contains()
-//                                        }
-//                                    }
-//
-//                            }
-//
-//                            override fun onChildRemoved(snapshot: DataSnapshot) {}
-//
-//                            override fun onChildMoved(
-//                                snapshot: DataSnapshot,
-//                                previousChildName: String?
-//                            ) {}
-//
-//                            override fun onCancelled(error: DatabaseError) {
-//                                Log.e("ChatHistoryHelper", "onCancelled: ${error.message}")
-//                            }
-//
-//                        })
+                            ?.equalTo(conversationId)
 
                         refWithQuery?.addValueEventListener(object : ValueEventListener {
                             override fun onDataChange(conversationSnapshot: DataSnapshot) {
-                                Log.e("ChatHistoryHelper", "ref with query")
-                                Log.e(
-                                    "ChatHistoryHelper",
-                                    "conversationSnapshot: ${conversationSnapshot}"
-                                )
 
                                 for (snapshot in conversationSnapshot.children) {
                                     val conversation = snapshot.getValue(Conversation::class.java)
                                     val firstUserId = conversation?.participants?.first().toString()
                                     val secondUserId =
                                         conversation?.participants?.last().toString()
-
-                                    Log.e(
-                                        "ChatHistoryHelper",
-                                        "firstUserId: ${firstUserId}, secondUserId: ${secondUserId}"
-                                    )
 
                                     val interlocutorId =
                                         if (firstUserId == currentUser.uid) secondUserId else firstUserId
@@ -206,80 +112,6 @@ class MainHelper(
                 }
             })
         }
-
-//        conversationsRef?.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                Log.e("ChatHistoryHelper", "receiveMessageHistory listener on data change")
-//                conversations.clear()
-//                for (snapshot in dataSnapshot.children) {
-//                    val conversationId = snapshot.key?.split("-")
-//
-//                    if (conversationId?.contains(currentUser?.uid) == true) {
-//                        val conversation = snapshot.getValue(Conversation::class.java)
-//                        val firstUserId = conversationId.first()
-//                        val secondUserId = conversationId.last()
-//
-//                        val interlocutorId = if (firstUserId == currentUser?.uid) secondUserId else firstUserId
-//
-//                        runBlocking {
-//
-//                            val userDoc = getUserById(interlocutorId)
-//                            val userAccount: UserAccount? = userDoc?.first()?.toObject()
-//                            var unreadMessageCounter = 0
-//
-////                            conversation?.messages?.forEach { (key, message) ->
-////                                if (message.receiverId == currentUser?.uid) {
-////                                    if (!message.beenRead) {
-////                                        unreadMessageCounter = unreadMessageCounter.plus(1)
-////                                    }
-////                                    if (message.deliveredTimestamp == 0L) {
-////                                        val timestamp = System.currentTimeMillis()
-////
-////                                        if (conversation.conversationId != null) {
-////                                            updateMessageDeliveredTime(
-////                                                conversation.conversationId!!,
-////                                                message.messageId,
-////                                                timestamp
-////                                            )
-////
-//////                                            if (message.messageId == conversation.lastMessage?.messageId){
-//////                                                val messageRef =
-//////                                                    conversationsRef?.child(
-//////                                                        conversation.conversationId!!)?.child("lastMessage")?.ref
-//////                                                messageRef?.child("deliveredTimestamp")?.setValue(timestamp)
-//////                                            }
-////                                        }
-////                                    }
-////                                }
-////                            }
-//
-//                            conversation?.interlocutor = userAccount
-//                            conversation?.unreadMessages = unreadMessageCounter
-//
-//                            if (conversation != null) {
-//                                conversations.add(conversation)
-//                            }
-//                        }
-//                    }
-//                }
-//                mListener.onDataChangeReceived(conversations)
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-////                TODO("Not yet implemented")
-//            }
-//        })
-    }
-
-    private fun updateMessageDeliveredTime(
-        conversationId: String,
-        messageId: String,
-        timestamp: Long
-    ) {
-
-        val messageRef =
-            conversationsRef?.child(conversationId)?.child("messages")?.child(messageId)?.ref
-        messageRef?.child("deliveredTimestamp")?.setValue(timestamp)
     }
 }
 

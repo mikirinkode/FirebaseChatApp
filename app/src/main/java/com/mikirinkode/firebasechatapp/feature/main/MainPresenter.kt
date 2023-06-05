@@ -18,9 +18,11 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     fun getMessageHistory() {
         Log.e("MainPresenter", "getMessageHistory called")
         mainHelper.receiveMessageHistory()
+        mView?.showLoading()
     }
 
     override fun onDataChangeReceived(conversations: List<Conversation>) {
+        mView?.hideLoading()
         if (conversations.isNotEmpty()){
             mView?.onChatHistoryReceived(conversations)
         }

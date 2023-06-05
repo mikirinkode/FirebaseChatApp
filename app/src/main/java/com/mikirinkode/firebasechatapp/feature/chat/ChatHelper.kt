@@ -12,10 +12,8 @@ class ChatHelper(
     private val loggedUserId: String,
     private val interlocutorId: String,
 ) {
-    private val auth = FirebaseProvider.instance().getFirebaseAuth()
     private val database = FirebaseProvider.instance().getDatabase()
     private val storage = FirebaseProvider.instance().getStorage()
-    private val firestore = FirebaseProvider.instance().getFirestore()
 
     private val conversationsRef = database?.getReference("conversations")
     private val messagesRef = database?.getReference("messages")
@@ -26,13 +24,6 @@ class ChatHelper(
             val messages = mutableListOf<ChatMessage>()
             val theLatestMessage =
                 dataSnapshot.children.lastOrNull()?.getValue(ChatMessage::class.java)
-
-            if (theLatestMessage != null) {
-                Log.e("ChatHelper", "the latest message is ${theLatestMessage.messageId}")
-                Log.e("ChatHelper", "the latest message is ${theLatestMessage.message}")
-            } else {
-                Log.e("ChatHelper", "the latest message is null")
-            }
 
             for (snapshot in dataSnapshot.children) {
                 val chatMessage = snapshot.getValue(ChatMessage::class.java)
@@ -127,6 +118,7 @@ class ChatHelper(
                 conversationsRef?.child(conversationId)?.updateChildren(initialConversation)
             }
 
+            // TODO: Check again later
             Log.e("ChatHelper", "before on doTransaction")
             // update total unread messages
             conversationsRef?.child(conversationId)?.child("unreadMessages")
