@@ -1,26 +1,19 @@
 package com.mikirinkode.firebasechatapp.firebase.cloudmessaging
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.feature.chat.ChatActivity
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import com.mikirinkode.firebasechatapp.helper.DateHelper
-import com.mikirinkode.firebasechatapp.service.UpdateDeliveredTimeService
-import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -31,23 +24,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
 
-    // TODO: update delivered time and on click message
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.e("MessagingServiece", "onMessageReceived")
-        val messageId = remoteMessage.data["messageId"].toString()
-        val conversationId = remoteMessage.data["conversationId"].toString()
-        val receiverId = remoteMessage.data["receiverId"]
         val senderId = remoteMessage.data["senderId"]
 
 
         val title = remoteMessage.notification?.title ?: ""
         val messageText = remoteMessage.notification?.body ?: ""
-        val clickAction = remoteMessage.notification?.clickAction
-
-        // TODO: update delivered time and on click message
-//        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
-//        serviceIntent.putExtra("message", messageText)
-//        startService(serviceIntent)
 
         val intent = Intent(this, ChatActivity::class.java)
             .putExtra(ChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID, senderId)
@@ -96,29 +78,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    private fun updateMessageDeliveredTime(
-        message: String,
-        conversationId: String,
-        messageId: String,
-        timestamp: Long
-    ) {
-        val database = FirebaseProvider.instance().getDatabase()
-
-        val conversationsRef = database?.getReference("conversations")
-
-//        val messageRef =
-//            conversationsRef?.child(conversationId)?.child("messages")?.child(messageId)?.ref
-//        messageRef?.child("deliveredTimestamp")?.setValue(timestamp)
-
-        val newData = database?.getReference("testing")?.push()
-
-        val value = mapOf(
-            "message" to message,
-            "deliveredTimestamp" to timestamp
-        )
-        newData?.setValue(value)
-    }
-
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         sendRegistrationToServer(token)
@@ -134,7 +93,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (currentUserId != null) {
             val currentDate = DateHelper.getCurrentDateTime()
             userRef?.child(currentUserId)?.child("fcmToken")?.setValue(token)
-            userRef?.child(currentUserId)?.child("fcmTokenUpdatedAt")?.setValue(currentDate)
+            userRef?.child(currentUserId)?.child("fcmTokenUpdatedAt")?.setValue(currentDate) // TODO
         }
     }
 }

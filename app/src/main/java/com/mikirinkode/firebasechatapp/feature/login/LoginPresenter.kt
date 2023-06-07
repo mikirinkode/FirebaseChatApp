@@ -20,7 +20,6 @@ class LoginPresenter(): BasePresenter<LoginView>, EmailLoginListener, GoogleAuth
     }
 
     fun performSignIn(email: String, password: String) {
-        Log.e("LoginPresenter", "login performSignIn")
         view?.showLoading()
         emailLoginHelper.performLogin(email, password)
     }
@@ -37,13 +36,11 @@ class LoginPresenter(): BasePresenter<LoginView>, EmailLoginListener, GoogleAuth
     }
 
     override fun onEmailLoginSuccess(userId: String?) {
-        Log.e("LoginPresenter", "login onEmailSignInSuccess")
         view?.onLoginSuccess()
         view?.hideLoading()
     }
 
     override fun onEmailLoginFail(errorMessage: String?) {
-        Log.e("LoginPresenter", "login onEmailSignInFail")
         view?.onLoginFailed(errorMessage.toString())
         view?.hideLoading()
     }

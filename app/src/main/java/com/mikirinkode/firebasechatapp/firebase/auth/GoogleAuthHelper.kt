@@ -108,8 +108,6 @@ class GoogleAuthHelper(
                                 googleAccount.id
                             )
                         }?.addOnFailureListener {
-                            Log.e("googleAuthHelper", "firestore failed")
-                            Log.e("googleAuthHelper", "${it.message}")
                             mListener?.onGoogleAuthSignInFailed("Registration failed: ${it.message}")
                         }
                     }
@@ -117,7 +115,6 @@ class GoogleAuthHelper(
             }
         } catch (e: ApiException) {
             mListener?.onGoogleAuthSignInFailed(e.message)
-            Log.e(TAG, e.message.toString())
         }
     }
 
@@ -131,6 +128,7 @@ class GoogleAuthHelper(
         return user
     }
 
+    // TODO
     fun performSignOut() {
         if (mAuth != null && mActivity != null) {
             mAuth?.signOut()

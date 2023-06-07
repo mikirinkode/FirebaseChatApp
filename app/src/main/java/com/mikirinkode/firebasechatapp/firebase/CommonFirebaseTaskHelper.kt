@@ -40,7 +40,7 @@ class CommonFirebaseTaskHelper {
                     if (isConnected == true) {
                         val timestamp = System.currentTimeMillis()
                         val newUpdate = hashMapOf<String, Any>(
-                            "userId" to userId,
+                            "userId" to userId, // TODO
                             "online" to true,
                             "lastOnlineTimestamp" to timestamp
                         )
@@ -53,7 +53,6 @@ class CommonFirebaseTaskHelper {
                             "online" to false,
                             "lastOnlineTimestamp" to timestamp
                         )
-//                        usersRef?.child(userId)?.onDisconnect()?.updateChildren(mapOf( "online" to false ))
                         usersRef?.child(userId)?.onDisconnect()?.updateChildren(newUpdate)
                     }
                 }
@@ -67,16 +66,14 @@ class CommonFirebaseTaskHelper {
     }
 
     fun observeToken(){
-        Log.e("FirebaseHelper", "observeToken() called")
         val currentUserId = auth?.currentUser?.uid
         val userRef = database?.getReference("users")
 
         messaging?.token?.addOnCompleteListener { task ->
             if (task.isSuccessful){
                 val token = task.result
-                Log.e("FirebaseHelper", "Token: $token")
 
-                // Todo: Save token to server if use a server
+                // Save token to server if use a server
                 if (currentUserId != null){
                     val currentDate = DateHelper.getCurrentDateTime()
                     userRef?.child(currentUserId)?.child("fcmToken")?.setValue(token)

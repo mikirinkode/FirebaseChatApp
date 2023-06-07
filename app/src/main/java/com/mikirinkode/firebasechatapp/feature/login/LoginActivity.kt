@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
@@ -65,12 +66,11 @@ class LoginActivity : AppCompatActivity(), LoginView {
     }
 
     override fun onLoginSuccess() {
-        Log.e("LoginActivity", "login onLoginSuccess")
+        Toast.makeText(this, getString(R.string.txt_login_success), Toast.LENGTH_SHORT).show()
         goToMainView()
     }
 
     override fun onLoginFailed(message: String) {
-        Log.e("LoginActivity", "login onLoginFailed")
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
@@ -87,7 +87,6 @@ class LoginActivity : AppCompatActivity(), LoginView {
             btnLogin.setOnClickListener {
                 val email: String = etEmail.text.toString().trim()
                 val password: String = etPassword.text.toString().trim()
-                Log.e("LoginActivity", "login onclick")
                 presenter.performSignIn(email, password)
             }
 

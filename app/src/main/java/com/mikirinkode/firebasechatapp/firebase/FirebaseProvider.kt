@@ -7,6 +7,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
+import com.mikirinkode.firebasechatapp.helper.DateHelper
 
 class FirebaseProvider {
     private var firebaseAuth: FirebaseAuth? = null
@@ -16,7 +17,6 @@ class FirebaseProvider {
     private var firebaseMessaging: FirebaseMessaging? = null
 
     fun initialize(context: Context?) {
-        Log.e("FirebaseHelper", "initialize() called")
         if (context != null) {
             firebaseAuth = FirebaseAuth.getInstance()
             firebaseDatabase = FirebaseDatabase.getInstance()
@@ -29,19 +29,19 @@ class FirebaseProvider {
         }
     }
 
-    fun observeToken(){
-        Log.e("FirebaseHelper", "observeToken() called")
+    private fun observeToken(){
         val currentUserId = firebaseAuth?.currentUser?.uid
         val userRef = firebaseDatabase?.getReference("users")
 
         firebaseMessaging?.token?.addOnCompleteListener { task ->
             if (task.isSuccessful){
                 val token = task.result
-                Log.e("FirebaseHelper", "Token: $token")
 
-                // Todo: Save token to server if use a server
+                // Save token to server if use a server
                 if (currentUserId != null){
-                    userRef?.child(currentUserId)?.child("fcmToken")?.setValue(token)
+                    val currentDate = DateHelper.getCurrentDateTime()
+                    userRef?.child(currentUserId)?.child("fcmToken")?.setValue(token) // TODO
+                    userRef?.child(currentUserId)?.child("fcmTokenUpdatedAt")?.setValue(currentDate)
                 }
             }
         }
