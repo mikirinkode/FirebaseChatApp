@@ -16,6 +16,18 @@ class CommonFirebaseTaskHelper {
     private val messaging = FirebaseProvider.instance().getMessaging()
     private val usersRef = database?.getReference("users")
 
+    fun updateTypingStatus(isTyping: Boolean, currentReceiver: String){
+        val userId = auth?.currentUser?.uid
+        val newUpdate = hashMapOf<String, Any>(
+            "typing" to isTyping,
+            "currentlyTypingFor" to currentReceiver
+        )
+
+        if (userId != null) {
+            usersRef?.child(userId)?.updateChildren(newUpdate)
+        }
+    }
+
     fun updateOnlineStatus() {
         val userId = auth?.currentUser?.uid
         val ref = database?.getReference(".info/connected")

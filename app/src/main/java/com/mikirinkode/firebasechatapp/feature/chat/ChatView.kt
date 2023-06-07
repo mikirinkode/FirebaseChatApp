@@ -14,4 +14,6 @@ interface ChatView: BaseView {
     fun onImageCaptured(capturedImage: Uri?)
 
     fun onGetInterlocutorProfileSuccess(user: UserAccount)
+
+    fun showOnUploadImageProgress(progress: Int)
 }

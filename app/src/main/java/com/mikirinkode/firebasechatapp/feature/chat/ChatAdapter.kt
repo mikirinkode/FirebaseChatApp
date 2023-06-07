@@ -245,7 +245,23 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
         }
         if (headerTimestamp != null) {
             holder.binding.cardDateHeader.visibility = View.VISIBLE
-            holder.binding.tvDateHeader.text = DateHelper.regularFormat(headerTimestamp)
+//            holder.binding.tvDateHeader.text = DateHelper.regularFormat(headerTimestamp)
+
+            val todayDate = DateHelper.getCurrentDate()
+            val startDate = DateHelper.getThisWeekStartDate()
+            val endDate = DateHelper.getThisWeekEndDate()
+            val timestampDate = DateHelper.getDateFromTimestamp(headerTimestamp ?: 0)
+
+            if (todayDate.equals(timestampDate, ignoreCase = true)) { // today
+                holder.binding.tvDateHeader.text = "Today"
+            } else if (DateHelper.isYesterdayDate(headerTimestamp ?: 0)){
+                holder.binding.tvDateHeader.text = "Yesterday"
+            }
+            else if (timestampDate in startDate..endDate) { // still this week
+                holder.binding.tvDateHeader.text = DateHelper.getDayNameFromTimestamp(headerTimestamp ?: 0)
+            } else {
+                holder.binding.tvDateHeader.text = DateHelper.regularFormat(headerTimestamp ?: 0)
+            }
         } else {
             holder.binding.cardDateHeader.visibility = View.GONE
         }

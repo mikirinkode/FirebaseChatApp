@@ -4,6 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +19,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
@@ -23,6 +28,7 @@ import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.databinding.FragmentChatRoomBinding
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
+import com.mikirinkode.firebasechatapp.firebase.CommonFirebaseTaskHelper
 import com.mikirinkode.firebasechatapp.helper.DateHelper
 import com.mikirinkode.firebasechatapp.helper.ImageHelper
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
@@ -44,6 +50,11 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         pref?.getObject(DataConstant.USER, UserAccount::class.java)
     }
 
+
+    private val mCommonHelper: CommonFirebaseTaskHelper by lazy {
+        CommonFirebaseTaskHelper()
+    }
+
     private var navigateFrom: String? = null // used to navigate back
     private var interlocutor: UserAccount? = null
 
@@ -63,6 +74,7 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initTextWatcher()
         initRecyclerView()
         handleBundleArgs()
         observeMessage()
@@ -74,6 +86,28 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         super.onDestroy()
         _binding = null
         presenter.detachView()
+    }
+
+    private fun initTextWatcher() {
+        val handler = Handler(Looper.getMainLooper())
+        binding.etMessage.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                Toast.makeText(requireContext(), "is typing", Toast.LENGTH_SHORT).show()
+                // User is typing or text is changing
+                interlocutor?.userId?.let { mCommonHelper.updateTypingStatus(true, it) }
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // User has stopped typing
+                handler.postDelayed({
+                    interlocutor?.userId?.let { mCommonHelper.updateTypingStatus(false, it) }
+                }, 5000)
+
+            }
+        })
     }
 
     private fun initRecyclerView() {
@@ -89,13 +123,11 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     }
 
     private fun handleBundleArgs() {
-        Log.e("ChatRoom", "handleBundleArgs")
         val args: ChatRoomFragmentArgs by navArgs()
         val interlocutorId = args.interlocutorId
         val loggedUserId = loggedUser?.userId
         navigateFrom = args.navigateFrom
-        Log.e("ChatRoom", "interlocutorId: ${interlocutorId}")
-        Log.e("ChatRoom", "loggedUserId: ${loggedUserId}")
+
         setupPresenter(
             loggedUserId,
             interlocutorId
@@ -120,7 +152,7 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     override fun onMessagesReceived(messages: List<ChatMessage>) {
         chatAdapter.setData(messages)
         if (messages.isNotEmpty()) {
-            if (chatAdapter.itemCount - 1 > 0){
+            if (chatAdapter.itemCount != null && chatAdapter.itemCount - 1 > 0) {
                 // TODO: check again later, error: NullPointerException
                 binding.rvMessages.smoothScrollToPosition(chatAdapter.itemCount - 1)
             }
@@ -143,8 +175,12 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     override fun updateReceiverOnlineStatus(status: UserRTDB) {
         binding.apply {
             if (status.online) {
-                tvUserStatus.text = "Online"
+                tvUserStatus.text = getString(R.string.txt_online)
                 ivOnlineStatusIndicator.visibility = View.VISIBLE
+
+                if (status.typing && status.currentlyTypingFor == loggedUser?.userId) {
+                    tvUserStatus.text = getString(R.string.txt_typing)
+                }
             } else {
                 ivOnlineStatusIndicator.visibility = View.GONE
                 tvUserStatus.text =
@@ -164,6 +200,19 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
             Glide.with(requireContext())
                 .load(capturedImage)
                 .into(ivSelectedImage)
+        }
+    }
+
+    override fun showOnUploadImageProgress(progress: Int) {
+        binding.apply {
+            progressBar.progress = progress
+            if (progress == 100) {
+                layoutUploadingProgress.visibility = View.GONE
+                progressBar.visibility = View.GONE
+            } else {
+                layoutUploadingProgress.visibility = View.VISIBLE
+                progressBar.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -247,7 +296,7 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     private fun onActionClicked() {
         binding.apply {
             btnBack.setOnClickListener {
-                if (navigateFrom != null){
+                if (navigateFrom != null) {
                     requireActivity().finish()
                 } else {
                     val intent = Intent(requireContext(), MainActivity::class.java)
@@ -296,8 +345,9 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
                         senderId != null && senderName != null && interlocutorId != null && interlocutorName != null
 
                     val isFirstTime: Boolean = chatAdapter.isChatEmpty()
-                    if (isFirstTime){
-                        Toast.makeText(requireContext(), "Chat Room Created", Toast.LENGTH_SHORT).show()
+                    if (isFirstTime) {
+                        Toast.makeText(requireContext(), "Chat Room Created", Toast.LENGTH_SHORT)
+                            .show()
                     }
 
                     if (senderId != null && senderName != null && interlocutorId != null && interlocutorName != null) {

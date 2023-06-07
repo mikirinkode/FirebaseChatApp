@@ -59,6 +59,10 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
         mView?.onMessagesReceived(messages)
     }
 
+    override fun showUploadImageProgress(progress: Int) {
+        mView?.showOnUploadImageProgress(progress)
+    }
+
     /**
      * USER PROFILE DATA
      */

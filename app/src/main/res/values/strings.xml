@@ -20,6 +20,11 @@
     <!--  MESSAGE INFO FRAGMENT  -->
     <string name="txt_fragment_message_info">Message Info</string>
 
+    <!--  CHAT ROOM FRAGMENT  -->
+    <string name="txt_uploading">Uploading</string>
+    <string name="txt_online">Online</string>
+    <string name="txt_typing">Typing…</string>
+
     <!--  OTHER  -->
     <string name="default_notification_channel_id">chitchatchannelid</string>
     <!-- TODO: Remove or change this placeholder text -->

@@ -268,6 +268,10 @@ class ChatHelper(
                     messagesRef?.child(conversationId)?.child(newMessageKey)?.setValue(chatMessage)
                 }
             }
+        }?.addOnProgressListener { taskSnapshot ->
+            // Update the progress bar as the upload progresses
+            val progress = (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount).toInt()
+            mListener.showUploadImageProgress(progress)
         }
 
     }
@@ -317,4 +321,5 @@ class ChatHelper(
 
 interface ChatEventListener {
     fun onDataChangeReceived(messages: List<ChatMessage>)
+    fun showUploadImageProgress(progress: Int)
 }
