@@ -42,6 +42,8 @@ class UpdateDeliveredTimeService : Service() {
         throw UnsupportedOperationException("Not yet implemented")
     }
 
+    // TODO: check again later
+    // sometimes error NPE on intent parameter
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 
         val loggedUserId = pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId

@@ -6,6 +6,9 @@ import com.google.firebase.database.*
 import com.google.firebase.storage.StorageReference
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ChatHelper(
     private val mListener: ChatEventListener,
@@ -119,6 +122,7 @@ class ChatHelper(
             }
 
             // TODO: Check again later
+            // TODO: maybe cause delay
             Log.e("ChatHelper", "before on doTransaction")
             // update total unread messages
             conversationsRef?.child(conversationId)?.child("unreadMessages")
@@ -157,6 +161,7 @@ class ChatHelper(
 
             // push message
             messagesRef?.child(conversationId)?.child(newMessageKey)?.setValue(chatMessage)
+            Log.e("ChatHelper", "message pushed")
         }
 
     }
@@ -280,7 +285,10 @@ class ChatHelper(
         val conversationId =
             if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
 
-        messagesRef?.child(conversationId)?.addValueEventListener(receiveListener)
+        val ref = messagesRef?.child(conversationId)
+        ref?.keepSynced(true)
+
+        ref?.addValueEventListener(receiveListener)
     }
 
     fun deactivateListener() {

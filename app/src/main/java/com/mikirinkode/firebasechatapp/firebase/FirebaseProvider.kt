@@ -20,6 +20,8 @@ class FirebaseProvider {
         if (context != null) {
             firebaseAuth = FirebaseAuth.getInstance()
             firebaseDatabase = FirebaseDatabase.getInstance()
+            firebaseDatabase?.setPersistenceEnabled(true)
+
             firebaseFirestore = FirebaseFirestore.getInstance()
             firebaseStorage = FirebaseStorage.getInstance()
             firebaseMessaging = FirebaseMessaging.getInstance()

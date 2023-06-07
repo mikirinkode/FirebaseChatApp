@@ -8,7 +8,7 @@ import com.mikirinkode.firebasechatapp.firebase.CommonFirebaseTaskHelper
 class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     private var mView: MainView? = null
     private val mCommonHelper: CommonFirebaseTaskHelper = CommonFirebaseTaskHelper()
-    private val mainHelper = MainHelper(this)
+    private val chatHistoryHelper = ChatHistoryHelper(this)
 
     fun updateUserOnlineStatus() {
         mCommonHelper.updateOnlineStatus()
@@ -17,13 +17,14 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     // TODO: show loading
     fun getMessageHistory() {
         Log.e("MainPresenter", "getMessageHistory called")
-        mainHelper.receiveMessageHistory()
+        chatHistoryHelper.receiveMessageHistory()
         mView?.showLoading()
     }
 
     override fun onDataChangeReceived(conversations: List<Conversation>) {
         mView?.hideLoading()
         if (conversations.isNotEmpty()){
+            conversations.sortedBy { it.lastMessage?.timestamp }
             mView?.onChatHistoryReceived(conversations)
         }
             Log.e("MainPresenter", "on chat history data change received")
