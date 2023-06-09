@@ -8,6 +8,7 @@
     <string name="txt_welcome_description">Silahkan login terlebih dahulu dengan menggunakan username dan password anda.</string>
     <string name="txt_welcome_back">Selamat Datang Kembali!</string>
     <string name="txt_do_not_have_account">Belum punya akun?</string>
+    <string name="txt_login_success">Login Success</string>
 
     <!--  REGISTER ACTIVITY  -->
     <string name="txt_button_register">Daftar</string>
@@ -31,4 +32,17 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="txt_read">Read</string>
     <string name="txt_delivered">Delivered</string>
+
+    <!--  USER LIST ACTIVITY  -->
+    <string name="txt_btn_new_group">New Group</string>
+    <string name="txt_users_on_app">Users on ChitChat</string>
+    <string name="txt_user_list_title">Let\'s Chat</string>
+    <string name="txt_new_group_title">New Group</string>
+    <string name="txt_create_group_title">Create Group</string>
+    <string name="txt_button_create_group">Create Group</string>
+    <string name="txt_hint_group_name">Group Name</string>
+    <string name="txt_total_member">Total Member</string>
+    <string name="txt_total_member_value">%d (Including You)</string>
+    <string name="txt_empty_group_name">Please input the group name</string>
+
 </resources>

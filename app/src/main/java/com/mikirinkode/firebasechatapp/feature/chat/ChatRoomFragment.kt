@@ -8,7 +8,6 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +19,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
-import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
+import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
@@ -47,7 +46,7 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     }
 
     private val loggedUser: UserAccount? by lazy {
-        pref?.getObject(DataConstant.USER, UserAccount::class.java)
+        pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
     }
 
 
@@ -123,25 +122,32 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
 
     private fun handleBundleArgs() {
         val args: ChatRoomFragmentArgs by navArgs()
+        val conversationId: String? = args.conversationId
+        navigateFrom = args.navigateFrom
+
         val interlocutorId = args.interlocutorId
-        val loggedUserId = loggedUser?.userId
         navigateFrom = args.navigateFrom
 
         setupPresenter(
-            loggedUserId,
+            conversationId,
             interlocutorId
         ) // call setup presenter after get the interlocutor user id
     }
 
-    private fun setupPresenter(loggedUserId: String?, interlocutorId: String?) {
+    private fun setupPresenter(conversationId: String?, interlocutorId: String) {
         presenter = ChatPresenter()
         presenter.attachView(this)
-
-        if (loggedUserId != null && interlocutorId != null) {
-            presenter.onInit(requireActivity(), loggedUserId, interlocutorId)
-            presenter.getUserOnlineStatus(interlocutorId)
-            presenter.getInterlocutorData(interlocutorId)
+        if (conversationId != null) {
+            presenter.onInit(requireActivity(), conversationId)
+        } else {
+            val loggedUserId = loggedUser?.userId
+            if (loggedUserId != null) {
+                val newId = if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
+                presenter.onInit(requireActivity(), newId)
+            }
         }
+        presenter.getUserOnlineStatus(interlocutorId)
+        presenter.getInterlocutorData(interlocutorId)
     }
 
     private fun observeMessage() {

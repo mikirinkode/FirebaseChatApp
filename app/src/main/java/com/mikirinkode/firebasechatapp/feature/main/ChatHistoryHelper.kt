@@ -1,13 +1,10 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
 import android.util.Log
-import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.ktx.toObject
-import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
+import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
@@ -19,7 +16,6 @@ import kotlinx.coroutines.tasks.await
 class ChatHistoryHelper(
     private val mListener: ChatHistoryListener
 ) {
-    private val auth = FirebaseProvider.instance().getFirebaseAuth()
     private val database = FirebaseProvider.instance().getDatabase()
     private val firestore = FirebaseProvider.instance().getFirestore()
     private val pref = LocalSharedPref.instance()
@@ -40,11 +36,11 @@ class ChatHistoryHelper(
 
     fun receiveMessageHistory() {
         Log.e("ChatHistoryHelper", "receiveMessageHistory called")
-        val currentUser = auth?.currentUser
+        val currentUser = pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
 
         val conversations = mutableListOf<Conversation>()
 
-        currentUser?.uid?.let { userId ->
+        currentUser?.userId?.let { userId ->
             usersRef?.child(userId)?.keepSynced(true)
 
             usersRef?.child(userId)?.addValueEventListener(object : ValueEventListener {
@@ -58,7 +54,7 @@ class ChatHistoryHelper(
                     user?.conversationIdList?.forEach { (id, _) -> idList.add(id) }
 
                     pref?.saveObjectsList(
-                        DataConstant.CONVERSATION_ID_LIST,
+                        PreferenceConstant.CONVERSATION_ID_LIST,
                         idList
                     )
 
@@ -79,7 +75,7 @@ class ChatHistoryHelper(
                                         conversation?.participants?.last().toString()
 
                                     val interlocutorId =
-                                        if (firstUserId == currentUser.uid) secondUserId else firstUserId
+                                        if (firstUserId == userId) secondUserId else firstUserId
 
                                     if (interlocutorId != "null") {
                                         // Get user data by interlocutor ID

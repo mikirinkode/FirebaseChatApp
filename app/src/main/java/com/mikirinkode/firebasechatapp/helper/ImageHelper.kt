@@ -14,6 +14,6 @@ object ImageHelper {
                 )
             )
 
-        return "messages/images-" + System.currentTimeMillis() + "." + imageExtension
+        return "images-" + System.currentTimeMillis() + "." + imageExtension
     }
 }

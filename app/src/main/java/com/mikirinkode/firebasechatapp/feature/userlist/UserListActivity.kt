@@ -1,13 +1,16 @@
 package com.mikirinkode.firebasechatapp.feature.userlist
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityUserListBinding
+import com.mikirinkode.firebasechatapp.feature.chat.PersonalChatActivity
+import com.mikirinkode.firebasechatapp.feature.group.CreateGroupChatActivity
 
-class UserListActivity : AppCompatActivity(), UserListView {
+class UserListActivity : AppCompatActivity(), UserListView, UserListAdapter.UserClickListener {
 
     private val binding: ActivityUserListBinding by lazy {
         ActivityUserListBinding.inflate(layoutInflater)
@@ -23,6 +26,7 @@ class UserListActivity : AppCompatActivity(), UserListView {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        initAdapter()
         initView()
         setupPresenter()
         onActionClicked()
@@ -33,6 +37,10 @@ class UserListActivity : AppCompatActivity(), UserListView {
         presenter.detachView()
     }
 
+    private fun initAdapter(){
+        userAdapter.userClickListener = this@UserListActivity
+    }
+
     private fun initView() {
         binding.apply {
             rvUser.layoutManager = LinearLayoutManager(this@UserListActivity)
@@ -40,7 +48,7 @@ class UserListActivity : AppCompatActivity(), UserListView {
         }
     }
 
-    private fun setupPresenter(){
+    private fun setupPresenter() {
         presenter = UserListPresenter()
         presenter.attachView(this)
         presenter.getUserList()
@@ -58,9 +66,21 @@ class UserListActivity : AppCompatActivity(), UserListView {
         binding.progressBar.visibility = View.GONE
     }
 
+    override fun onUserClick(user: UserAccount) {
+        // TODO:
+        startActivity(
+            Intent(this, PersonalChatActivity::class.java)
+                .putExtra(PersonalChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID, user.userId)
+        )
+    }
+
     private fun onActionClicked() {
         binding.topAppBar.setNavigationOnClickListener {
             onBackPressed()
+        }
+
+        binding.btnNewGroup.setOnClickListener {
+            startActivity(Intent(this, CreateGroupChatActivity::class.java))
         }
     }
 }

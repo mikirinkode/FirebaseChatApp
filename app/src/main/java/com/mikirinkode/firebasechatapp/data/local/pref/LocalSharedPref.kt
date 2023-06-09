@@ -116,8 +116,8 @@ class LocalSharedPref {
     }
 
     fun startSession(user: UserAccount){
-        saveBoolean(DataConstant.IS_LOGGED_IN, true)
-        saveObject(DataConstant.USER, user)
+        saveBoolean(PreferenceConstant.IS_LOGGED_IN, true)
+        saveObject(PreferenceConstant.USER, user)
     }
 
     fun clearSession() {

@@ -3,11 +3,10 @@ package com.mikirinkode.firebasechatapp.feature.login
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.mikirinkode.firebasechatapp.R
-import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
+import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.databinding.ActivityLoginBinding
@@ -45,7 +44,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
 
 
     private fun checkLoggedUser() {
-        val isLoggedIn: Boolean? = pref?.getBoolean(DataConstant.IS_LOGGED_IN)
+        val isLoggedIn: Boolean? = pref?.getBoolean(PreferenceConstant.IS_LOGGED_IN)
 
         if (isLoggedIn == true) {
             goToMainView()

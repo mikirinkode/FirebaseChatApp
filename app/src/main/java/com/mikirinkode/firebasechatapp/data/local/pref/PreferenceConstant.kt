@@ -1,6 +1,6 @@
 package com.mikirinkode.firebasechatapp.data.local.pref
 
-object DataConstant {
+object PreferenceConstant {
     const val USER = "user"
     const val IS_LOGGED_IN: String = "is_logged_in"
 

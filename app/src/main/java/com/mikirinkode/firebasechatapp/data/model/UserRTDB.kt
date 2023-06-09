@@ -1,5 +1,6 @@
 package com.mikirinkode.firebasechatapp.data.model
 
+// TODO: merge with the firestore
 /**
  * Class that used to store data user from Firebase Realtime Database
  */

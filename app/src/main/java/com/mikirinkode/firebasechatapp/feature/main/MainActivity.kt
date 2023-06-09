@@ -1,26 +1,18 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.TaskStackBuilder
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
-import com.mikirinkode.firebasechatapp.R
+import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
-import com.mikirinkode.firebasechatapp.feature.chat.ChatActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.feature.userlist.UserListActivity
 import com.mikirinkode.firebasechatapp.service.UpdateDeliveredTimeService
@@ -37,7 +29,7 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private val user: UserAccount? by lazy {
-        pref?.getObject(DataConstant.USER, UserAccount::class.java)
+        pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
     }
 
     private lateinit var presenter: MainPresenter

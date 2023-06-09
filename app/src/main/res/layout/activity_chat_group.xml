@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".feature.chat.PersonalChatActivity">
+    tools:context=".feature.chat.GroupChatActivity">
 
     <fragment
-        android:id="@+id/navHostChatRoom"
+        android:id="@+id/navHostGroupChatRoom"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -16,6 +16,5 @@
         app:defaultNavHost="true"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_height="match_parent"/>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

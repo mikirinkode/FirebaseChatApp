@@ -2,14 +2,13 @@ package com.mikirinkode.firebasechatapp.feature.chat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.navigation.findNavController
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.databinding.ActivityChatBinding
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
-class ChatActivity : AppCompatActivity() {
+class PersonalChatActivity : AppCompatActivity() {
 
     private val binding: ActivityChatBinding by lazy {
         ActivityChatBinding.inflate(layoutInflater)
@@ -19,7 +18,11 @@ class ChatActivity : AppCompatActivity() {
         const val REQUEST_IMAGE_CAPTURE = 1
         const val GALLERY_REQUEST_CODE = 2
         const val EXTRA_INTENT_INTERLOCUTOR_ID = "key_interlocutor_id"
+        const val EXTRA_INTENT_CONVERSATION_ID = "key_conversation_id"
+        const val EXTRA_INTENT_CONVERSATION_TYPE = "key_conversation_type"
 
+        const val BUNDLE_CONVERSATION_ID = "conversationId"
+        const val BUNDLE_CONVERSATION_TYPE = "conversationType"
         const val BUNDLE_INTERLOCUTOR_ID = "interlocutorId"
         const val BUNDLE_NAVIGATE_FROM = "navigateFrom"
     }
@@ -33,24 +36,30 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun handleIntent() {
+        // TODO: merge
         // data from previous activity
-        val idFromActivity = intent.getStringExtra(EXTRA_INTENT_INTERLOCUTOR_ID)
-        if (idFromActivity != null) {
-            setupNavigation(idFromActivity, "MainActivity")
+        val interlocutorIdFromActivity = intent?.getStringExtra(EXTRA_INTENT_INTERLOCUTOR_ID)
+        val idFromActivity = intent.getStringExtra(EXTRA_INTENT_CONVERSATION_ID)
+//        val typeFromActivity = intent.getStringExtra(EXTRA_INTENT_CONVERSATION_TYPE)
+        if (interlocutorIdFromActivity != null) {
+            setupNavigation(idFromActivity, interlocutorIdFromActivity, "AnotherActivity")
         }
 
         // data from notification that sent from system tray
         val extras = intent?.extras
-        val idFromFCM = extras?.getString("senderId")
-        if (idFromFCM != null) {
-            setupNavigation(idFromFCM, null)
+        val interlocutorIdFromFCM = extras?.getString(EXTRA_INTENT_INTERLOCUTOR_ID)
+        val idFromFCM = extras?.getString(EXTRA_INTENT_CONVERSATION_ID)
+//        val typeFromFCM = extras?.getString(EXTRA_INTENT_CONVERSATION_TYPE)
+        if (idFromFCM != null && interlocutorIdFromFCM != null) {
+            setupNavigation(idFromFCM, interlocutorIdFromFCM, null)
         }
     }
 
 
-    private fun setupNavigation(interlocutorId: String, navigateFrom: String?) {
-        val navController = findNavController(R.id.nav_host_chat_room)
+    private fun setupNavigation(conversationId: String?, interlocutorId: String, navigateFrom: String?) {
+        val navController = findNavController(R.id.navHostChatRoom)
         val bundle = Bundle()
+        bundle.putString(BUNDLE_CONVERSATION_ID, conversationId)
         bundle.putString(BUNDLE_INTERLOCUTOR_ID, interlocutorId)
         bundle.putString(BUNDLE_NAVIGATE_FROM, navigateFrom)
         navController.setGraph(R.navigation.chat_room_navigation, bundle)

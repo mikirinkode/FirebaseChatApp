@@ -10,16 +10,13 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.R
-import com.mikirinkode.firebasechatapp.data.local.pref.DataConstant
+import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
-import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
-import com.mikirinkode.firebasechatapp.helper.DateHelper
 import kotlinx.coroutines.*
 
 class UpdateDeliveredTimeService : Service() {
@@ -46,9 +43,9 @@ class UpdateDeliveredTimeService : Service() {
     // sometimes error NPE on intent parameter
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 
-        val loggedUserId = pref?.getObject(DataConstant.USER, UserAccount::class.java)?.userId
+        val loggedUserId = pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)?.userId
         val conversationIdList: List<String>? =
-            pref?.getObjectsList(DataConstant.CONVERSATION_ID_LIST, String::class.java)
+            pref?.getObjectsList(PreferenceConstant.CONVERSATION_ID_LIST, String::class.java)
 
         val notification = buildNotification()
         startForeground(NOTIFICATION_ID, notification)

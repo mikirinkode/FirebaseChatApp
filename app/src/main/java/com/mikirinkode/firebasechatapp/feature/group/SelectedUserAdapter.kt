@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.userlist
+package com.mikirinkode.firebasechatapp.feature.group
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,15 +6,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.databinding.ItemUserBinding
+import com.mikirinkode.firebasechatapp.databinding.ItemSelectedUserBinding
 
-class UserListAdapter : RecyclerView.Adapter<UserListAdapter.ViewHolder>() {
+class SelectedUserAdapter : RecyclerView.Adapter<SelectedUserAdapter.ViewHolder>() {
 
     private val userList: ArrayList<UserAccount> = ArrayList()
 
     var userClickListener: UserClickListener? = null
 
-    inner class ViewHolder(private val binding: ItemUserBinding) :
+    inner class ViewHolder(private val binding: ItemSelectedUserBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(user: UserAccount) {
@@ -30,13 +30,13 @@ class UserListAdapter : RecyclerView.Adapter<UserListAdapter.ViewHolder>() {
                 }
             }
             itemView.setOnClickListener {
-                userClickListener?.onUserClick(user)
+                userClickListener?.onRemoveSelected(user)
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemUserBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemSelectedUserBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
@@ -55,6 +55,6 @@ class UserListAdapter : RecyclerView.Adapter<UserListAdapter.ViewHolder>() {
     }
 
     interface UserClickListener {
-        fun onUserClick(user: UserAccount)
+        fun onRemoveSelected(user: UserAccount)
     }
 }

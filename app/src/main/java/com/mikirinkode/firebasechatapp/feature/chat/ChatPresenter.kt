@@ -1,7 +1,6 @@
 package com.mikirinkode.firebasechatapp.feature.chat
 
 import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import com.mikirinkode.firebasechatapp.base.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
@@ -21,8 +20,8 @@ class ChatPresenter : BasePresenter<ChatView>, ChatEventListener, UserOnlineStat
     private var firebaseUserHelper: FirebaseUserHelper? = null
     private val userOnlineStatusHelper = FirebaseUserOnlineStatusHelper(this)
 
-    fun onInit(mActivity: Activity, loggedUserId: String, interlocutorId: String){
-        chatHelper = ChatHelper(this, loggedUserId, interlocutorId)
+    fun onInit(mActivity: Activity, conversationId: String?){
+        chatHelper = ChatHelper(this, conversationId)
         cameraHelper = CameraHelper(mActivity, this)
         firebaseUserHelper = FirebaseUserHelper(this)
     }

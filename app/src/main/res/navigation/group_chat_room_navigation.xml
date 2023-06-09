@@ -2,13 +2,13 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/chat_room_navigation"
-    app:startDestination="@id/chatRoomFragment">
+    android:id="@+id/group_chat_room_navigation"
+    app:startDestination="@id/groupChatRoomFragment">
 
     <fragment
-        android:id="@+id/chatRoomFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.chat.ChatRoomFragment"
-        android:label="ChatRoomFragment" >
+        android:id="@+id/groupChatRoomFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.chat.GroupChatRoomFragment"
+        android:label="GroupChatRoomFragment" >
         <action
             android:id="@+id/actionOpenImage"
             app:destination="@id/fullScreenImageFragment" />
@@ -18,12 +18,8 @@
         <argument
             android:name="conversationId"
             android:defaultValue=""
-            app:nullable="true"
             app:argType="string"/>
-        <argument
-            android:name="interlocutorId"
-            android:defaultValue=""
-            app:argType="string"/>
+
         <argument
             android:name="navigateFrom"
             app:argType="string"
