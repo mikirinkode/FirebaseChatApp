@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.chat
+package com.mikirinkode.firebasechatapp.constants
 
 enum class MessageType {
     TEXT,

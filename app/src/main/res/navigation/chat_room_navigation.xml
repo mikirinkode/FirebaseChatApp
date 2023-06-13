@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/chatRoomFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.chat.ChatRoomFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.chat.fragment.ConversationFragment"
         android:label="ChatRoomFragment" >
         <action
             android:id="@+id/actionOpenImage"
@@ -19,6 +19,10 @@
             android:name="conversationId"
             android:defaultValue=""
             app:nullable="true"
+            app:argType="string"/>
+        <argument
+            android:name="conversationType"
+            android:defaultValue=""
             app:argType="string"/>
         <argument
             android:name="interlocutorId"
@@ -33,7 +37,7 @@
 
     <fragment
         android:id="@+id/fullScreenImageFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.chat.FullScreenImageFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.chat.fragment.FullScreenImageFragment"
         android:label="fragment_full_screen_image"
         tools:layout="@layout/fragment_full_screen_image" >
 
@@ -53,7 +57,7 @@
 
     <fragment
         android:id="@+id/messageInfoFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.chat.MessageInfoFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.chat.fragment.MessageInfoFragment"
         android:label="fragment_message_info"
         tools:layout="@layout/fragment_message_info" >
         <argument

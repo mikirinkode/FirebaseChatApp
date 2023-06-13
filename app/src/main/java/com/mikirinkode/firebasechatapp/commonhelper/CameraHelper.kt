@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.helper
+package com.mikirinkode.firebasechatapp.commonhelper
 
 import android.app.Activity
 import android.content.Intent
@@ -6,7 +6,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
-import com.mikirinkode.firebasechatapp.feature.chat.PersonalChatActivity
+import com.mikirinkode.firebasechatapp.feature.chat.ConversationActivity
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 import java.io.File
 import java.io.IOException
@@ -14,8 +14,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class CameraHelper(
+    private val mListener: CameraListener,
     private val mActivity: Activity,
-    private val mListener: CameraListener
 ) {
     private var capturedImage: Uri? = null
 
@@ -44,7 +44,7 @@ class CameraHelper(
 
                 if (PermissionManager.isCameraPermissionGranted(mActivity)) {
                     // Launch the camera intent
-                    mActivity.startActivityForResult(takePictureIntent, PersonalChatActivity.REQUEST_IMAGE_CAPTURE)
+                    mActivity.startActivityForResult(takePictureIntent, ConversationActivity.REQUEST_IMAGE_CAPTURE)
                     if (capturedImage != null){
                         mListener.onImageCaptured(capturedImage)
                     }

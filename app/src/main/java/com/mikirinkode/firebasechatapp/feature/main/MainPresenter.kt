@@ -24,10 +24,14 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     override fun onDataChangeReceived(conversations: List<Conversation>) {
         mView?.hideLoading()
         if (conversations.isNotEmpty()){
-            val sortedList = conversations.sortedBy { it.lastMessage?.timestamp }.reversed()
+            val sortedList = conversations.sortedBy { it.lastMessage?.sendTimestamp }.reversed()
             mView?.onChatHistoryReceived(sortedList)
         }
             Log.e("MainPresenter", "on chat history data change received")
+    }
+
+    override fun onEmptyConversation() {
+        mView?.hideLoading()
     }
 
     override fun attachView(view: MainView) {

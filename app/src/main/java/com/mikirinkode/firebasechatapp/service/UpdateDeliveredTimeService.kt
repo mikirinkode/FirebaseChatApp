@@ -67,7 +67,7 @@ class UpdateDeliveredTimeService : Service() {
                                 val chatMessage = snapshot.getValue(ChatMessage::class.java)
 
                                 if (chatMessage != null) {
-                                    if (chatMessage.receiverId == loggedUserId) {
+                                    if (chatMessage.senderId != loggedUserId) {
                                         if (chatMessage.deliveredTimestamp == 0L) {
 
                                             val timeStamp = System.currentTimeMillis()

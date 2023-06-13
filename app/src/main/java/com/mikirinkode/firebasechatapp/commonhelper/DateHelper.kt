@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.helper
+package com.mikirinkode.firebasechatapp.commonhelper
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat

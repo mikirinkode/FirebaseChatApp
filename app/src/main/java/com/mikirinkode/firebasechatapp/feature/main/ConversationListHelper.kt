@@ -53,6 +53,11 @@ class ChatHistoryHelper(
 
                     user?.conversationIdList?.forEach { (id, _) -> idList.add(id) }
 
+                    if (idList.isEmpty()){
+                        mListener.onEmptyConversation()
+                        return
+                    }
+
                     pref?.saveObjectsList(
                         PreferenceConstant.CONVERSATION_ID_LIST,
                         idList
@@ -116,4 +121,6 @@ class ChatHistoryHelper(
 
 interface ChatHistoryListener {
     fun onDataChangeReceived(conversations: List<Conversation>)
+
+    fun onEmptyConversation()
 }

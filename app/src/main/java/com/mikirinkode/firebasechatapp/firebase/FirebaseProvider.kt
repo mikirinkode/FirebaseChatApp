@@ -1,13 +1,12 @@
 package com.mikirinkode.firebasechatapp.firebase
 
 import android.content.Context
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
-import com.mikirinkode.firebasechatapp.helper.DateHelper
+import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 
 class FirebaseProvider {
     private var firebaseAuth: FirebaseAuth? = null

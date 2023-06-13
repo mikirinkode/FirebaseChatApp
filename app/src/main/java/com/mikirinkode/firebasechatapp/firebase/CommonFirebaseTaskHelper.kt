@@ -1,10 +1,9 @@
 package com.mikirinkode.firebasechatapp.firebase
 
-import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.mikirinkode.firebasechatapp.helper.DateHelper
+import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 
 /**
  * common task that don't need listener

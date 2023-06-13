@@ -11,9 +11,9 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.mikirinkode.firebasechatapp.R
-import com.mikirinkode.firebasechatapp.feature.chat.PersonalChatActivity
+import com.mikirinkode.firebasechatapp.feature.chat.ConversationActivity
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
-import com.mikirinkode.firebasechatapp.helper.DateHelper
+import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -32,12 +32,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = remoteMessage.notification?.title ?: ""
         val messageText = remoteMessage.notification?.body ?: ""
 
-        val intent = Intent(this, PersonalChatActivity::class.java)
-            .putExtra(PersonalChatActivity.EXTRA_INTENT_CONVERSATION_ID, conversationId)
-            .putExtra(PersonalChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID, senderId)
+        val intent = Intent(this, ConversationActivity::class.java)
+            .putExtra(ConversationActivity.EXTRA_INTENT_CONVERSATION_ID, conversationId)
+            .putExtra(ConversationActivity.EXTRA_INTENT_INTERLOCUTOR_ID, senderId)
 
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
-            addParentStack(PersonalChatActivity::class.java)
+            addParentStack(ConversationActivity::class.java)
             addNextIntent(intent)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 getPendingIntent(110, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)

@@ -1,7 +1,6 @@
-package com.mikirinkode.firebasechatapp.helper
+package com.mikirinkode.firebasechatapp.commonhelper
 
 import android.content.ContentResolver
-import android.media.Image
 import android.net.Uri
 import android.webkit.MimeTypeMap
 

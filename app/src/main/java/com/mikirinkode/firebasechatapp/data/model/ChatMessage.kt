@@ -8,15 +8,15 @@ data class ChatMessage(
     val messageId: String = "",
     val message: String = "",
     val imageUrl: String = "",
-    val timestamp: Long = 0L,
+    val sendTimestamp: Long = 0L,
     val type: String = "",
     val senderId: String = "",
     val senderName: String = "",
-    val receiverId: String = "",
-    val receiverName: String = "",
     val deliveredTimestamp: Long = 0L,
-    val readTimestamp: Long = 0L,
-    val beenRead: Boolean = false,
+    val beenReadBy: Map<String, Long> = mapOf(),
+//    val readTimestamp: Long = 0L,
+//    val beenRead: Boolean = false,
 
+    var isTheFirstUnreadMessage: Boolean = false,
     var isSelected: Boolean = false
 ): Parcelable

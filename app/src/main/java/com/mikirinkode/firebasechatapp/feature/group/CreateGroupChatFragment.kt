@@ -16,7 +16,7 @@ import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.FragmentCreateGroupChatBinding
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
-import com.mikirinkode.firebasechatapp.helper.ImageHelper
+import com.mikirinkode.firebasechatapp.commonhelper.ImageHelper
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
 class CreateGroupChatFragment : Fragment(), CreateGroupChatView {

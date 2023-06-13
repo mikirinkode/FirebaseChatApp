@@ -61,7 +61,7 @@
                 tools:visibility="visible" />
 
             <TextView
-                android:id="@+id/tvName"
+                android:id="@+id/tvAppBarTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -74,7 +74,7 @@
                 tools:text="Muhammad Wafa" />
 
             <TextView
-                android:id="@+id/tvUserStatus"
+                android:id="@+id/tvAppBarDescription"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -83,7 +83,7 @@
                 android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/cardUserAvatar"
-                app:layout_constraintTop_toBottomOf="@id/tvName"
+                app:layout_constraintTop_toBottomOf="@id/tvAppBarTitle"
                 tools:text="Online" />
 
 
@@ -311,7 +311,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <Button
             android:id="@+id/btnRemoveCapturedImage"

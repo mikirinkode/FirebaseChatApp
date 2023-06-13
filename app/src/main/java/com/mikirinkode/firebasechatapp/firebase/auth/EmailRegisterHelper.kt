@@ -1,12 +1,11 @@
 package com.mikirinkode.firebasechatapp.firebase.auth
 
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
-import com.mikirinkode.firebasechatapp.helper.DateHelper
+import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 
 class EmailRegisterHelper(
     private val mListener: EmailRegisterListener

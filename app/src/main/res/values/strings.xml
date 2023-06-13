@@ -44,5 +44,9 @@
     <string name="txt_total_member">Total Member</string>
     <string name="txt_total_member_value">%d (Including You)</string>
     <string name="txt_empty_group_name">Please input the group name</string>
+    <string name="txt_tap_to_see_group_info">Tap to see group information</string>
+    <string name="txt_unread_messages">unread messages</string>
+    <string name="txt_today">Today</string>
+    <string name="txt_yesterday">Yesterday</string>
 
 </resources>

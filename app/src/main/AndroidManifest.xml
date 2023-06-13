@@ -19,9 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FirebaseChatApp"
         tools:targetApi="31" >
-        <activity
-            android:name=".feature.chat.GroupChatActivity"
-            android:exported="false" />
+
         <activity
             android:name=".feature.group.CreateGroupChatActivity"
             android:exported="false" />
@@ -29,7 +27,7 @@
             android:name=".feature.profile.ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".feature.chat.PersonalChatActivity"
+            android:name=".feature.chat.ConversationActivity"
             android:exported="true"
             android:parentActivityName=".feature.main.MainActivity" >
             <intent-filter>

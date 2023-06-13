@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.chat
+package com.mikirinkode.firebasechatapp.feature.chat.fragment
 
 import android.content.Context
 import android.content.Intent
@@ -19,20 +19,26 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
-import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
+import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
+import com.mikirinkode.firebasechatapp.commonhelper.ImageHelper
+import com.mikirinkode.firebasechatapp.constants.ConversationType
+import com.mikirinkode.firebasechatapp.constants.MessageType
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
+import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
+import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.databinding.FragmentChatRoomBinding
+import com.mikirinkode.firebasechatapp.feature.chat.*
+import com.mikirinkode.firebasechatapp.feature.chat.adapter.ConversationAdapter
+import com.mikirinkode.firebasechatapp.feature.chat.presenter.ConversationPresenter
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.firebase.CommonFirebaseTaskHelper
-import com.mikirinkode.firebasechatapp.helper.DateHelper
-import com.mikirinkode.firebasechatapp.helper.ImageHelper
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
-class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
+class ConversationFragment : Fragment(), ChatView, ConversationAdapter.ChatClickListener {
 
     private var _binding: FragmentChatRoomBinding? = null
     private val binding get() = _binding!!
@@ -41,8 +47,8 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         LocalSharedPref.instance()
     }
 
-    private val chatAdapter: ChatAdapter by lazy {
-        ChatAdapter()
+    private val conversationAdapter: ConversationAdapter by lazy {
+        ConversationAdapter()
     }
 
     private val loggedUser: UserAccount? by lazy {
@@ -54,12 +60,15 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         CommonFirebaseTaskHelper()
     }
 
+    private val args: ConversationFragmentArgs by navArgs()
+
     private var navigateFrom: String? = null // used to navigate back
     private var interlocutor: UserAccount? = null
 
-    private lateinit var presenter: ChatPresenter
+    private lateinit var presenter: ConversationPresenter
     private var capturedImage: Uri? = null
     private var currentMessageType = MessageType.TEXT
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -111,55 +120,145 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     private fun initRecyclerView() {
         binding.apply {
             rvMessages.layoutManager = LinearLayoutManager(requireContext())
-            rvMessages.adapter = chatAdapter
-            chatAdapter.chatClickListener = this@ChatRoomFragment
+            rvMessages.adapter = conversationAdapter
+            conversationAdapter.chatClickListener = this@ConversationFragment
 
             if (loggedUser?.userId != null) {
-                chatAdapter.setLoggedUserId(loggedUser?.userId!!)
+                conversationAdapter.setLoggedUserId(loggedUser?.userId!!)
+                conversationAdapter.setConversationType(args.conversationType)
             }
         }
     }
 
     private fun handleBundleArgs() {
-        val args: ChatRoomFragmentArgs by navArgs()
-        val conversationId: String? = args.conversationId
+        val conversationType: String = args.conversationType
+        val participantIdList: List<String> = listOf()
         navigateFrom = args.navigateFrom
 
-        val interlocutorId = args.interlocutorId
-        navigateFrom = args.navigateFrom
-
-        setupPresenter(
-            conversationId,
-            interlocutorId
-        ) // call setup presenter after get the interlocutor user id
-    }
-
-    private fun setupPresenter(conversationId: String?, interlocutorId: String) {
-        presenter = ChatPresenter()
-        presenter.attachView(this)
-        if (conversationId != null) {
-            presenter.onInit(requireActivity(), conversationId)
-        } else {
-            val loggedUserId = loggedUser?.userId
-            if (loggedUserId != null) {
-                val newId = if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
-                presenter.onInit(requireActivity(), newId)
+        when (conversationType) {
+            ConversationType.PERSONAL.toString() -> {
+                val interlocutorId = args.interlocutorId
+                val loggedUserId = loggedUser?.userId
+                if (loggedUserId != null) {
+                    val conversationId =
+                        if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
+                    setupPresenter(conversationId, conversationType)
+                    getInterlocutorData(interlocutorId)
+                }
+            }
+            ConversationType.GROUP.toString() -> {
+                val conversationId: String? = args.conversationId
+                if (conversationId != null) {
+                    setupPresenter(conversationId, conversationType)
+                    getGroupData(conversationId)
+                }
             }
         }
+    }
+
+    private fun setupPresenter(conversationId: String, conversationType: String) {
+        presenter = ConversationPresenter()
+        presenter.attachView(this, requireActivity(), conversationId, conversationType)
+    }
+
+    private fun getInterlocutorData(interlocutorId: String) {
         presenter.getUserOnlineStatus(interlocutorId)
         presenter.getInterlocutorData(interlocutorId)
+    }
+
+    private fun getGroupData(conversationId: String) {
+        presenter.getGroupData(conversationId)
     }
 
     private fun observeMessage() {
         presenter.receiveMessage()
     }
 
-    override fun onMessagesReceived(messages: List<ChatMessage>) {
-        chatAdapter.setData(messages)
-        if (messages.isNotEmpty()) {
-            if (chatAdapter.itemCount != null && chatAdapter.itemCount - 1 > 0) {
-                // TODO: check again later, error: NullPointerException
-                binding.rvMessages.smoothScrollToPosition(chatAdapter.itemCount - 1)
+    private fun sendMessage() {
+        binding.apply {
+            // Get a reference to the InputMethodManager
+            val imm =
+                requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+            // Check if the keyboard is currently open
+            if (imm.isAcceptingText) {
+                // If the keyboard is open, hide it
+                imm.hideSoftInputFromWindow(binding.root.windowToken, 0)
+            }
+
+            val message = etMessage.text.toString().trim()
+            if (message.isNotBlank()) {
+
+                val senderId = loggedUser?.userId
+                val senderName = loggedUser?.name
+
+                val isValid: Boolean = senderId != null && senderName != null
+                if (isValid) {
+                    etMessage.setText("")
+                    val isFirstTime: Boolean = conversationAdapter.isChatEmpty()
+
+                    if (isFirstTime) {
+                        val interlocutorId = interlocutor?.userId
+                        if (interlocutorId != null) {
+                            presenter.createPersonaChatRoom(senderId!!, interlocutorId)
+                            Toast.makeText(
+                                requireContext(),
+                                "Chat Room Created",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    when (currentMessageType) {
+                        MessageType.TEXT -> {
+                            presenter.sendMessage(
+                                message,
+                                senderId!!,
+                                senderName!!,
+                            )
+                        }
+                        MessageType.IMAGE -> {
+                            if (capturedImage != null) {
+                                val path = ImageHelper.getPathForMessages(
+                                    requireActivity().contentResolver,
+                                    capturedImage!!
+                                )
+                                presenter.sendMessage(
+                                    message,
+                                    senderId!!,
+                                    senderName!!,
+                                    capturedImage!!,
+                                    path
+                                )
+                                btnAddExtras.visibility = View.VISIBLE
+                                binding.layoutSelectedImage.visibility = View.GONE
+                                capturedImage = null
+                            }
+                        }
+                        MessageType.VIDEO -> {}
+                        MessageType.AUDIO -> {}
+                    }
+                }
+//                when (args.conversationType) {
+//                    ConversationType.PERSONAL.toString() -> handlePersonalMessage(message)
+//                    ConversationType.GROUP.toString() -> handleGroupMessage(message)
+//                }
+            }
+        }
+    }
+
+    override fun onReceiveGroupData(conversation: Conversation) {
+        binding.apply {
+            conversationAdapter.setParticipantIdList(conversation.participants)
+            tvAppBarTitle.text = conversation.conversationName
+            tvAppBarDescription.text = getString(R.string.txt_tap_to_see_group_info)
+            if (conversation.conversationAvatar != null && conversation.conversationAvatar != "") {
+                Glide.with(requireContext())
+                    .load(conversation.conversationAvatar)
+                    .into(ivUserAvatar)
+            } else {
+                Glide.with(requireContext())
+                    .load(R.drawable.ic_default_group_avatar).into(binding.ivUserAvatar)
             }
         }
     }
@@ -168,11 +267,24 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
         binding.apply {
             interlocutor = user
 
-            tvName.text = user.name
+            tvAppBarTitle.text = user.name
             if (user.avatarUrl != null && user.avatarUrl != "") {
                 Glide.with(requireContext())
                     .load(user.avatarUrl)
                     .into(ivUserAvatar)
+            } else {
+                Glide.with(requireContext())
+                    .load(R.drawable.ic_default_user_avatar).into(binding.ivUserAvatar)
+            }
+        }
+    }
+
+    override fun onMessagesReceived(messages: List<ChatMessage>) {
+        conversationAdapter.setData(messages)
+        if (messages.isNotEmpty()) {
+            if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0) {
+                // TODO: check again later, error: NullPointerException
+                binding.rvMessages.smoothScrollToPosition(conversationAdapter.itemCount - 1)
             }
         }
     }
@@ -180,15 +292,15 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
     override fun updateReceiverOnlineStatus(status: UserRTDB) {
         binding.apply {
             if (status.online) {
-                tvUserStatus.text = getString(R.string.txt_online)
+                tvAppBarDescription.text = getString(R.string.txt_online)
                 ivOnlineStatusIndicator.visibility = View.VISIBLE
 
                 if (status.typing && status.currentlyTypingFor == loggedUser?.userId) {
-                    tvUserStatus.text = getString(R.string.txt_typing)
+                    tvAppBarDescription.text = getString(R.string.txt_typing)
                 }
             } else {
                 ivOnlineStatusIndicator.visibility = View.GONE
-                tvUserStatus.text =
+                tvAppBarDescription.text =
                     "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
             }
         }
@@ -230,10 +342,10 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
      */
     override fun onImageClick(chat: ChatMessage) {
         binding.apply {
-            val action = ChatRoomFragmentDirections.actionOpenImage(
+            val action = ConversationFragmentDirections.actionOpenImage(
                 chat.imageUrl,
                 chat.message,
-                chat.timestamp,
+                chat.sendTimestamp,
                 chat.senderName
             )
             Navigation.findNavController(binding.root).navigate(action)
@@ -251,12 +363,14 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
 
     private fun updateAppBarOnSelectedView() {
         binding.apply {
-            val totalSelectedMessages = chatAdapter.getTotalSelectedMessages()
+            val totalSelectedMessages = conversationAdapter.getTotalSelectedMessages()
             if (totalSelectedMessages > 0) {
                 appBarLayoutOnItemSelected.visibility = View.VISIBLE
                 tvTotalSelectedMessages.text = totalSelectedMessages.toString()
 
-                if (totalSelectedMessages == 1) {
+                val selectedMessageSender = conversationAdapter.getCurrentSelectedMessage()?.senderId
+
+                if (totalSelectedMessages == 1 && selectedMessageSender == loggedUser?.userId) {
                     btnShowMessageInfo.visibility = View.VISIBLE
                 } else {
                     btnShowMessageInfo.visibility = View.GONE
@@ -273,20 +387,20 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
 
             btnBackOnItemSelected.setOnClickListener {
                 appBarLayoutOnItemSelected.visibility = View.GONE
-                chatAdapter.onDeselectAllMessage()
+                conversationAdapter.onDeselectAllMessage()
             }
 
             btnShowMessageInfo.setOnClickListener { // TODO
-                val totalSelectedMessages = chatAdapter.getTotalSelectedMessages()
-                val currentSelectedMessage = chatAdapter.getCurrentSelectedMessage()
+                val totalSelectedMessages = conversationAdapter.getTotalSelectedMessages()
+                val currentSelectedMessage = conversationAdapter.getCurrentSelectedMessage()
 
                 if (totalSelectedMessages == 1 && loggedUser?.userId != null && currentSelectedMessage != null) {
-                    val action = ChatRoomFragmentDirections.actionShowMessageInfo(
+                    val action = ConversationFragmentDirections.actionShowMessageInfo(
                         loggedUser?.userId!!,
                         currentSelectedMessage
                     )
                     Navigation.findNavController(binding.root).navigate(action)
-                    chatAdapter.onDeselectAllMessage()
+                    conversationAdapter.onDeselectAllMessage()
                 } else {
                     Toast.makeText(
                         requireContext(),
@@ -311,12 +425,17 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
             }
 
             layoutInterlocutorProfile.setOnClickListener {
-                startActivity(
-                    Intent(requireActivity(), ProfileActivity::class.java).putExtra(
-                        ProfileActivity.EXTRA_INTENT_USER_ID,
-                        interlocutor?.userId
-                    )
-                )
+                when (args.conversationType) {
+                    ConversationType.GROUP.toString() -> {}
+                    ConversationType.PERSONAL.toString() -> {
+                        startActivity(
+                            Intent(requireActivity(), ProfileActivity::class.java).putExtra(
+                                ProfileActivity.EXTRA_INTENT_USER_ID,
+                                interlocutor?.userId
+                            )
+                        )
+                    }
+                }
             }
 
             btnAddExtras.setOnClickListener { // TODO
@@ -328,72 +447,7 @@ class ChatRoomFragment : Fragment(), ChatView, ChatAdapter.ChatClickListener {
             }
 
             btnSend.setOnClickListener {
-                // Get a reference to the InputMethodManager
-                val imm =
-                    requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
-                // Check if the keyboard is currently open
-                if (imm.isAcceptingText) {
-                    // If the keyboard is open, hide it
-                    imm.hideSoftInputFromWindow(binding.root.windowToken, 0)
-                }
-
-                val message = etMessage.text.toString().trim()
-                if (message.isNotBlank()) {
-                    val senderId = loggedUser?.userId
-                    val senderName = loggedUser?.name
-
-                    val interlocutorId = interlocutor?.userId
-                    val interlocutorName = interlocutor?.name
-
-                    val isValid: Boolean =
-                        senderId != null && senderName != null && interlocutorId != null && interlocutorName != null
-
-                    val isFirstTime: Boolean = chatAdapter.isChatEmpty()
-                    if (isFirstTime) {
-                        Toast.makeText(requireContext(), "Chat Room Created", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
-                    if (senderId != null && senderName != null && interlocutorId != null && interlocutorName != null) {
-                        etMessage.setText("")
-                        when (currentMessageType) {
-                            MessageType.TEXT -> {
-                                presenter.sendMessage(
-                                    message,
-                                    senderId,
-                                    interlocutorId,
-                                    senderName,
-                                    interlocutorName,
-                                    isFirstTime
-                                )
-                            }
-                            MessageType.IMAGE -> {
-                                if (capturedImage != null) {
-                                    val path = ImageHelper.getPathForMessages(
-                                        requireActivity().contentResolver,
-                                        capturedImage!!
-                                    )
-                                    presenter.sendMessage(
-                                        message,
-                                        senderId,
-                                        interlocutorId,
-                                        senderName,
-                                        interlocutorName,
-                                        capturedImage!!,
-                                        path,
-                                        isFirstTime
-                                    )
-                                    btnAddExtras.visibility = View.VISIBLE
-                                    binding.layoutSelectedImage.visibility = View.GONE
-                                    capturedImage = null
-                                }
-                            }
-                            MessageType.VIDEO -> {}
-                            MessageType.AUDIO -> {}
-                        }
-                    }
-                }
+                sendMessage()
             }
 
             btnCamera.setOnClickListener {

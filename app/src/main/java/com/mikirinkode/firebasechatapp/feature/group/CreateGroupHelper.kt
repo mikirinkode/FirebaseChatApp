@@ -3,7 +3,7 @@ package com.mikirinkode.firebasechatapp.feature.group
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.storage.StorageReference
-import com.mikirinkode.firebasechatapp.feature.chat.MessageType
+import com.mikirinkode.firebasechatapp.constants.MessageType
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
 // TODO: confusing name, because double
@@ -30,7 +30,9 @@ class CreateGroupHelper(
 
         if (conversationId != null) {
             // add conversationId to all participants
+            val unreadMessageCountMap = mutableMapOf<String, Int>()
             for (userId in participants) {
+                unreadMessageCountMap[userId] = 0
                 Log.e("GCH", "userId: ${userId}")
                 usersRef?.child(userId)?.child("conversationIdList")?.child(conversationId)
                     ?.setValue(mapOf(conversationId to true))
@@ -48,9 +50,7 @@ class CreateGroupHelper(
                 "senderName" to "",
                 "receiverId" to "",
                 "receiverName" to "",
-                "deliveredTimestamp" to 0L,
-                "readTimestamp" to 1L,
-                "beenRead" to false,
+                "deliveredTimestamp" to 0L
             )
 
             // upload the conversation avatar
@@ -63,7 +63,7 @@ class CreateGroupHelper(
                         val conversation = mapOf(
                             "conversationId" to conversationId,
                             "participants" to participants,
-                            "unreadMessages" to 0,
+                            "unreadMessageEachParticipant" to unreadMessageCountMap,
                             "conversationType" to "GROUP",
                             "conversationName" to groupName,
                             "conversationAvatar" to uri.toString(),
@@ -82,7 +82,7 @@ class CreateGroupHelper(
                 val conversation = mapOf(
                     "conversationId" to conversationId,
                     "participants" to participants,
-                    "unreadMessages" to 0,
+                    "unreadMessageEachParticipant" to unreadMessageCountMap,
                     "conversationType" to "GROUP",
                     "conversationName" to groupName,
                     "conversationAvatar" to "",

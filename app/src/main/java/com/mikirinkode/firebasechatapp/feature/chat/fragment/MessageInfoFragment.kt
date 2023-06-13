@@ -1,16 +1,16 @@
-package com.mikirinkode.firebasechatapp.feature.chat
+package com.mikirinkode.firebasechatapp.feature.chat.fragment
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
-import com.mikirinkode.firebasechatapp.R
+import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
+import com.mikirinkode.firebasechatapp.constants.MessageType
 import com.mikirinkode.firebasechatapp.databinding.FragmentMessageInfoBinding
-import com.mikirinkode.firebasechatapp.helper.DateHelper
 
 class MessageInfoFragment : Fragment() {
 
@@ -52,8 +52,10 @@ class MessageInfoFragment : Fragment() {
                     tvDeliveredTimestamp.text = "-"
                 }
 
-                if (message.readTimestamp != 0L){
-                    tvReadTimestamp.text = DateHelper.getRegularFormattedDateTimeFromTimestamp(message.readTimestamp)
+                // TODO: update if opened in group
+                if (message.beenReadBy.isNotEmpty()){
+                    val readTimestamp = message.beenReadBy.entries.first().value
+                    tvReadTimestamp.text = DateHelper.getRegularFormattedDateTimeFromTimestamp(readTimestamp)
                 } else {
                     tvReadTimestamp.text = "-"
                 }
@@ -63,14 +65,14 @@ class MessageInfoFragment : Fragment() {
                     layoutItemMessage.layoutLoggedUserMessage.visibility = View.VISIBLE
                     layoutItemMessage.apply {
                         tvloggedUserMessage.text = message.message
-                        tvloggedUserTimestamp.text = DateHelper.getRegularFormattedDateTimeFromTimestamp(message.timestamp)
+                        tvloggedUserTimestamp.text = DateHelper.getRegularFormattedDateTimeFromTimestamp(message.sendTimestamp)
                     }
                 } else {
                     layoutItemMessage.layoutInterlocutorMessage.visibility = View.VISIBLE
                     layoutItemMessage.layoutLoggedUserMessage.visibility = View.GONE
                     layoutItemMessage.apply {
                         tvInterlocutorMessage.text = message.message
-                        tvInterlocutorTimestamp.text = DateHelper.getRegularFormattedDateTimeFromTimestamp(message.timestamp)
+                        tvInterlocutorTimestamp.text = DateHelper.getRegularFormattedDateTimeFromTimestamp(message.sendTimestamp)
                     }
                 }
 

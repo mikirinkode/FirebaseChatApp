@@ -2,7 +2,6 @@ package com.mikirinkode.firebasechatapp.firebase.auth
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -14,8 +13,8 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
-import com.mikirinkode.firebasechatapp.helper.DateHelper
-import com.mikirinkode.firebasechatapp.utils.Constants
+import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
+import com.mikirinkode.firebasechatapp.constants.Constants
 
 class GoogleAuthHelper(
     private val mActivity: Activity?,

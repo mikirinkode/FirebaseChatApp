@@ -7,7 +7,8 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityUserListBinding
-import com.mikirinkode.firebasechatapp.feature.chat.PersonalChatActivity
+import com.mikirinkode.firebasechatapp.constants.ConversationType
+import com.mikirinkode.firebasechatapp.feature.chat.ConversationActivity
 import com.mikirinkode.firebasechatapp.feature.group.CreateGroupChatActivity
 
 class UserListActivity : AppCompatActivity(), UserListView, UserListAdapter.UserClickListener {
@@ -69,8 +70,9 @@ class UserListActivity : AppCompatActivity(), UserListView, UserListAdapter.User
     override fun onUserClick(user: UserAccount) {
         // TODO:
         startActivity(
-            Intent(this, PersonalChatActivity::class.java)
-                .putExtra(PersonalChatActivity.EXTRA_INTENT_INTERLOCUTOR_ID, user.userId)
+            Intent(this, ConversationActivity::class.java)
+                .putExtra(ConversationActivity.EXTRA_INTENT_INTERLOCUTOR_ID, user.userId)
+                .putExtra(ConversationActivity.EXTRA_INTENT_CONVERSATION_TYPE, ConversationType.PERSONAL.toString())
         )
     }
 

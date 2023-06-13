@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.chat
+package com.mikirinkode.firebasechatapp.feature.chat.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater

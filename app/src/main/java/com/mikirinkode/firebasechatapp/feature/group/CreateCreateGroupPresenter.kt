@@ -7,8 +7,8 @@ import com.mikirinkode.firebasechatapp.base.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListHelper
 import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListListener
-import com.mikirinkode.firebasechatapp.helper.CameraHelper
-import com.mikirinkode.firebasechatapp.helper.CameraListener
+import com.mikirinkode.firebasechatapp.commonhelper.CameraHelper
+import com.mikirinkode.firebasechatapp.commonhelper.CameraListener
 
 class CreateCreateGroupPresenter: BasePresenter<CreateGroupChatView>, CreateGroupListener, FirebaseUserListListener, CameraListener {
     private var mView: CreateGroupChatView? = null
@@ -45,7 +45,7 @@ class CreateCreateGroupPresenter: BasePresenter<CreateGroupChatView>, CreateGrou
      * CAMERA
      */
     fun takePicture(mActivity: Activity){
-        val cameraHelper = CameraHelper(mActivity, this)
+        val cameraHelper = CameraHelper(this, mActivity)
         cameraHelper?.dispatchTakePictureIntent()
     }
 

@@ -34,8 +34,8 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private lateinit var presenter: MainPresenter
 
-    private val chatHistoryAdapter: ChatHistoryAdapter by lazy {
-        ChatHistoryAdapter()
+    private val conversationListAdapter: ConversationListAdapter by lazy {
+        ConversationListAdapter()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,8 +83,8 @@ class MainActivity : AppCompatActivity(), MainView {
                 }
 
                 rvChatHistory.layoutManager = LinearLayoutManager(this@MainActivity)
-                rvChatHistory.adapter = chatHistoryAdapter
-                chatHistoryAdapter.setLoggedUserId(user?.userId.toString())
+                rvChatHistory.adapter = conversationListAdapter
+                conversationListAdapter.setLoggedUserId(user?.userId.toString())
 
                 presenter.getMessageHistory()
             }
@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun onChatHistoryReceived(conversations: List<Conversation>) {
         if (conversations.isNotEmpty()) {
-            chatHistoryAdapter.setData(conversations)
+            conversationListAdapter.setData(conversations)
         }
     }
 
