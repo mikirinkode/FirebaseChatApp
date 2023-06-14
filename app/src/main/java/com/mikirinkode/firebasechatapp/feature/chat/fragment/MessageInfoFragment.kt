@@ -95,7 +95,7 @@ class MessageInfoFragment : Fragment() {
 
     private fun onActionClick(){
         binding.apply {
-            btnBack.setOnClickListener {
+            binding.topAppBar.setNavigationOnClickListener {
                 Navigation.findNavController(binding.root).navigateUp()
             }
         }

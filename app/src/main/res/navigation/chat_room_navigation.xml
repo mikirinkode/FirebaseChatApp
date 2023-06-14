@@ -15,6 +15,9 @@
         <action
             android:id="@+id/actionShowMessageInfo"
             app:destination="@id/messageInfoFragment" />
+        <action
+            android:id="@+id/actionOpenGroupProfile"
+            app:destination="@id/groupProfileFragment" />
         <argument
             android:name="conversationId"
             android:defaultValue=""
@@ -66,5 +69,14 @@
         <argument
             android:name="chatMessage"
             app:argType="com.mikirinkode.firebasechatapp.data.model.ChatMessage" />
+    </fragment>
+    <fragment
+        android:id="@+id/groupProfileFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.chat.fragment.GroupProfileFragment"
+        android:label="fragment_group_profile"
+        tools:layout="@layout/fragment_group_profile" >
+        <argument
+            android:name="conversation"
+            app:argType="com.mikirinkode.firebasechatapp.data.model.Conversation" />
     </fragment>
 </navigation>

@@ -64,6 +64,7 @@ class ConversationFragment : Fragment(), ChatView, ConversationAdapter.ChatClick
 
     private var navigateFrom: String? = null // used to navigate back
     private var interlocutor: UserAccount? = null
+    private var conversation: Conversation? = null
 
     private lateinit var presenter: ConversationPresenter
     private var capturedImage: Uri? = null
@@ -248,6 +249,7 @@ class ConversationFragment : Fragment(), ChatView, ConversationAdapter.ChatClick
     }
 
     override fun onReceiveGroupData(conversation: Conversation) {
+        this.conversation = conversation
         binding.apply {
             conversationAdapter.setParticipantIdList(conversation.participants)
             tvAppBarTitle.text = conversation.conversationName
@@ -368,7 +370,8 @@ class ConversationFragment : Fragment(), ChatView, ConversationAdapter.ChatClick
                 appBarLayoutOnItemSelected.visibility = View.VISIBLE
                 tvTotalSelectedMessages.text = totalSelectedMessages.toString()
 
-                val selectedMessageSender = conversationAdapter.getCurrentSelectedMessage()?.senderId
+                val selectedMessageSender =
+                    conversationAdapter.getCurrentSelectedMessage()?.senderId
 
                 if (totalSelectedMessages == 1 && selectedMessageSender == loggedUser?.userId) {
                     btnShowMessageInfo.visibility = View.VISIBLE
@@ -426,8 +429,14 @@ class ConversationFragment : Fragment(), ChatView, ConversationAdapter.ChatClick
 
             layoutInterlocutorProfile.setOnClickListener {
                 when (args.conversationType) {
-                    ConversationType.GROUP.toString() -> {}
-                    ConversationType.PERSONAL.toString() -> {
+                    ConversationType.GROUP.toString() -> {
+                        if (conversation != null){
+                            val action =
+                                ConversationFragmentDirections.actionOpenGroupProfile(conversation!!)
+                            Navigation.findNavController(binding.root).navigate(action)
+                        }
+                    }
+                    ConversationType.PERSONAL.toString() -> { // TODO
                         startActivity(
                             Intent(requireActivity(), ProfileActivity::class.java).putExtra(
                                 ProfileActivity.EXTRA_INTENT_USER_ID,

@@ -106,7 +106,7 @@ class CreateGroupChatFragment : Fragment(), CreateGroupChatView {
                 Navigation.findNavController(binding.root).navigateUp()
             }
 
-            cardProfile.setOnClickListener {
+            cardAvatar.setOnClickListener {
                 if (PermissionManager.isCameraPermissionGranted(requireContext())) {
                     presenter.takePicture(requireActivity())
                 } else {
@@ -116,7 +116,7 @@ class CreateGroupChatFragment : Fragment(), CreateGroupChatView {
 
             btnCreateGroup.setOnClickListener {
                 val groupName = etGroupName.text.toString().trim()
-                if (groupName.isNullOrBlank()) {
+                if (groupName.isBlank()) {
                     etGroupName.error = getString(R.string.txt_empty_group_name)
                 } else {
                     if (loggedUser != null && loggedUser?.userId != null){

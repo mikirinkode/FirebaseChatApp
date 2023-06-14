@@ -12,6 +12,7 @@ import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityProfileBinding
 import com.mikirinkode.firebasechatapp.feature.login.LoginActivity
 
+// TODO
 class ProfileActivity : AppCompatActivity(), ProfileView {
 
     private val binding: ActivityProfileBinding by lazy {
@@ -63,7 +64,7 @@ class ProfileActivity : AppCompatActivity(), ProfileView {
 
             if (user.avatarUrl != null && user.avatarUrl != "") {
                 Glide.with(this@ProfileActivity)
-                    .load(user.avatarUrl).into(ivUserProfile)
+                    .load(user.avatarUrl).into(ivAvatar)
             }
         }
     }

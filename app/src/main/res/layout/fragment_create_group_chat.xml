@@ -32,11 +32,11 @@
         android:layout_marginTop="70dp"
         app:layout_constraintStart_toStartOf="@id/layoutGroupBasicInfo"
         app:layout_constraintEnd_toEndOf="@id/layoutGroupBasicInfo"
-        app:layout_constraintTop_toTopOf="@id/cardProfile"
+        app:layout_constraintTop_toTopOf="@id/cardAvatar"
         app:layout_constraintBottom_toBottomOf="@id/layoutGroupBasicInfo"/>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardProfile"
+        android:id="@+id/cardAvatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -75,7 +75,7 @@
         android:padding="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardProfile">
+        app:layout_constraintTop_toBottomOf="@id/cardAvatar">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilGroupName"

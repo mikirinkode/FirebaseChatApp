@@ -86,10 +86,10 @@ class ChatHelper(
         usersRef?.child(anotherUserId)?.child("conversationIdList")?.child(conversationId)
             ?.setValue(mapOf(conversationId to true))
 
+        // TODO
         val initialConversation = mapOf(
             "conversationId" to conversationId,
             "participants" to listOf(userId, anotherUserId),
-            "unreadMessages" to 0,
             "conversationType" to "PERSONAL",
             "createdAt" to timeStamp
         )

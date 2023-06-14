@@ -48,5 +48,7 @@
     <string name="txt_unread_messages">unread messages</string>
     <string name="txt_today">Today</string>
     <string name="txt_yesterday">Yesterday</string>
+    <string name="txt_group_profile">Group Profile</string>
+    <string name="txt_add_participant">Add Participant</string>
 
 </resources>
