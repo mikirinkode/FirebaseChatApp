@@ -15,12 +15,11 @@ import com.mikirinkode.firebasechatapp.commonhelper.CameraHelper
 import com.mikirinkode.firebasechatapp.commonhelper.CameraListener
 import com.mikirinkode.firebasechatapp.feature.chat.helper.ChatEventListener
 import com.mikirinkode.firebasechatapp.feature.chat.helper.ChatHelper
-import com.mikirinkode.firebasechatapp.feature.chat.ChatView
-import com.mikirinkode.firebasechatapp.feature.chat.ConversationPresenterInterface
+import com.mikirinkode.firebasechatapp.feature.chat.ConversationView
 
-class ConversationPresenter : BasePresenter<ChatView>, ChatEventListener,
+class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener,
     UserOnlineStatusEventListener, CameraListener, FirebaseUserListener {
-    private var mView: ChatView? = null
+    private var mView: ConversationView? = null
     private var chatHelper: ChatHelper? = null
     private var cameraHelper: CameraHelper? = null
     private var firebaseUserHelper: FirebaseUserHelper? = null
@@ -145,7 +144,7 @@ class ConversationPresenter : BasePresenter<ChatView>, ChatEventListener,
     }
 
 
-    fun attachView(view: ChatView, mActivity: Activity, conversationId: String, conversationType: String) {
+    fun attachView(view: ConversationView, mActivity: Activity, conversationId: String, conversationType: String) {
         attachView(view)
         chatHelper = ChatHelper(this, conversationId, conversationType)
         cameraHelper = CameraHelper(this, mActivity)
@@ -154,7 +153,7 @@ class ConversationPresenter : BasePresenter<ChatView>, ChatEventListener,
 
     }
 
-    override fun attachView(view: ChatView) {
+    override fun attachView(view: ConversationView) {
         mView = view
     }
 

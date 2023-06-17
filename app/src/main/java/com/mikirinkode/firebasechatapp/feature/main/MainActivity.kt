@@ -8,13 +8,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.mikirinkode.firebasechatapp.constants.ConversationType
 import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
+import com.mikirinkode.firebasechatapp.feature.group.CreateNewChatActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
-import com.mikirinkode.firebasechatapp.feature.userlist.UserListActivity
 import com.mikirinkode.firebasechatapp.service.UpdateDeliveredTimeService
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
@@ -108,7 +109,7 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
 
-    override fun onChatHistoryReceived(conversations: List<Conversation>) {
+    override fun onConversationListReceived(conversations: List<Conversation>) {
         if (conversations.isNotEmpty()) {
             conversationListAdapter.setData(conversations)
         }
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun showLoading() {
         binding.progressBar.visibility = View.VISIBLE
     }
+
     override fun hideLoading() {
         binding.progressBar.visibility = View.GONE
     }
@@ -133,7 +135,12 @@ class MainActivity : AppCompatActivity(), MainView {
             }
 
             btnNewChat.setOnClickListener {
-                startActivity(Intent(this@MainActivity, UserListActivity::class.java))
+                startActivity(
+                    Intent(this@MainActivity, CreateNewChatActivity::class.java).putExtra(
+                        CreateNewChatActivity.EXTRA_INTENT_CONVERSATION_TYPE,
+                        ConversationType.PERSONAL.toString()
+                    )
+                )
             }
         }
     }

@@ -18,9 +18,9 @@ class ConversationActivity : AppCompatActivity() {
     companion object {
         const val REQUEST_IMAGE_CAPTURE = 1
         const val GALLERY_REQUEST_CODE = 2
-        const val EXTRA_INTENT_INTERLOCUTOR_ID = "key_interlocutor_id"
-        const val EXTRA_INTENT_CONVERSATION_ID = "key_conversation_id"
-        const val EXTRA_INTENT_CONVERSATION_TYPE = "key_conversation_type"
+        const val EXTRA_INTENT_INTERLOCUTOR_ID = "intent_interlocutor_id"
+        const val EXTRA_INTENT_CONVERSATION_ID = "intent_conversation_id"
+        const val EXTRA_INTENT_CONVERSATION_TYPE = "intent_conversation_type"
 
         const val BUNDLE_CONVERSATION_ID = "conversationId"
         const val BUNDLE_CONVERSATION_TYPE = "conversationType"

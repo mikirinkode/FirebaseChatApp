@@ -7,7 +7,7 @@ import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 
-interface ChatView: BaseView {
+interface ConversationView: BaseView {
     fun onMessagesReceived(messages: List<ChatMessage>)
 
     fun updateReceiverOnlineStatus(status: UserRTDB)

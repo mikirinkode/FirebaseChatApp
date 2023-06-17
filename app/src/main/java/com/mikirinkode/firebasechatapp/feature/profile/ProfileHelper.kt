@@ -4,6 +4,7 @@ import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
+// TODO: check
 class ProfileHelper(
     private val mListener: ProfileEventListener
 ) {
@@ -19,8 +20,6 @@ class ProfileHelper(
                 val user: UserAccount? = document.toObject()
                 if (user != null) {
                     mListener.onGetProfileSuccess(user)
-                } else {
-                    // TODO: handle on fail
                 }
             }
     }

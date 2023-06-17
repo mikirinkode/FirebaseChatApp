@@ -20,7 +20,7 @@
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_back"
             app:navigationIconTint="?android:attr/textColor"
-            app:title="@string/txt_new_group_title" />
+            app:title="@string/txt_select_user_title" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

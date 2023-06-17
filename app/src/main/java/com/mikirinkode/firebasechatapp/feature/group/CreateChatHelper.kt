@@ -10,8 +10,8 @@ import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
 // TODO: confusing name, because double
-class CreateGroupHelper(
-    private val mListener: CreateGroupListener,
+class CreateChatHelper(
+    private val mListener: CreateChatListener,
 ) {
 
     private val storage = FirebaseProvider.instance().getStorage()
@@ -87,6 +87,6 @@ class CreateGroupHelper(
     }
 }
 
-interface CreateGroupListener {
+interface CreateChatListener {
     fun onSuccessCreateGroupChat(conversationId: String)
 }

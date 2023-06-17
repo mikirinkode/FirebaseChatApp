@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chat_room_navigation">
+
+
+    <fragment
+        android:id="@+id/selectUserFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.selectuser.SelectUserFragment"
+        android:label="SelectUserFragment"
+        tools:layout="@layout/fragment_select_user">
+        <action
+            android:id="@+id/actionContinue"
+            app:destination="@id/createGroupChatFragment" />
+
+        <argument
+            android:name="conversationId"
+            app:argType="string"
+            android:defaultValue="@null"
+            app:nullable="true" />
+        <argument
+            android:name="participantsId"
+            app:argType="string[]"
+            android:defaultValue="@null"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createGroupChatFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.group.SetupProfileGroupChatFragment"
+        android:label="fragment_create_group_chat"
+        tools:layout="@layout/fragment_setup_group_chat" >
+        <argument
+            android:name="selectedUsers"
+            app:argType="com.mikirinkode.firebasechatapp.data.model.UserAccount[]" />
+    </fragment>
+    <fragment
+        android:id="@+id/userListFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.userlist.UserListFragment"
+        android:label="UserListFragment"
+        tools:layout="@layout/fragment_user_list" >
+        <action
+            android:id="@+id/actionCreateGroup"
+            app:destination="@id/selectUserFragment" />
+    </fragment>
+</navigation>

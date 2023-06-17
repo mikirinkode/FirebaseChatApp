@@ -4,5 +4,5 @@ import com.mikirinkode.firebasechatapp.base.BaseView
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 
 interface MainView: BaseView {
-    fun onChatHistoryReceived(conversations: List<Conversation>)
+    fun onConversationListReceived(conversations: List<Conversation>)
 }

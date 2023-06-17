@@ -25,7 +25,7 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
         mView?.hideLoading()
         if (conversations.isNotEmpty()){
             val sortedList = conversations.sortedBy { it.lastMessage?.sendTimestamp }.reversed()
-            mView?.onChatHistoryReceived(sortedList)
+            mView?.onConversationListReceived(sortedList)
         }
             Log.e("MainPresenter", "on chat history data change received")
     }

@@ -49,26 +49,19 @@ class ConversationListAdapter : RecyclerView.Adapter<ConversationListAdapter.Vie
                     } else {
                         tvUnreadMessages.visibility = View.GONE
                     }
-
-//                    if (latestMessage?.beenReadBy?.containsKey(loggedUserId) != true && conversation.unreadMessages > 0) {
-//                        // if there are unread messages
-//                        tvUnreadMessages.visibility = View.VISIBLE
-//                        tvUnreadMessages.text = conversation.unreadMessages.toString() // todo
-//                    } else {
-//                        tvUnreadMessages.visibility = View.GONE
-//                    }
                 }
                 Log.e("CHA", "type: ${conversation.conversationType}")
 
 
                 when (conversation.conversationType) {
                     ConversationType.GROUP.toString() -> {
+
+                        Log.e("CHA", "type: ${conversation.conversationAvatar.isNullOrBlank()}")
                         tvUserName.text = conversation.conversationName
-                        if (conversation.conversationAvatar != null && conversation.conversationAvatar != "") {
+                        if (!conversation.conversationAvatar.isNullOrBlank()) {
                             Glide.with(itemView.context)
                                 .load(conversation.conversationAvatar).into(binding.ivUserAvatar)
                         } else {
-                            Log.e("CHA", "else")
                             Glide.with(itemView.context)
                                 .load(R.drawable.ic_default_group_avatar).into(binding.ivUserAvatar)
                         }

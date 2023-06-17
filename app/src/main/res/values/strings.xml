@@ -50,5 +50,6 @@
     <string name="txt_yesterday">Yesterday</string>
     <string name="txt_group_profile">Group Profile</string>
     <string name="txt_add_participant">Add Participant</string>
+    <string name="txt_select_user_title">Select user</string>
 
 </resources>

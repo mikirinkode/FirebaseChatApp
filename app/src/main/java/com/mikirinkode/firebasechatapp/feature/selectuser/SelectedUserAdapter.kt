@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.group
+package com.mikirinkode.firebasechatapp.feature.selectuser
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

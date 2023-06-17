@@ -29,7 +29,7 @@ import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.data.model.UserRTDB
-import com.mikirinkode.firebasechatapp.databinding.FragmentChatRoomBinding
+import com.mikirinkode.firebasechatapp.databinding.FragmentConversationBinding
 import com.mikirinkode.firebasechatapp.feature.chat.*
 import com.mikirinkode.firebasechatapp.feature.chat.adapter.ConversationAdapter
 import com.mikirinkode.firebasechatapp.feature.chat.presenter.ConversationPresenter
@@ -38,9 +38,9 @@ import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.firebase.CommonFirebaseTaskHelper
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
-class ConversationFragment : Fragment(), ChatView, ConversationAdapter.ChatClickListener {
+class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.ChatClickListener {
 
-    private var _binding: FragmentChatRoomBinding? = null
+    private var _binding: FragmentConversationBinding? = null
     private val binding get() = _binding!!
 
     private val pref: LocalSharedPref? by lazy {
@@ -76,7 +76,7 @@ class ConversationFragment : Fragment(), ChatView, ConversationAdapter.ChatClick
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        _binding = FragmentChatRoomBinding.inflate(inflater, container, false)
+        _binding = FragmentConversationBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -254,13 +254,13 @@ class ConversationFragment : Fragment(), ChatView, ConversationAdapter.ChatClick
             conversationAdapter.setParticipantIdList(conversation.participants)
             tvAppBarTitle.text = conversation.conversationName
             tvAppBarDescription.text = getString(R.string.txt_tap_to_see_group_info)
-            if (conversation.conversationAvatar != null && conversation.conversationAvatar != "") {
+            if (conversation.conversationAvatar == null || conversation.conversationAvatar == "") {
+                Glide.with(requireContext())
+                    .load(R.drawable.ic_default_group_avatar).into(binding.ivUserAvatar)
+            } else {
                 Glide.with(requireContext())
                     .load(conversation.conversationAvatar)
                     .into(ivUserAvatar)
-            } else {
-                Glide.with(requireContext())
-                    .load(R.drawable.ic_default_group_avatar).into(binding.ivUserAvatar)
             }
         }
     }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".feature.chat.fragment.GroupProfileFragment">
+    tools:context=".feature.groupprofile.GroupProfileFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -40,24 +40,12 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginBottom="64dp"
                 android:background="@drawable/bg_user_profile"
-                android:backgroundTint="?android:attr/colorPrimary"
+                android:backgroundTint="?attr/background"
                 app:layout_constraintBottom_toBottomOf="@id/cardInfo"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="64dp"
-                android:background="@drawable/bg_rounded_card"
-                android:backgroundTint="?attr/background"
-                app:layout_constraintBottom_toBottomOf="@id/cardInfo"
-                app:layout_constraintEnd_toEndOf="@id/cardInfo"
-                app:layout_constraintStart_toStartOf="@id/cardInfo"
-                app:layout_constraintTop_toTopOf="@id/cardAvatar" />
 
 
             <com.google.android.material.card.MaterialCardView
@@ -75,7 +63,7 @@
                     android:id="@+id/ivAvatar"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
-                    android:src="@drawable/ic_default_user_avatar" />
+                    tools:src="@drawable/ic_default_user_avatar" />
             </com.google.android.material.card.MaterialCardView>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -84,8 +72,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="24dp"
-                android:background="@drawable/bg_rounded_card"
-                android:backgroundTint="?attr/background"
                 android:padding="24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

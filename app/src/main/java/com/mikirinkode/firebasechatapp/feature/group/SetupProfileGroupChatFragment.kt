@@ -3,25 +3,25 @@ package com.mikirinkode.firebasechatapp.feature.group
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
+import com.mikirinkode.firebasechatapp.commonhelper.ImageHelper
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.databinding.FragmentCreateGroupChatBinding
+import com.mikirinkode.firebasechatapp.databinding.FragmentSetupGroupChatBinding
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
-import com.mikirinkode.firebasechatapp.commonhelper.ImageHelper
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
 
-class CreateGroupChatFragment : Fragment(), CreateGroupChatView {
+class SetupProfileGroupChatFragment : Fragment(), CreateChatView {
 
-    private var _binding: FragmentCreateGroupChatBinding? = null
+    private var _binding: FragmentSetupGroupChatBinding? = null
     private val binding get() = _binding!!
 
     private val pref: LocalSharedPref? by lazy {
@@ -32,9 +32,9 @@ class CreateGroupChatFragment : Fragment(), CreateGroupChatView {
         pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
     }
 
-    private val args: CreateGroupChatFragmentArgs by navArgs()
+    private val args: SetupProfileGroupChatFragmentArgs by navArgs()
 
-    private lateinit var presenter: CreateCreateGroupPresenter
+    private lateinit var presenter: CreateChatPresenter
     private var capturedImage: Uri? = null
 
     override fun onCreateView(
@@ -42,7 +42,7 @@ class CreateGroupChatFragment : Fragment(), CreateGroupChatView {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        _binding = FragmentCreateGroupChatBinding.inflate(inflater, container, false)
+        _binding = FragmentSetupGroupChatBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -60,7 +60,7 @@ class CreateGroupChatFragment : Fragment(), CreateGroupChatView {
         onActionClick()
     }
 
-    private fun initView(args: CreateGroupChatFragmentArgs) {
+    private fun initView(args: SetupProfileGroupChatFragmentArgs) {
         binding.apply {
             val total = args.selectedUsers.size + 1
             tvTotalMember.text = getString(R.string.txt_total_member_value, total)
@@ -68,18 +68,13 @@ class CreateGroupChatFragment : Fragment(), CreateGroupChatView {
     }
 
     private fun setupPresenter() {
-        presenter = CreateCreateGroupPresenter()
+        presenter = CreateChatPresenter()
         presenter.attachView(this)
     }
 
     override fun onSuccessCreateGroupChat(conversationId: String) {
-//        startActivity(Intent(requireContext(), ChatActivity::class.java))
         startActivity(Intent(requireContext(), MainActivity::class.java))
         requireActivity().finishAffinity()
-    }
-
-    override fun setDataToRecyclerView(users: List<UserAccount>) {
-//        TODO("Not yet implemented")
     }
 
     override fun onImageCaptured(capturedImage: Uri?) {
