@@ -13,5 +13,11 @@ data class UserAccount(
     var lastLoginAt: String? = "",
     var updatedAt: String? = "",
 
+    val online: Boolean = false,
+    val typing: Boolean = false,
+    val currentlyTypingFor: String = "",
+    val lastOnlineTimestamp: Long = 0L,
+    val conversationIdList: List<String> = listOf<String>(),
+
     var isSelected: Boolean = false
 ): Parcelable

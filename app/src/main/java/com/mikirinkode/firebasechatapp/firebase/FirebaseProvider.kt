@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
@@ -30,7 +31,7 @@ class FirebaseProvider {
 
     private fun observeToken(){
         val currentUserId = firebaseAuth?.currentUser?.uid
-        val userRef = firebaseDatabase?.getReference("users")
+        val userRef = currentUserId?.let { firebaseFirestore?.collection("users")?.document(it) }
 
         firebaseMessaging?.token?.addOnCompleteListener { task ->
             if (task.isSuccessful){
@@ -39,8 +40,11 @@ class FirebaseProvider {
                 // Save token to server if use a server
                 if (currentUserId != null){
                     val currentDate = DateHelper.getCurrentDateTime()
-                    userRef?.child(currentUserId)?.child("fcmToken")?.setValue(token) // TODO
-                    userRef?.child(currentUserId)?.child("fcmTokenUpdatedAt")?.setValue(currentDate)
+                    val updates = hashMapOf<String, Any>(
+                        "fcmToken" to token,
+                        "fcmTokenUpdatedAt" to currentDate
+                    )
+                    userRef?.set(updates, SetOptions.merge())
                 }
             }
         }

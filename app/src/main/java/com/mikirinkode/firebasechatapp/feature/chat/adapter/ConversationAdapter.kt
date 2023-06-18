@@ -2,6 +2,7 @@ package com.mikirinkode.firebasechatapp.feature.chat.adapter
 
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -258,6 +259,7 @@ class ConversationAdapter : RecyclerView.Adapter<ConversationAdapter.ViewHolder>
     ) {
         // check if message is been read by all user or not yet
         val isBeenRead = chat.beenReadBy.size == participantIdList.size - 1
+        Log.e("CA", "${chat.message}, ${chat.beenReadBy}, ${chat.beenReadBy.size}, ${isBeenRead}, ${participantIdList.size}")
         if (isBeenRead) {
             tvloggedUserMessageStatus.visibility = View.VISIBLE
             tvloggedUserMessageStatus.text = "✓✓"

@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.Conversation
@@ -21,16 +22,16 @@ class ChatHistoryHelper(
     private val pref = LocalSharedPref.instance()
 
     private val conversationsRef = database?.getReference("conversations")
-    private val usersRef = database?.getReference("users")
+//    private val usersRef = database?.getReference("users")
 
     // TODO: is it possible if use fucntion from FirebaseUserHelper?
     // i think no, cause it is more complicated
     private suspend fun getUserById(userId: String): UserAccount? {
         val querySnapshot = firestore?.collection("users")
-            ?.whereEqualTo("userId", userId)
+            ?.document( userId)
             ?.get()?.await()
 
-        val userDoc = querySnapshot?.documents?.first()
+        val userDoc = querySnapshot
         return userDoc?.toObject(UserAccount::class.java)
     }
 
@@ -41,21 +42,18 @@ class ChatHistoryHelper(
         val conversations = mutableListOf<Conversation>()
 
         currentUser?.userId?.let { userId ->
-            usersRef?.child(userId)?.keepSynced(true)
-
-            usersRef?.child(userId)?.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(userSnapshot: DataSnapshot) {
+            val userRef = firestore?.collection("users")?.document(userId)
+            userRef
+                ?.addSnapshotListener { document, error ->
+                    val user: UserAccount? = document?.toObject()
                     Log.e("ChatHistoryHelper", "onDataChange")
-
-                    val user = userSnapshot.getValue(UserRTDB::class.java)
 
                     val idList = arrayListOf<String>()
 
-                    user?.conversationIdList?.forEach { (id, _) -> idList.add(id) }
+                    user?.conversationIdList?.forEach { id -> idList.add(id) }
 
-                    if (idList.isEmpty()){
+                    if (idList.isEmpty()) {
                         mListener.onEmptyConversation()
-                        return
                     }
 
                     pref?.saveObjectsList(
@@ -64,7 +62,7 @@ class ChatHistoryHelper(
                     )
 
                     // TODO: Check Again, kemungkinan boros memory / tidak optimal
-                    user?.conversationIdList?.forEach { (conversationId, value) ->
+                    user?.conversationIdList?.forEach { conversationId ->
                         val refWithQuery = conversationsRef?.orderByChild("conversationId")
                             ?.equalTo(conversationId)
 
@@ -75,10 +73,10 @@ class ChatHistoryHelper(
 
                                 for (snapshot in conversationSnapshot.children) {
                                     val conversation = snapshot.getValue(Conversation::class.java)
-                                    val firstUserId = conversation?.participants?.first().toString()
+                                    val firstUserId = conversation?.participants?.keys?.first().toString()
                                     val secondUserId =
-                                        conversation?.participants?.last().toString()
-
+                                        conversation?.participants?.keys?.last().toString()
+                        // todo
                                     val interlocutorId =
                                         if (firstUserId == userId) secondUserId else firstUserId
 
@@ -92,7 +90,8 @@ class ChatHistoryHelper(
                                                 conversation?.interlocutor = interlocutorUser
                                                 // Add the conversation object to the conversations list
                                                 if (conversation != null) {
-                                                    val oldConversation = conversations.find { it.conversationId == conversation.conversationId }
+                                                    val oldConversation =
+                                                        conversations.find { it.conversationId == conversation.conversationId }
                                                     conversations.remove(oldConversation)
                                                     conversations.add(conversation)
 
@@ -110,11 +109,6 @@ class ChatHistoryHelper(
                         })
                     }
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("ChatHistoryHelper", "onCancelled : ${error.message}")
-                }
-            })
         }
     }
 }

@@ -47,12 +47,12 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         LocalSharedPref.instance()
     }
 
-    private val conversationAdapter: ConversationAdapter by lazy {
-        ConversationAdapter()
-    }
-
     private val loggedUser: UserAccount? by lazy {
         pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
+    }
+
+    private val conversationAdapter: ConversationAdapter by lazy {
+        ConversationAdapter()
     }
 
 
@@ -145,6 +145,8 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                         if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
                     setupPresenter(conversationId, conversationType)
                     getInterlocutorData(interlocutorId)
+                    val participants = listOf<String>(loggedUser?.userId!!, args.interlocutorId)
+                    conversationAdapter.setParticipantIdList(participants)
                 }
             }
             ConversationType.GROUP.toString() -> {
@@ -251,7 +253,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     override fun onReceiveGroupData(conversation: Conversation) {
         this.conversation = conversation
         binding.apply {
-            conversationAdapter.setParticipantIdList(conversation.participants)
+            conversationAdapter.setParticipantIdList(conversation.participants.keys.toList())
             tvAppBarTitle.text = conversation.conversationName
             tvAppBarDescription.text = getString(R.string.txt_tap_to_see_group_info)
             if (conversation.conversationAvatar == null || conversation.conversationAvatar == "") {
@@ -291,7 +293,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         }
     }
 
-    override fun updateReceiverOnlineStatus(status: UserRTDB) {
+    override fun updateReceiverOnlineStatus(status: UserAccount) {
         binding.apply {
             if (status.online) {
                 tvAppBarDescription.text = getString(R.string.txt_online)
@@ -430,9 +432,16 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
             layoutInterlocutorProfile.setOnClickListener {
                 when (args.conversationType) {
                     ConversationType.GROUP.toString() -> {
-                        if (conversation != null){
+                        val conversationId = conversation?.conversationId
+                        val participantsId = conversation?.participants?.keys?.toTypedArray()
+                        val creatorId = conversation?.createdBy
+                        if (conversationId != null && participantsId != null && creatorId != null) {
                             val action =
-                                ConversationFragmentDirections.actionOpenGroupProfile(conversation!!)
+                                ConversationFragmentDirections.actionOpenGroupProfile(
+                                    conversationId,
+                                    creatorId,
+                                    participantsId
+                                )
                             Navigation.findNavController(binding.root).navigate(action)
                         }
                     }

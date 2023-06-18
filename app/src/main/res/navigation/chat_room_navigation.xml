@@ -76,8 +76,14 @@
         android:label="fragment_group_profile"
         tools:layout="@layout/fragment_group_profile" >
         <argument
-            android:name="conversation"
-            app:argType="com.mikirinkode.firebasechatapp.data.model.Conversation" />
+            android:name="conversationId"
+            app:argType="string" />
+        <argument
+            android:name="creatorId"
+            app:argType="string" />
+        <argument
+            android:name="participantsId"
+            app:argType="string[]"/>
     </fragment>
 
 </navigation>

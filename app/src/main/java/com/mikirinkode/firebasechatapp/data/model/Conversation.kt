@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class Conversation(
     var conversationId: String? = "",
-    var participants: List<String> = listOf(),
+    var participants: Map<String, Boolean> = mapOf(),
     var lastMessage: ChatMessage? = null,
     var conversationType: String? = "",
     var conversationAvatar: String? = "",

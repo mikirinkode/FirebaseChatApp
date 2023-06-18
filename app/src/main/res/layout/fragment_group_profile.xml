@@ -37,71 +37,118 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <View
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layoutGroupProfile"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/bg_user_profile"
                 android:backgroundTint="?attr/background"
-                app:layout_constraintBottom_toBottomOf="@id/cardInfo"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
 
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardAvatar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                app:cardCornerRadius="@dimen/corner_radius"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:strokeWidth="0dp">
-
-                <ImageView
-                    android:id="@+id/ivAvatar"
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    tools:src="@drawable/ic_default_user_avatar" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cardInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp"
-                android:padding="24dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardAvatar">
-
-                <TextView
-                    android:id="@+id/tvGroupName"
-                    android:layout_width="0dp"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardAvatar"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
+                    android:layout_marginTop="32dp"
+                    app:cardCornerRadius="@dimen/corner_radius"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="Firstname Lastname" />
+                    app:strokeWidth="0dp">
 
+                    <ImageView
+                        android:id="@+id/ivAvatar"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        tools:src="@drawable/ic_default_user_avatar" />
+                </com.google.android.material.card.MaterialCardView>
 
-                <Button
-                    android:id="@+id/btnAddParticipant"
-                    style="@style/Widget.Material3.Button.IconButton"
-                    android:layout_width="wrap_content"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/cardInfo"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/txt_add_participant"
-                    app:icon="@drawable/ic_add_participant"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="24dp"
+                    android:padding="24dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvGroupName" />
+                    app:layout_constraintTop_toBottomOf="@id/cardAvatar">
+
+                    <TextView
+                        android:id="@+id/tvGroupName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Firstname Lastname" />
+
+
+                    <Button
+                        android:id="@+id/btnAddParticipant"
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/txt_add_participant"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        app:icon="@drawable/ic_add_participant"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvGroupName" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layoutGroupDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layoutGroupProfile"
+                android:background="@drawable/bg_rounded_card"
+                android:backgroundTint="?attr/background"
+                android:layout_marginTop="24dp"
+                android:padding="24dp"
+                app:layout_constraintEnd_toEndOf="parent">
+
+
+                <TextView
+                    android:id="@+id/tvDescriptionLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:textSize="18sp"
+                    android:text="@string/txt_description_label"/>
+
+                <TextView
+                    android:id="@+id/tvCreatedBy"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    app:layout_constraintStart_toStartOf="@id/tvDescriptionLabel"
+                    app:layout_constraintTop_toBottomOf="@id/tvDescriptionLabel"
+                    tools:text="Created by You" />
+
+
+                <TextView
+                    android:id="@+id/tvCreatedAt"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:layout_marginStart="8dp"
+                    app:layout_constraintStart_toEndOf="@id/tvCreatedBy"
+                    app:layout_constraintTop_toTopOf="@id/tvCreatedBy"
+                    tools:text="at 12 Juni 2023" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -112,7 +159,7 @@
                 android:background="@drawable/bg_rounded_card"
                 android:layout_marginTop="24dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardInfo">
+                app:layout_constraintTop_toBottomOf="@id/layoutGroupDesc">
                 <TextView
                     android:id="@+id/tvParticipant"
                     android:layout_width="wrap_content"

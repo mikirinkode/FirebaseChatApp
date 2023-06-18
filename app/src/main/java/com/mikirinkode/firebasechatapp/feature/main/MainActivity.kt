@@ -48,32 +48,31 @@ class MainActivity : AppCompatActivity(), MainView {
         initView()
         onActionClick()
 
-        runService()
+//        runService()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         presenter.detachView()
     }
-
     override fun onResume() {
         super.onResume()
-//        if (presenter != null) {
-//            presenter.updateUserOnlineStatus()
-//            presenter.getMessageHistory()
-//        } else {
-//            setupPresenter()
-//        }
-    }
-
-    private fun runService() {
-        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
-        if (Build.VERSION.SDK_INT >= 26) {
-            startForegroundService(serviceIntent)
+        if (presenter != null) {
+            presenter.updateUserOnlineStatus()
+            presenter.getMessageHistory()
         } else {
-            startService(serviceIntent)
+            setupPresenter()
         }
     }
+
+//    private fun runService() { // TODO
+//        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
+//        if (Build.VERSION.SDK_INT >= 26) {
+//            startForegroundService(serviceIntent)
+//        } else {
+//            startService(serviceIntent)
+//        }
+//    }
 
     private fun initView() {
         binding.apply {

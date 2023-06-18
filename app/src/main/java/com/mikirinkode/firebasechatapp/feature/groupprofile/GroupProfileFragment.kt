@@ -11,7 +11,11 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
+import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 import com.mikirinkode.firebasechatapp.constants.ConversationType
+import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
+import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
+import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.FragmentGroupProfileBinding
 import com.mikirinkode.firebasechatapp.feature.group.CreateNewChatActivity
@@ -31,6 +35,14 @@ class GroupProfileFragment : Fragment(), GroupProfileView {
         UserListAdapter()
     }
 
+    private val pref: LocalSharedPref? by lazy {
+        LocalSharedPref.instance()
+    }
+
+    private val loggedUser: UserAccount? by lazy {
+        pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,6 +58,16 @@ class GroupProfileFragment : Fragment(), GroupProfileView {
         _binding = null
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (presenter == null){
+            initPresenter()
+        } else {
+            presenter.getGroupData(args.conversationId)
+            presenter.getParticipantList(args.participantsId.toList())
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -59,10 +81,26 @@ class GroupProfileFragment : Fragment(), GroupProfileView {
             rvUser.layoutManager = LinearLayoutManager(requireContext())
             rvUser.adapter = userAdapter
 
+        }
+    }
 
-            val conversation = args.conversation
+    private fun initPresenter() {
+        presenter = GroupProfilePresenter()
+        presenter.attachView(this)
+        presenter.getGroupData(args.conversationId)
+        presenter.getParticipantList(args.participantsId.toList())
+    }
+
+    override fun onReceiveGroupData(conversation: Conversation) {
+        binding.apply {
+            if (conversation.createdBy == loggedUser?.userId){
+                btnAddParticipant.visibility = View.VISIBLE
+            } else {
+                btnAddParticipant.visibility = View.GONE
+            }
             tvGroupName.text = conversation.conversationName
             tvParticipant.text = "Participants (${conversation.participants.size})"
+            tvCreatedAt.text = "at ${DateHelper.getRegularFormattedDateTimeFromTimestamp(conversation.createdAt ?: 0)}"
 
             if (!conversation.conversationAvatar.isNullOrBlank()) {
                 Glide.with(requireContext())
@@ -74,10 +112,19 @@ class GroupProfileFragment : Fragment(), GroupProfileView {
         }
     }
 
-    private fun initPresenter() {
-        presenter = GroupProfilePresenter()
-        presenter.attachView(this)
-        presenter.getAllParticipantsDate(args.conversation.participants)
+    override fun onParticipantsDataReceived(participants: List<UserAccount>) {
+        userAdapter.setData(participants)
+
+        val creatorId = args.creatorId
+        val creator = participants.firstOrNull { user -> user.userId == creatorId }
+
+        binding.apply {
+            if (loggedUser?.userId == creatorId) {
+                tvCreatedBy.text = "Created by You,"
+            } else {
+                tvCreatedBy.text = "Created by ${creator?.name}"
+            }
+        }
     }
 
     private fun onActionClick() {
@@ -94,17 +141,13 @@ class GroupProfileFragment : Fragment(), GroupProfileView {
                             ConversationType.GROUP.toString()
                         ).putExtra(
                             CreateNewChatActivity.EXTRA_INTENT_CONVERSATION_ID,
-                            args.conversation.conversationId
+                            args.conversationId
                         ).putStringArrayListExtra(
                             CreateNewChatActivity.EXTRA_INTENT_PARTICIPANTS_ID,
-                            ArrayList<String>(args.conversation.participants)
+                            ArrayList<String>(args.participantsId.toList())
                         )
                 )
             }
         }
-    }
-
-    override fun onParticipantsDataReceived(participants: List<UserAccount>) {
-        userAdapter.setData(participants)
     }
 }

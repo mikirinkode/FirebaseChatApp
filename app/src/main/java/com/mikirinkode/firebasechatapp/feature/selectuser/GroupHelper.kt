@@ -1,6 +1,7 @@
 package com.mikirinkode.firebasechatapp.feature.selectuser
 
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,18 +12,22 @@ class GroupHelper(
     private val mListener: GroupParticipantListener
 ) {
 
+    private val fireStore = FirebaseProvider.instance().getFirestore()
     private val database = FirebaseProvider.instance().getDatabase()
-    private val usersRef = database?.getReference("users")
+
 
     fun addParticipantsToGroup(conversationId: String, participantsId: List<String>) {
+        var conversationRef = database?.getReference("conversations")?.child(conversationId)
 
-        Log.e("GroupHelper", "addParticipantsToGroup")
-        Log.e("GroupHelper", "addParticipantsToGroup: ${conversationId}")
-        Log.e("GroupHelper", "addParticipantsToGroup: ${participantsId}")
         CoroutineScope(Dispatchers.Main).launch {
             for (userId in participantsId){
-                usersRef?.child(userId)?.child("conversationIdList")?.child(conversationId)
-                    ?.setValue(mapOf(conversationId to true))?.await()
+
+                // update on user collection
+                val userRef = fireStore?.collection("users")?.document(userId)
+                userRef?.update("conversationIdList", FieldValue.arrayUnion(conversationId))
+
+                // update on conversation collection // TODO
+                conversationRef?.child("participants")?.child(userId)?.setValue(true)
             }
         }
         mListener.onSuccessAddParticipantsToGroup()

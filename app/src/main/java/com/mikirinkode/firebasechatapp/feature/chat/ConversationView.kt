@@ -10,7 +10,7 @@ import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 interface ConversationView: BaseView {
     fun onMessagesReceived(messages: List<ChatMessage>)
 
-    fun updateReceiverOnlineStatus(status: UserRTDB)
+    fun updateReceiverOnlineStatus(status: UserAccount)
 
     fun onImageCaptured(capturedImage: Uri?)
 

@@ -3,6 +3,7 @@ package com.mikirinkode.firebasechatapp.firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.SetOptions
 import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 
 /**
@@ -13,22 +14,26 @@ class CommonFirebaseTaskHelper {
     private val auth = FirebaseProvider.instance().getFirebaseAuth()
     private val database = FirebaseProvider.instance().getDatabase()
     private val messaging = FirebaseProvider.instance().getMessaging()
-    private val usersRef = database?.getReference("users")
+    private val fireStore = FirebaseProvider.instance().getFirestore()
 
     fun updateTypingStatus(isTyping: Boolean, currentReceiver: String){
         val userId = auth?.currentUser?.uid
+
+        val userRef = userId?.let { fireStore?.collection("users")?.document(it) }
         val newUpdate = hashMapOf<String, Any>(
             "typing" to isTyping,
             "currentlyTypingFor" to currentReceiver
         )
 
         if (userId != null) {
-            usersRef?.child(userId)?.updateChildren(newUpdate)
+            userRef?.set(newUpdate, SetOptions.merge())
         }
     }
 
     fun updateOnlineStatus() {
         val userId = auth?.currentUser?.uid
+        val userRef = userId?.let { fireStore?.collection("users")?.document(it) }
+
         val ref = database?.getReference(".info/connected")
         ref?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -43,7 +48,7 @@ class CommonFirebaseTaskHelper {
                             "online" to true,
                             "lastOnlineTimestamp" to timestamp
                         )
-                        usersRef?.child(userId)?.updateChildren(newUpdate)
+                        userRef?.set(newUpdate, SetOptions.merge())
                     } else {
 
                         val timestamp = System.currentTimeMillis()
@@ -52,7 +57,7 @@ class CommonFirebaseTaskHelper {
                             "online" to false,
                             "lastOnlineTimestamp" to timestamp
                         )
-                        usersRef?.child(userId)?.onDisconnect()?.updateChildren(newUpdate)
+                        userRef?.set(newUpdate, SetOptions.merge())
                     }
                 }
             }
@@ -66,7 +71,7 @@ class CommonFirebaseTaskHelper {
 
     fun observeToken(){
         val currentUserId = auth?.currentUser?.uid
-        val userRef = database?.getReference("users")
+        val userRef = currentUserId?.let { fireStore?.collection("users")?.document(it) }
 
         messaging?.token?.addOnCompleteListener { task ->
             if (task.isSuccessful){
@@ -75,8 +80,12 @@ class CommonFirebaseTaskHelper {
                 // Save token to server if use a server
                 if (currentUserId != null){
                     val currentDate = DateHelper.getCurrentDateTime()
-                    userRef?.child(currentUserId)?.child("fcmToken")?.setValue(token)
-                    userRef?.child(currentUserId)?.child("fcmTokenUpdatedAt")?.setValue(currentDate)
+                    val newUpdate = hashMapOf<String, Any>(
+                        "fcmToken" to token,
+                        "fcmTokenUpdatedAt" to currentDate
+                    )
+
+                    userRef?.set(newUpdate, SetOptions.merge())
                 }
             }
         }

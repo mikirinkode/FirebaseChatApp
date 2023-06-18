@@ -30,7 +30,7 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
             Log.e("MainPresenter", "on chat history data change received")
     }
 
-    override fun onEmptyConversation() {
+    override fun onEmptyConversation() { // todo: show empty conversation message
         mView?.hideLoading()
     }
 

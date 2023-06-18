@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.mikirinkode.firebasechatapp.R
@@ -86,16 +87,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun sendRegistrationToServer(token: String) {
-        val database = FirebaseProvider.instance().getDatabase()
-        val userRef = database?.getReference("users")
-
+        val firebaseFirestore = FirebaseProvider.instance().getFirestore()
         val auth = FirebaseProvider.instance().getFirebaseAuth()
         val currentUserId = auth?.currentUser?.uid
+        val userRef = currentUserId?.let { firebaseFirestore?.collection("users")?.document(it) }
 
         if (currentUserId != null) {
             val currentDate = DateHelper.getCurrentDateTime()
-            userRef?.child(currentUserId)?.child("fcmToken")?.setValue(token)
-            userRef?.child(currentUserId)?.child("fcmTokenUpdatedAt")?.setValue(currentDate) // TODO
+            val updates = hashMapOf<String, Any>(
+                "fcmToken" to token,
+                "fcmTokenUpdatedAt" to currentDate
+            )
+            userRef?.set(updates, SetOptions.merge())
         }
     }
 }

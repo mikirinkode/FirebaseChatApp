@@ -2,6 +2,7 @@ package com.mikirinkode.firebasechatapp.feature.group
 
 import android.net.Uri
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.StorageReference
 import com.mikirinkode.firebasechatapp.constants.ConversationType
 import com.mikirinkode.firebasechatapp.constants.MessageType
@@ -17,7 +18,7 @@ class CreateChatHelper(
     private val storage = FirebaseProvider.instance().getStorage()
     private val database = FirebaseProvider.instance().getDatabase()
     private val conversationsRef = database?.getReference("conversations")
-    private val usersRef = database?.getReference("users")
+    private val fireStore = FirebaseProvider.instance().getFirestore()
 
     fun createGroupChat(
         groupName: String,
@@ -34,11 +35,14 @@ class CreateChatHelper(
         if (conversationId != null) {
             // add conversationId to all participants
             val unreadMessageCountMap = mutableMapOf<String, Int>()
+            val groupParticipant = mutableMapOf<String, Boolean>()
+
             for (userId in participants) {
                 unreadMessageCountMap[userId] = 0
-                Log.e("GCH", "userId: ${userId}")
-                usersRef?.child(userId)?.child("conversationIdList")?.child(conversationId) // TODO
-                    ?.setValue(mapOf(conversationId to true))
+                groupParticipant[userId] = true
+                val userRef = fireStore?.collection("users")?.document(userId)
+
+                userRef?.update("conversationIdList", FieldValue.arrayUnion(conversationId))
             }
 
             val timeStamp = System.currentTimeMillis()
@@ -55,7 +59,7 @@ class CreateChatHelper(
 
             val conversation = Conversation(
                 conversationId = conversationId,
-                participants = participants,
+                participants = groupParticipant,
                 lastMessage = initialMessage,
                 conversationType = ConversationType.GROUP.toString(),
                 conversationAvatar = "",

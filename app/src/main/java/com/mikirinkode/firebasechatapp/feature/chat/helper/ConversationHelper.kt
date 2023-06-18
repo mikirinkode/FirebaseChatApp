@@ -3,6 +3,7 @@ package com.mikirinkode.firebasechatapp.feature.chat.helper
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.database.*
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.StorageReference
 import com.mikirinkode.firebasechatapp.constants.ConversationType
 import com.mikirinkode.firebasechatapp.constants.MessageType
@@ -19,12 +20,14 @@ class ChatHelper(
     private val conversationId: String,
     private val conversationType: String,
 ) {
+    private val fireStore = FirebaseProvider.instance().getFirestore()
     private val database = FirebaseProvider.instance().getDatabase()
     private val storage = FirebaseProvider.instance().getStorage()
 
     private val conversationsRef = database?.getReference("conversations")
     private val messagesRef = database?.getReference("messages")
-    private val usersRef = database?.getReference("users")
+
+    //    private val usersRef = database?.getReference("users")
     private val pref = LocalSharedPref.instance()
     private val loggedUser = pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
     private val participantIdList = ArrayList<String>()
@@ -80,20 +83,45 @@ class ChatHelper(
     }
 
     fun createPersonaChatRoom(userId: String, anotherUserId: String) {
-        val timeStamp = System.currentTimeMillis()
-        usersRef?.child(userId)?.child("conversationIdList")?.child(conversationId)
-            ?.setValue(mapOf(conversationId to true))
-        usersRef?.child(anotherUserId)?.child("conversationIdList")?.child(conversationId)
-            ?.setValue(mapOf(conversationId to true))
 
-        // TODO
+        // add conversation id to user firestore collection
+        val userRef = fireStore?.collection("users")?.document(userId)
+        userRef?.update("conversationIdList", FieldValue.arrayUnion(conversationId))
+        val anotherUserRef = fireStore?.collection("users")?.document(anotherUserId)
+        anotherUserRef?.update("conversationIdList", FieldValue.arrayUnion(conversationId))
+
+
+        // create conversation object on realtime database
+        val timeStamp = System.currentTimeMillis()
+        val participants = mapOf(
+            userId to true,
+            anotherUserId to true
+        )
         val initialConversation = mapOf(
             "conversationId" to conversationId,
-            "participants" to listOf(userId, anotherUserId),
+            "participants" to participants,
             "conversationType" to "PERSONAL",
             "createdAt" to timeStamp
         )
         conversationsRef?.child(conversationId)?.updateChildren(initialConversation)
+
+        val currentUser = pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
+        val newConversationList = ArrayList<String>()
+        currentUser?.conversationIdList?.let { newConversationList.addAll(it) }
+        newConversationList.add(conversationId)
+        val newUserData = UserAccount(
+            userId = currentUser?.userId,
+            email = currentUser?.email,
+            name = currentUser?.name,
+            avatarUrl = currentUser?.avatarUrl,
+            createdAt = currentUser?.createdAt,
+            lastLoginAt = currentUser?.lastLoginAt,
+            updatedAt = currentUser?.updatedAt,
+            conversationIdList = newConversationList
+        )
+
+        pref?.saveObject(PreferenceConstant.USER, newUserData)
+
     }
 
     fun sendMessage(
@@ -204,7 +232,9 @@ class ChatHelper(
                 val conversation = conversationSnapshot.getValue(Conversation::class.java)
                 if (conversation != null) {
                     participantIdList.clear()
-                    participantIdList.addAll(conversation.participants)
+                    conversation.participants.forEach { (key, _) ->
+                        participantIdList.add(key)
+                    }
                     mListener.onReceiveGroupData(conversation)
                 }
             }
@@ -220,7 +250,6 @@ class ChatHelper(
             messagesRef?.child(conversationId)?.removeEventListener(receiveListener)
         }
     }
-
 
 
     private fun updateMessageReadTime(timeStamp: Long, userId: String, messageId: String) {
@@ -244,18 +273,20 @@ class ChatHelper(
     }
 
     private fun updateTotalUnreadMessages() {
-        if (participantIdList.isEmpty()){
-            conversationsRef?.child(conversationId)?.child("participants")?.get()?.addOnSuccessListener {participants ->
-                participants.children.forEach { id ->
-                    val userId = id.getValue(String::class.java)
-                    if (userId != loggedUser?.userId) {
-                        if (userId != null) {
-                            conversationsRef.child(conversationId).child("unreadMessageEachParticipant")
-                                .child(userId).setValue(ServerValue.increment(1))
+        if (participantIdList.isEmpty()) {
+            conversationsRef?.child(conversationId)?.child("participants")?.get()
+                ?.addOnSuccessListener { participants ->
+                    participants.children.forEach { participant ->
+                        val userId = participant.key
+                        if (userId != loggedUser?.userId) {
+                            if (userId != null) {
+                                conversationsRef.child(conversationId)
+                                    .child("unreadMessageEachParticipant")
+                                    .child(userId).setValue(ServerValue.increment(1))
+                            }
                         }
                     }
                 }
-            }
         }
         participantIdList.forEach { userId ->
             if (userId != loggedUser?.userId) {
@@ -263,36 +294,6 @@ class ChatHelper(
                     ?.child(userId)?.setValue(ServerValue.increment(1))
             }
         }
-//        conversationsRef?.child(conversationId)?.child("unreadMessages")
-//            ?.runTransaction(object : Transaction.Handler {
-//                override fun doTransaction(currentData: MutableData): Transaction.Result {
-//                    Log.e("ChatHelper", "on doTransaction")
-//                    val currentValue = currentData.getValue(Int::class.java)
-//                    return if (currentValue != null) {
-//                        currentData.value = currentValue + 1
-//                        Transaction.success(currentData)
-//                    } else {
-//                        currentData.value = 1
-//                        Transaction.success(currentData)
-//                    }
-//                }
-//
-//                override fun onComplete(
-//                    error: DatabaseError?,
-//                    committed: Boolean,
-//                    currentData: DataSnapshot?
-//                ) {
-//                    if (error != null) {
-//                        // Handle the error
-//                        Log.e("ChatHelper", "Error incrementing data: ${error.message}")
-//                    } else if (committed) {
-//                        // Data incremented successfully
-//                        Log.e("ChatHelper", "Successfully increment")
-//                    } else {
-//                        // Transaction was not committed, handle the case if needed
-//                    }
-//                }
-//            })
     }
 }
 

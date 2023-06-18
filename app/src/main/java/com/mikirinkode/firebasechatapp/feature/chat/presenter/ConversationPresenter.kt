@@ -25,29 +25,6 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
     private var firebaseUserHelper: FirebaseUserHelper? = null
     private var userOnlineStatusHelper: FirebaseUserOnlineStatusHelper? = null
 
-    // TODO
-//    fun onInit(mActivity: Activity, conversationId: String?){
-//        chatHelper = ChatHelper(this, conversationId)
-//        cameraHelper = CameraHelper(mActivity, this)
-//        firebaseUserHelper = FirebaseUserHelper(this)
-//    }
-
-    /**
-     * MESSAGING
-     */
-//    fun sendMessage(
-//        message: String,
-//        senderId: String,
-//        receiverId: String,
-//        senderName: String,
-//        isFirstTime: Boolean
-//    ) {
-//        if (isFirstTime) {
-//            chatHelper?.createPersonaChatRoom(senderId, receiverId)
-//        }
-//        chatHelper?.sendMessage(message, senderId, senderName)
-//    }
-
     fun createPersonaChatRoom(userId: String, anotherUserId: String) {
         chatHelper?.createPersonaChatRoom(userId, anotherUserId)
     }
@@ -60,16 +37,6 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         chatHelper?.sendMessage(message, senderId, senderName)
     }
 
-    //    fun sendMessage(
-//        message: String,
-//        senderId: String,
-//        receiverId: String,
-//        senderName: String,
-//        receiverName: String,
-//        isFirstTime: Boolean
-//    ) {
-//        chatHelper?.sendMessage(message, senderId, receiverId, senderName, receiverName, isFirstTime)
-//    }
     fun sendMessage(
         message: String,
         senderId: String,
@@ -85,7 +52,6 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
             path
         )
     }
-
 
     fun receiveMessage() {
         chatHelper?.receiveMessages()
@@ -128,7 +94,7 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         userOnlineStatusHelper?.getUserOnlineStatus(userId)
     }
 
-    override fun onUserOnlineStatusReceived(status: UserRTDB) {
+    override fun onUserOnlineStatusReceived(status: UserAccount) {
         mView?.updateReceiverOnlineStatus(status)
     }
 
