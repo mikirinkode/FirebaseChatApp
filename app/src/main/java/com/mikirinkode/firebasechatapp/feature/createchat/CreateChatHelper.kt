@@ -1,7 +1,6 @@
-package com.mikirinkode.firebasechatapp.feature.group
+package com.mikirinkode.firebasechatapp.feature.createchat
 
 import android.net.Uri
-import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.StorageReference
 import com.mikirinkode.firebasechatapp.constants.ConversationType
@@ -10,7 +9,6 @@ import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
-// TODO: confusing name, because double
 class CreateChatHelper(
     private val mListener: CreateChatListener,
 ) {
@@ -27,10 +25,7 @@ class CreateChatHelper(
         file: Uri?,
         path: String,
     ) {
-        Log.e("GCH", "onCreateGroupChat")
         val conversationId = conversationsRef?.push()?.key
-        Log.e("GCH", "conversationId: ${conversationId}")
-
 
         if (conversationId != null) {
             // add conversationId to all participants
@@ -76,16 +71,14 @@ class CreateChatHelper(
                 sRef?.putFile(file)?.addOnSuccessListener {
                     it.metadata?.reference?.downloadUrl?.addOnSuccessListener { uri ->
 
-                        conversation.conversationAvatar = uri.toString() // TODO check
+                        conversation.conversationAvatar = uri.toString()
                         conversationsRef?.child(conversationId)?.setValue(conversation)
                         mListener.onSuccessCreateGroupChat(conversationId)
-                        Log.e("GCH", "successfully created")
                     }
                 }
             } else {
                 conversationsRef?.child(conversationId)?.setValue(conversation)
                 mListener.onSuccessCreateGroupChat(conversationId)
-                Log.e("GCH", "successfully created")
             }
         }
     }

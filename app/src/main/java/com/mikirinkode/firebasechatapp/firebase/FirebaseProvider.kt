@@ -25,28 +25,6 @@ class FirebaseProvider {
             firebaseFirestore = FirebaseFirestore.getInstance()
             firebaseStorage = FirebaseStorage.getInstance()
             firebaseMessaging = FirebaseMessaging.getInstance()
-            observeToken()
-        }
-    }
-
-    private fun observeToken(){
-        val currentUserId = firebaseAuth?.currentUser?.uid
-        val userRef = currentUserId?.let { firebaseFirestore?.collection("users")?.document(it) }
-
-        firebaseMessaging?.token?.addOnCompleteListener { task ->
-            if (task.isSuccessful){
-                val token = task.result
-
-                // Save token to server if use a server
-                if (currentUserId != null){
-                    val currentDate = DateHelper.getCurrentDateTime()
-                    val updates = hashMapOf<String, Any>(
-                        "fcmToken" to token,
-                        "fcmTokenUpdatedAt" to currentDate
-                    )
-                    userRef?.set(updates, SetOptions.merge())
-                }
-            }
         }
     }
 

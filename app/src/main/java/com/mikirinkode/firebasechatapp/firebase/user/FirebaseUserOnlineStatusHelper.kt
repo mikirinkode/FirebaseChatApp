@@ -1,11 +1,8 @@
-package com.mikirinkode.firebasechatapp.firebase
+package com.mikirinkode.firebasechatapp.firebase.user
 
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.data.model.UserRTDB
+import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
 class FirebaseUserOnlineStatusHelper(
     private val mListener: UserOnlineStatusEventListener

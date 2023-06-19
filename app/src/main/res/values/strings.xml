@@ -52,5 +52,6 @@
     <string name="txt_add_participant">Add Participant</string>
     <string name="txt_select_user_title">Select user</string>
     <string name="txt_description_label">Description</string>
+    <string name="txt_read_by">Read By</string>
 
 </resources>

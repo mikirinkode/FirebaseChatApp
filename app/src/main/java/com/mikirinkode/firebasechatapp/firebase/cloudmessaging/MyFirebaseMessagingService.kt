@@ -16,6 +16,9 @@ import com.mikirinkode.firebasechatapp.feature.chat.ConversationActivity
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 
+/**
+ * TODO: UNUSED
+ */
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     companion object {
@@ -24,10 +27,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         private const val notificationId = 123
     }
 
-
-    // TODO: update
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        val conversationId = remoteMessage.data["conversationId"] // TODO
+        val conversationId = remoteMessage.data["conversationId"]
         val senderId = remoteMessage.data["senderId"]
 
         val title = remoteMessage.notification?.title ?: ""

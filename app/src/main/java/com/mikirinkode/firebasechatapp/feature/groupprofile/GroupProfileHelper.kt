@@ -40,7 +40,7 @@ class GroupProfileHelper(
     fun getGroupData(conversationId: String) {
         val refWithQuery = conversationsRef?.child(conversationId)
 
-        refWithQuery?.addValueEventListener(object : ValueEventListener {
+        refWithQuery?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(conversationSnapshot: DataSnapshot) {
                 val conversation = conversationSnapshot.getValue(Conversation::class.java)
                 if (conversation != null) {

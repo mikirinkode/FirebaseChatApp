@@ -7,8 +7,10 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
 
+/**
+ * Class to handle Permissions
+ */
 object PermissionManager {
-
     const val CAMERA_REQUEST_PERMISSION_CODE = 9001
     const val READ_EXTERNAL_REQUEST_PERMISSION_CODE = 9002
     const val NOTIFICATION_REQUEST_PERMISSION_CODE = 9003

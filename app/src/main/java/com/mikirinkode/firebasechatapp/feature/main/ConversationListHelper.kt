@@ -9,7 +9,6 @@ import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
@@ -22,10 +21,7 @@ class ChatHistoryHelper(
     private val pref = LocalSharedPref.instance()
 
     private val conversationsRef = database?.getReference("conversations")
-//    private val usersRef = database?.getReference("users")
 
-    // TODO: is it possible if use fucntion from FirebaseUserHelper?
-    // i think no, cause it is more complicated
     private suspend fun getUserById(userId: String): UserAccount? {
         val querySnapshot = firestore?.collection("users")
             ?.document( userId)
@@ -36,7 +32,6 @@ class ChatHistoryHelper(
     }
 
     fun receiveMessageHistory() {
-        Log.e("ChatHistoryHelper", "receiveMessageHistory called")
         val currentUser = pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
 
         val conversations = mutableListOf<Conversation>()
@@ -46,7 +41,6 @@ class ChatHistoryHelper(
             userRef
                 ?.addSnapshotListener { document, error ->
                     val user: UserAccount? = document?.toObject()
-                    Log.e("ChatHistoryHelper", "onDataChange")
 
                     val idList = arrayListOf<String>()
 
@@ -61,7 +55,6 @@ class ChatHistoryHelper(
                         idList
                     )
 
-                    // TODO: Check Again, kemungkinan boros memory / tidak optimal
                     user?.conversationIdList?.forEach { conversationId ->
                         val refWithQuery = conversationsRef?.orderByChild("conversationId")
                             ?.equalTo(conversationId)
@@ -76,7 +69,6 @@ class ChatHistoryHelper(
                                     val firstUserId = conversation?.participants?.keys?.first().toString()
                                     val secondUserId =
                                         conversation?.participants?.keys?.last().toString()
-                        // todo
                                     val interlocutorId =
                                         if (firstUserId == userId) secondUserId else firstUserId
 
@@ -104,7 +96,6 @@ class ChatHistoryHelper(
                             }
 
                             override fun onCancelled(error: DatabaseError) {
-                                Log.e("ChatHistoryHelper", "onCancelled : ${error.message}")
                             }
                         })
                     }

@@ -1,8 +1,8 @@
-package com.mikirinkode.firebasechatapp.firebase
+package com.mikirinkode.firebasechatapp.firebase.user
 
-import android.util.Log
 import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
+import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
 class FirebaseUserListHelper(
     val mListener: FirebaseUserListListener

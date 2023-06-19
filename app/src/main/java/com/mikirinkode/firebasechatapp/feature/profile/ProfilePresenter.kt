@@ -11,6 +11,14 @@ class ProfilePresenter : BasePresenter<ProfileView>, ProfileEventListener {
         mHelper.getUserById(userId)
     }
 
+    fun logout(){
+        mHelper.logout()
+    }
+
+    override fun onLogoutSuccess() {
+        mView?.onLogoutSuccess()
+    }
+
     override fun onGetProfileSuccess(user: UserAccount) {
         mView?.onGetProfileSuccess(user)
     }

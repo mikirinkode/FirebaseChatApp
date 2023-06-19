@@ -30,6 +30,7 @@
         <argument
             android:name="interlocutorId"
             android:defaultValue=""
+            app:nullable="true"
             app:argType="string"/>
         <argument
             android:name="navigateFrom"
@@ -60,12 +61,18 @@
 
     <fragment
         android:id="@+id/messageInfoFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.chat.fragment.MessageInfoFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.messageinfo.MessageInfoFragment"
         android:label="fragment_message_info"
         tools:layout="@layout/fragment_message_info" >
         <argument
             android:name="loggedUserId"
             app:argType="string" />
+        <argument
+            android:name="conversationType"
+            app:argType="string" />
+        <argument
+            android:name="participantsId"
+            app:argType="string[]"/>
         <argument
             android:name="chatMessage"
             app:argType="com.mikirinkode.firebasechatapp.data.model.ChatMessage" />

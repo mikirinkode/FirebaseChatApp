@@ -45,9 +45,9 @@ class ProfileActivity : AppCompatActivity(), ProfileView {
 
     private fun initView() {}
 
-    private fun handleIntent(){
+    private fun handleIntent() {
         val userId = intent.getStringExtra(EXTRA_INTENT_USER_ID)
-        if (userId != null){
+        if (userId != null) {
             presenter.observeUserProfile(userId)
         }
     }
@@ -55,6 +55,11 @@ class ProfileActivity : AppCompatActivity(), ProfileView {
     private fun setupPresenter() {
         presenter = ProfilePresenter()
         presenter.attachView(this)
+    }
+
+    override fun onLogoutSuccess() {
+        startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
+        finishAffinity()
     }
 
     override fun onGetProfileSuccess(user: UserAccount) {
@@ -79,10 +84,7 @@ class ProfileActivity : AppCompatActivity(), ProfileView {
             }
 
             btnLogout.setOnClickListener {
-                pref?.clearSession()
-                Firebase.auth.signOut()
-                startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
-                finishAffinity()
+                presenter.logout()
             }
         }
     }

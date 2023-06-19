@@ -14,9 +14,11 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
         mCommonHelper.updateOnlineStatus()
     }
 
-    // TODO: show loading
+    fun updateOneSignalToken(){
+        mCommonHelper.updateOneSignalDeviceToken()
+    }
+
     fun getMessageHistory() {
-        Log.e("MainPresenter", "getMessageHistory called")
         chatHistoryHelper.receiveMessageHistory()
         mView?.showLoading()
     }
@@ -27,16 +29,14 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
             val sortedList = conversations.sortedBy { it.lastMessage?.sendTimestamp }.reversed()
             mView?.onConversationListReceived(sortedList)
         }
-            Log.e("MainPresenter", "on chat history data change received")
     }
 
-    override fun onEmptyConversation() { // todo: show empty conversation message
+    override fun onEmptyConversation() {
         mView?.hideLoading()
     }
 
     override fun attachView(view: MainView) {
         mView = view
-        mCommonHelper.observeToken()
     }
 
     override fun detachView() {

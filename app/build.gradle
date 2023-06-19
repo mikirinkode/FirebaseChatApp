@@ -5,6 +5,7 @@ plugins {
 
     id 'kotlin-parcelize'
     id 'androidx.navigation.safeargs'
+    id 'com.google.firebase.crashlytics'
 }
 
 //apply plugin: "androidx.navigation.safeargs.kotlin"
@@ -67,6 +68,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.firebase:firebase-functions-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
 
 
     //----- Google play services auth for login using google account
@@ -86,4 +89,11 @@ dependencies {
 
     //----- coil
     implementation("io.coil-kt:coil:1.1.1")
+
+    //----- analyzing memory leak
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+
+    //----- one signal
+    implementation 'com.onesignal:OneSignal:4.8.5'
+
 }

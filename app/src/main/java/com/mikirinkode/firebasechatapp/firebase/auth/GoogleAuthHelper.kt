@@ -127,14 +127,6 @@ class GoogleAuthHelper(
         return user
     }
 
-    // TODO
-    fun performSignOut() {
-        if (mAuth != null && mActivity != null) {
-            mAuth?.signOut()
-            mGoogleSignInClient?.signOut()?.addOnCompleteListener(mActivity) { }
-        }
-    }
-
     companion object {
         private const val TAG = "GoogleSignInHelper"
         private const val RC_SIGN_IN = 9001

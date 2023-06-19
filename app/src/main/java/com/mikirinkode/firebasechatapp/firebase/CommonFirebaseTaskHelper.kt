@@ -5,6 +5,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.SetOptions
 import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
+import com.onesignal.OneSignal
 
 /**
  * common task that don't need listener
@@ -16,7 +17,30 @@ class CommonFirebaseTaskHelper {
     private val messaging = FirebaseProvider.instance().getMessaging()
     private val fireStore = FirebaseProvider.instance().getFirestore()
 
-    fun updateTypingStatus(isTyping: Boolean, currentReceiver: String){
+    fun updateOneSignalDeviceToken() {
+        // Retrieve the device token
+        val deviceState = OneSignal.getDeviceState()
+        val deviceToken = deviceState?.userId
+
+        // Check if device token is available
+        if (deviceToken != null) {
+            val currentUserId = auth?.currentUser?.uid
+            val userRef = currentUserId?.let { fireStore?.collection("users")?.document(it) }
+
+            // Save token to server if use a server
+            if (currentUserId != null) {
+                val currentDate = DateHelper.getCurrentDateTime()
+                val newUpdate = hashMapOf<String, Any>(
+                    "oneSignalToken" to deviceToken,
+                    "oneSignalTokenUpdatedAt" to currentDate
+                )
+
+                userRef?.set(newUpdate, SetOptions.merge())
+            }
+        }
+    }
+
+    fun updateTypingStatus(isTyping: Boolean, currentReceiver: String) {
         val userId = auth?.currentUser?.uid
 
         val userRef = userId?.let { fireStore?.collection("users")?.document(it) }
@@ -44,7 +68,6 @@ class CommonFirebaseTaskHelper {
                     if (isConnected == true) {
                         val timestamp = System.currentTimeMillis()
                         val newUpdate = hashMapOf<String, Any>(
-                            "userId" to userId, // TODO
                             "online" to true,
                             "lastOnlineTimestamp" to timestamp
                         )
@@ -53,7 +76,6 @@ class CommonFirebaseTaskHelper {
 
                         val timestamp = System.currentTimeMillis()
                         val newUpdate = hashMapOf<String, Any>(
-                            "userId" to userId,
                             "online" to false,
                             "lastOnlineTimestamp" to timestamp
                         )
@@ -67,27 +89,5 @@ class CommonFirebaseTaskHelper {
             }
 
         })
-    }
-
-    fun observeToken(){
-        val currentUserId = auth?.currentUser?.uid
-        val userRef = currentUserId?.let { fireStore?.collection("users")?.document(it) }
-
-        messaging?.token?.addOnCompleteListener { task ->
-            if (task.isSuccessful){
-                val token = task.result
-
-                // Save token to server if use a server
-                if (currentUserId != null){
-                    val currentDate = DateHelper.getCurrentDateTime()
-                    val newUpdate = hashMapOf<String, Any>(
-                        "fcmToken" to token,
-                        "fcmTokenUpdatedAt" to currentDate
-                    )
-
-                    userRef?.set(newUpdate, SetOptions.merge())
-                }
-            }
-        }
     }
 }

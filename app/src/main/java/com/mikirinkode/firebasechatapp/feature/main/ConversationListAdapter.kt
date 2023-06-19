@@ -37,6 +37,7 @@ class ConversationListAdapter : RecyclerView.Adapter<ConversationListAdapter.Vie
                     // the logged user is the sender
                     tvMessage.text = "you: ${latestMessage.message}"
                     updateMessageStatus(latestMessage, conversation.participants.size, tvMessageStatus, itemView.resources)
+                    tvUnreadMessages.visibility = View.GONE
                 } else {
                     tvMessage.text = latestMessage?.message
                     // the interlocutor is the sender and the logged user is the receiver
@@ -50,13 +51,10 @@ class ConversationListAdapter : RecyclerView.Adapter<ConversationListAdapter.Vie
                         tvUnreadMessages.visibility = View.GONE
                     }
                 }
-                Log.e("CHA", "type: ${conversation.conversationType}")
-
 
                 when (conversation.conversationType) {
                     ConversationType.GROUP.toString() -> {
 
-                        Log.e("CHA", "type: ${conversation.conversationAvatar.isNullOrBlank()}")
                         tvUserName.text = conversation.conversationName
                         if (!conversation.conversationAvatar.isNullOrBlank()) {
                             Glide.with(itemView.context)

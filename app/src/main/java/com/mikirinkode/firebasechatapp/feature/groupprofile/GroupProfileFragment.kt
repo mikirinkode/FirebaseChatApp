@@ -2,6 +2,7 @@ package com.mikirinkode.firebasechatapp.feature.groupprofile
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +19,7 @@ import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.FragmentGroupProfileBinding
-import com.mikirinkode.firebasechatapp.feature.group.CreateNewChatActivity
+import com.mikirinkode.firebasechatapp.feature.createchat.CreateNewChatActivity
 import com.mikirinkode.firebasechatapp.feature.userlist.UserListAdapter
 
 
@@ -53,8 +54,8 @@ class GroupProfileFragment : Fragment(), GroupProfileView {
         return binding.root
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
 

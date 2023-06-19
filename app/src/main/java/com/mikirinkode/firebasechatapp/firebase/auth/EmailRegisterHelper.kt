@@ -38,7 +38,7 @@ class EmailRegisterHelper(
                         val documentRef =
                             fireStore?.collection("users")?.document(loggedUser?.uid ?: "")
                         val date = DateHelper.getCurrentDateTime()
-                        val user = hashMapOf( // TODO
+                        val user = hashMapOf(
                             "userId" to loggedUser?.uid,
                             "email" to loggedUser?.email,
                             "name" to name,

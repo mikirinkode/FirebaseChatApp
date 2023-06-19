@@ -5,4 +5,5 @@ import com.mikirinkode.firebasechatapp.data.model.UserAccount
 
 interface ProfileView: BaseView {
     fun onGetProfileSuccess(user: UserAccount)
+    fun onLogoutSuccess()
 }

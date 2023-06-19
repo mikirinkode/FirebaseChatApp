@@ -28,7 +28,7 @@
 
     <fragment
         android:id="@+id/createGroupChatFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.group.SetupProfileGroupChatFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.createchat.SetupProfileGroupChatFragment"
         android:label="fragment_create_group_chat"
         tools:layout="@layout/fragment_setup_group_chat" >
         <argument

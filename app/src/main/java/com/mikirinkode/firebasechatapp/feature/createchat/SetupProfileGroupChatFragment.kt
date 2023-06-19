@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.group
+package com.mikirinkode.firebasechatapp.feature.createchat
 
 import android.content.Intent
 import android.net.Uri

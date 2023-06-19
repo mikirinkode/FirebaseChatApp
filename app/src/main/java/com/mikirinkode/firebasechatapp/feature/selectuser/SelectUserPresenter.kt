@@ -3,13 +3,14 @@ package com.mikirinkode.firebasechatapp.feature.selectuser
 import android.util.Log
 import com.mikirinkode.firebasechatapp.base.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListHelper
-import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListListener
+import com.mikirinkode.firebasechatapp.firebase.user.FirebaseUserListHelper
+import com.mikirinkode.firebasechatapp.firebase.user.FirebaseUserListListener
 
-class SelectUserPresenter: BasePresenter<SelectUserView>, GroupParticipantListener, FirebaseUserListListener {
+class SelectUserPresenter: BasePresenter<SelectUserView>, AddParticipantListener,
+    FirebaseUserListListener {
     private var mView: SelectUserView? = null
     private val mHelper: FirebaseUserListHelper = FirebaseUserListHelper(this)
-    private val mGroupHelper: GroupHelper = GroupHelper(this)
+    private val mAddParticipantHelper: AddParticipantHelper = AddParticipantHelper(this)
 
     fun getUserList(){
         mView?.showLoading()
@@ -32,7 +33,7 @@ class SelectUserPresenter: BasePresenter<SelectUserView>, GroupParticipantListen
     }
 
     fun addParticipantsToGroup(conversationId: String, participantsId: List<String>) {
-        mGroupHelper.addParticipantsToGroup(conversationId, participantsId)
+        mAddParticipantHelper.addParticipantsToGroup(conversationId, participantsId)
     }
 
     override fun onSuccessAddParticipantsToGroup() {

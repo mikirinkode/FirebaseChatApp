@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.firebase
+package com.mikirinkode.firebasechatapp.firebase.user
 
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 

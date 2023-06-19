@@ -6,35 +6,38 @@ import com.mikirinkode.firebasechatapp.base.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.data.model.UserRTDB
-import com.mikirinkode.firebasechatapp.firebase.FirebaseUserHelper
-import com.mikirinkode.firebasechatapp.firebase.FirebaseUserListener
-import com.mikirinkode.firebasechatapp.firebase.FirebaseUserOnlineStatusHelper
-import com.mikirinkode.firebasechatapp.firebase.UserOnlineStatusEventListener
+import com.mikirinkode.firebasechatapp.firebase.user.FirebaseUserHelper
+import com.mikirinkode.firebasechatapp.firebase.user.FirebaseUserOnlineStatusHelper
+import com.mikirinkode.firebasechatapp.firebase.user.UserOnlineStatusEventListener
 import com.mikirinkode.firebasechatapp.commonhelper.CameraHelper
 import com.mikirinkode.firebasechatapp.commonhelper.CameraListener
 import com.mikirinkode.firebasechatapp.feature.chat.helper.ChatEventListener
-import com.mikirinkode.firebasechatapp.feature.chat.helper.ChatHelper
+import com.mikirinkode.firebasechatapp.feature.chat.helper.ConversationHelper
 import com.mikirinkode.firebasechatapp.feature.chat.ConversationView
 
 class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener,
-    UserOnlineStatusEventListener, CameraListener, FirebaseUserListener {
+    UserOnlineStatusEventListener, CameraListener {
     private var mView: ConversationView? = null
-    private var chatHelper: ChatHelper? = null
+    private var conversationHelper: ConversationHelper? = null
     private var cameraHelper: CameraHelper? = null
     private var firebaseUserHelper: FirebaseUserHelper? = null
     private var userOnlineStatusHelper: FirebaseUserOnlineStatusHelper? = null
 
+    fun resetTotalUnreadMessage(){
+        conversationHelper?.resetTotalUnreadMessage()
+    }
+
     fun createPersonaChatRoom(userId: String, anotherUserId: String) {
-        chatHelper?.createPersonaChatRoom(userId, anotherUserId)
+        conversationHelper?.createPersonaChatRoom(userId, anotherUserId)
     }
 
     fun sendMessage(
         message: String,
         senderId: String,
         senderName: String,
+        receiverDeviceTokenList: List<String>
     ) {
-        chatHelper?.sendMessage(message, senderId, senderName)
+        conversationHelper?.sendMessage(message, senderId, senderName, receiverDeviceTokenList)
     }
 
     fun sendMessage(
@@ -42,22 +45,24 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         senderId: String,
         senderName: String,
         file: Uri,
-        path: String
+        path: String,
+        receiverDeviceTokenList: List<String>
     ) {
-        chatHelper?.sendMessage(
+        conversationHelper?.sendMessage(
             message,
             senderId,
             senderName,
             file,
-            path
+            path,
+            receiverDeviceTokenList
         )
     }
 
     fun receiveMessage() {
-        chatHelper?.receiveMessages()
+        conversationHelper?.receiveMessages()
     }
 
-    override fun onDataChangeReceived(messages: List<ChatMessage>) {
+    override fun onMessageReceived(messages: List<ChatMessage>) {
         mView?.onMessagesReceived(messages)
     }
 
@@ -68,23 +73,12 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
     /**
      * GROUP CHAT DATA
      */
-    fun getGroupData(conversationId: String) {
-        chatHelper?.getGroupData(conversationId)
+    fun getConversationDataById(conversationId: String) {
+        conversationHelper?.getConversationById(conversationId)
     }
 
-    override fun onReceiveGroupData(conversation: Conversation) {
-        mView?.onReceiveGroupData(conversation)
-    }
-
-    /**
-     * USER PROFILE DATA
-     */
-    fun getInterlocutorData(userId: String) {
-        firebaseUserHelper?.getUserById(userId)
-    }
-
-    override fun onGetUserSuccess(user: UserAccount) {
-        mView?.onGetInterlocutorProfileSuccess(user)
+    override fun onConversationDataReceived(conversation: Conversation) {
+        mView?.onConversationDataReceived(conversation)
     }
 
     /**
@@ -109,12 +103,14 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         mView?.onImageCaptured(capturedImage)
     }
 
+    override fun onParticipantsDataReceived(participants: List<UserAccount>) {
+        mView?.onParticipantsDataReceived(participants)
+    }
 
     fun attachView(view: ConversationView, mActivity: Activity, conversationId: String, conversationType: String) {
         attachView(view)
-        chatHelper = ChatHelper(this, conversationId, conversationType)
+        conversationHelper = ConversationHelper(this, conversationId, conversationType)
         cameraHelper = CameraHelper(this, mActivity)
-        firebaseUserHelper = FirebaseUserHelper(this)
         userOnlineStatusHelper = FirebaseUserOnlineStatusHelper(this)
 
     }
@@ -124,8 +120,8 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
     }
 
     override fun detachView() {
-        chatHelper?.deactivateListener()
-        chatHelper = null
+        conversationHelper?.deactivateListener()
+        conversationHelper = null
         cameraHelper = null
         mView = null
     }

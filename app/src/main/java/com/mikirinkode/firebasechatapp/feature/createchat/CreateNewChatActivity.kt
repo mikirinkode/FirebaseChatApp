@@ -1,13 +1,11 @@
-package com.mikirinkode.firebasechatapp.feature.group
+package com.mikirinkode.firebasechatapp.feature.createchat
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.constants.ConversationType
 import com.mikirinkode.firebasechatapp.databinding.ActivityCreateNewChatBinding
-import com.mikirinkode.firebasechatapp.feature.chat.ConversationActivity
 
 
 class CreateNewChatActivity : AppCompatActivity() {
@@ -39,10 +37,6 @@ class CreateNewChatActivity : AppCompatActivity() {
         val conversationId = intent.getStringExtra(EXTRA_INTENT_CONVERSATION_ID)
         val participants = intent.getStringArrayListExtra(EXTRA_INTENT_PARTICIPANTS_ID)
 
-        Log.e("CNCA", "conversationType: ${conversationType}")
-        Log.e("CNCA", "id: ${conversationId}")
-        Log.e("CNCA", "size: ${participants?.size}")
-
         if (conversationType != null) {
             setupNavigation(conversationType, conversationId, participants)
         }
@@ -56,13 +50,10 @@ class CreateNewChatActivity : AppCompatActivity() {
             ConversationType.GROUP.toString() -> {
                 val participantList = if (participants.isNullOrEmpty()) null else participants.toTypedArray()
 
-                Log.e("CNCA", "size: ${participants?.size}")
-
                 graph.setStartDestination(R.id.selectUserFragment)
                 val bundle = Bundle()
                 bundle.putString(BUNDLE_CONVERSATION_ID, conversationId)
                 bundle.putStringArray(BUNDLE_PARTICIPANTS_ID, participantList)
-//                navController.graph = graph
                 navController.setGraph(graph, bundle)
             }
             else -> {

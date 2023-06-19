@@ -56,8 +56,8 @@ class SelectUserFragment : Fragment(), SelectUserView, SelectUserAdapter.UserCli
         onActionClicked()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
 
@@ -96,9 +96,6 @@ class SelectUserFragment : Fragment(), SelectUserView, SelectUserAdapter.UserCli
 
     override fun setDataToRecyclerView(users: List<UserAccount>) {
         val participants = args.participantsId?.toList()
-        Log.e("SelectUserFragment", "args: ${args}")
-        Log.e("SelectUserFragment", "args: ${args.conversationId}")
-        Log.e("SelectUserFragment", "args: ${args.participantsId}")
         if (participants?.isNotEmpty() == true) {
             val filteredList = users.filter { user -> user.userId !in participants }
             userListAdapter.setData(filteredList)
@@ -169,7 +166,6 @@ class SelectUserFragment : Fragment(), SelectUserView, SelectUserAdapter.UserCli
             btnNext.setOnClickListener {
                 val conversationId = args.conversationId
 
-                Log.e("SelectUser", "conversationId: $conversationId")
                 if (conversationId != null) {
                     val participantsId: List<String> = selectedUserList.map { user ->
                         user.userId ?: ""

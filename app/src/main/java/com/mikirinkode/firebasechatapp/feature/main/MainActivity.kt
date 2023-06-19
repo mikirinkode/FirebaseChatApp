@@ -1,23 +1,25 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.mikirinkode.firebasechatapp.constants.Constants
 import com.mikirinkode.firebasechatapp.constants.ConversationType
 import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
-import com.mikirinkode.firebasechatapp.feature.group.CreateNewChatActivity
+import com.mikirinkode.firebasechatapp.feature.createchat.CreateNewChatActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
-import com.mikirinkode.firebasechatapp.service.UpdateDeliveredTimeService
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
+import com.onesignal.OneSignal
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), MainView {
 
@@ -95,6 +97,7 @@ class MainActivity : AppCompatActivity(), MainView {
         presenter = MainPresenter()
         presenter.attachView(this)
         presenter.updateUserOnlineStatus()
+        presenter.updateOneSignalToken()
     }
 
     private fun checkPermission() {

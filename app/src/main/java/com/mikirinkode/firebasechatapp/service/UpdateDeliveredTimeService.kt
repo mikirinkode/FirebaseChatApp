@@ -23,7 +23,7 @@ class UpdateDeliveredTimeService : Service() {
 
     companion object {
         private const val CHANNEL_ID = "ChitChatChannel"
-        private const val CHANNEL_NAME = "MyChannel" // TODO: Create Constants
+        private const val CHANNEL_NAME = "MyChannel"
         private const val NOTIFICATION_ID = 123
         internal val TAG = UpdateDeliveredTimeService::class.java.simpleName
     }
@@ -50,10 +50,8 @@ class UpdateDeliveredTimeService : Service() {
         val notification = buildNotification()
         startForeground(NOTIFICATION_ID, notification)
 
-        Log.d(TAG, "Service dijalankan...")
-        serviceScope.launch {
-            Log.d(TAG, "conversation id list size: ${conversationIdList?.size}")
 
+        serviceScope.launch {
             conversationIdList?.forEach { conversationId ->
 
                 messagesRef?.child(conversationId)
@@ -91,8 +89,6 @@ class UpdateDeliveredTimeService : Service() {
 
                         override fun onCancelled(error: DatabaseError) {
                             stopSelf()
-                            Log.d(TAG, "Service dihentikan")
-                            Log.d(TAG, "An Error Occured: ${error.message}")
                         }
                     })
             }
@@ -104,7 +100,6 @@ class UpdateDeliveredTimeService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         serviceJob.cancel()
-        Log.d(TAG, "onDestroy: Service dihentikan")
     }
 
 

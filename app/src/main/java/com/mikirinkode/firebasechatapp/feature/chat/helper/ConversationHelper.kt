@@ -1,11 +1,11 @@
 package com.mikirinkode.firebasechatapp.feature.chat.helper
 
 import android.net.Uri
-import android.util.Log
 import com.google.firebase.database.*
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.StorageReference
-import com.mikirinkode.firebasechatapp.constants.ConversationType
+import com.mikirinkode.firebasechatapp.constants.Constants
 import com.mikirinkode.firebasechatapp.constants.MessageType
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
@@ -13,9 +13,11 @@ import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
-import kotlin.math.log
+import com.onesignal.OneSignal
+import org.json.JSONArray
+import org.json.JSONObject
 
-class ChatHelper(
+class ConversationHelper(
     private val mListener: ChatEventListener,
     private val conversationId: String,
     private val conversationType: String,
@@ -27,7 +29,6 @@ class ChatHelper(
     private val conversationsRef = database?.getReference("conversations")
     private val messagesRef = database?.getReference("messages")
 
-    //    private val usersRef = database?.getReference("users")
     private val pref = LocalSharedPref.instance()
     private val loggedUser = pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
     private val participantIdList = ArrayList<String>()
@@ -38,18 +39,12 @@ class ChatHelper(
             val theLatestMessage =
                 dataSnapshot.children.lastOrNull()?.getValue(ChatMessage::class.java)
 
-            Log.e("ChatHelper", "message size: ${dataSnapshot.childrenCount}")
             for (snapshot in dataSnapshot.children) {
                 val chatMessage = snapshot.getValue(ChatMessage::class.java)
-                Log.e("ChatHelper", "message: ${chatMessage?.message}")
 
                 if (chatMessage != null) {
                     if (loggedUser?.userId != null && chatMessage.senderId != loggedUser.userId) {
                         if (!chatMessage.beenReadBy.containsKey(loggedUser.userId!!)) {
-                            val previousMessage = messages.lastOrNull()
-                            if (previousMessage != null && previousMessage.beenReadBy.isNotEmpty()) {
-                                chatMessage.isTheFirstUnreadMessage = true
-                            }
 
                             val timeStamp = System.currentTimeMillis()
                             updateMessageReadTime(
@@ -62,23 +57,19 @@ class ChatHelper(
                                 updateLastMessageReadTime(
                                     loggedUser.userId!!, timeStamp
                                 )
-                                resetTotalUnreadMessage()
+//                                resetTotalUnreadMessage() // move, reset when user close the view
                             }
                         }
                     }
-                    Log.e(
-                        "ChatHelper",
-                        "message: ${chatMessage.message}, is the first unread message: ${chatMessage.isTheFirstUnreadMessage}"
-                    )
                     messages.add(chatMessage)
                 }
             }
             val sortedMessages = messages.sortedBy { it.sendTimestamp }
-            mListener.onDataChangeReceived(sortedMessages)
+            mListener.onMessageReceived(sortedMessages)
         }
 
         override fun onCancelled(error: DatabaseError) {
-            // TODO
+            // TODO: UNIMPLEMENTED
         }
     }
 
@@ -128,6 +119,7 @@ class ChatHelper(
         message: String,
         senderId: String,
         senderName: String,
+        receiverDeviceTokenList: List<String>
     ) {
         val timeStamp = System.currentTimeMillis()
         val newMessageKey = conversationsRef?.child(conversationId)?.child("messages")?.push()?.key
@@ -146,9 +138,6 @@ class ChatHelper(
                 "lastMessage" to chatMessage
             )
 
-            // TODO: Check again later
-            // TODO: maybe cause delay
-            Log.e("ChatHelper", "before on doTransaction")
             // update total unread messages
             updateTotalUnreadMessages()
 
@@ -157,7 +146,12 @@ class ChatHelper(
 
             // push message
             messagesRef?.child(conversationId)?.child(newMessageKey)?.setValue(chatMessage)
-            Log.e("ChatHelper", "message pushed")
+
+            // post notification
+            postNotification(senderName, message, receiverDeviceTokenList)
+
+            // reset total unread messages
+            resetTotalUnreadMessage()
         }
 
     }
@@ -168,6 +162,7 @@ class ChatHelper(
         senderName: String,
         file: Uri,
         path: String,
+        receiverDeviceTokenList: List<String>
     ) {
         val sRef: StorageReference? =
             storage?.reference?.child("conversations/${conversationId}")?.child(path)
@@ -195,7 +190,6 @@ class ChatHelper(
                         "lastMessage" to chatMessage
                     )
 
-                    Log.e("ChatHelper", "before on doTransaction")
                     // update total unread messages
                     updateTotalUnreadMessages()
 
@@ -204,6 +198,12 @@ class ChatHelper(
 
                     // push message
                     messagesRef?.child(conversationId)?.child(newMessageKey)?.setValue(chatMessage)
+
+                    // post notification
+                    postNotification(senderName, message, receiverDeviceTokenList)
+
+                    // reset total unread messages
+                    resetTotalUnreadMessage()
                 }
             }
         }?.addOnProgressListener { taskSnapshot ->
@@ -214,17 +214,65 @@ class ChatHelper(
         }
     }
 
-    fun receiveMessages() {
-        Log.e("ChatHelper", "ReceiveMessages called")
-        Log.e("ChatHelper", "conversationId: ${conversationId}")
+    private fun postNotification(
+        senderName: String,
+        message: String,
+        receiverDeviceTokenList: List<String>
+    ) {
+        val receivers = JSONArray(receiverDeviceTokenList)
+        val customData = JSONObject().apply {
+            put("conversationId", conversationId)
+            put("conversationType", conversationType)
+        }
+        val notificationJson = JSONObject().apply {
+            put("app_id", Constants.ONE_SIGNAL_APP_ID)
+            put("include_player_ids", receivers)
+            put("contents", JSONObject().put("en", message))
+            put("headings", JSONObject().put("en", senderName))
+            put("data", customData)
+        }
 
+        OneSignal.postNotification(
+            notificationJson,
+            object : OneSignal.PostNotificationResponseHandler {
+                override fun onSuccess(response: JSONObject?) {
+                    // Notification sent successfully
+                }
+
+                override fun onFailure(response: JSONObject?) {
+                    // Failed to send notification
+                }
+            })
+    }
+
+    fun getParticipantList(participantsId: List<String>) {
+        val userList = ArrayList<UserAccount>()
+
+        fireStore?.collection("users")
+            ?.whereIn("userId", participantsId)
+            ?.get()
+            ?.addOnSuccessListener { documentList ->
+                for (document in documentList) {
+                    if (document != null) {
+                        val userAccount: UserAccount = document.toObject()
+                        userList.add(userAccount)
+                    }
+                }
+                mListener.onParticipantsDataReceived(userList)
+            }
+            ?.addOnFailureListener {
+                // TODO: UNIMPLEMENTED
+            }
+    }
+
+    fun receiveMessages() {
         val ref = conversationId?.let { messagesRef?.child(it) }
         ref?.keepSynced(true)
 
         ref?.addValueEventListener(receiveListener)
     }
 
-    fun getGroupData(conversationId: String) {
+    fun getConversationById(conversationId: String) {
         val refWithQuery = conversationsRef?.child(conversationId)
 
         refWithQuery?.addValueEventListener(object : ValueEventListener {
@@ -232,28 +280,24 @@ class ChatHelper(
                 val conversation = conversationSnapshot.getValue(Conversation::class.java)
                 if (conversation != null) {
                     participantIdList.clear()
-                    conversation.participants.forEach { (key, _) ->
-                        participantIdList.add(key)
-                    }
-                    mListener.onReceiveGroupData(conversation)
+                    participantIdList.addAll(conversation.participants.keys.toList())
+                    getParticipantList(conversation.participants.keys.toList())
+                    mListener.onConversationDataReceived(conversation)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
+                // TODO: UNIMPLEMENTED
             }
         })
     }
 
     fun deactivateListener() {
-        if (conversationId != null) {
-            messagesRef?.child(conversationId)?.removeEventListener(receiveListener)
-        }
+        messagesRef?.child(conversationId)?.removeEventListener(receiveListener)
     }
 
 
     private fun updateMessageReadTime(timeStamp: Long, userId: String, messageId: String) {
-
         messagesRef?.child(conversationId)?.child(messageId)?.child("beenReadBy")?.child(userId)
             ?.setValue(timeStamp)
     }
@@ -264,7 +308,7 @@ class ChatHelper(
     }
 
     // Reset the total unread message
-    private fun resetTotalUnreadMessage() {
+    fun resetTotalUnreadMessage() {
         loggedUser?.userId?.let {
             conversationsRef?.child(conversationId)?.child("unreadMessageEachParticipant")?.child(
                 it
@@ -298,8 +342,8 @@ class ChatHelper(
 }
 
 interface ChatEventListener {
-    fun onDataChangeReceived(messages: List<ChatMessage>) // todo: change name
+    fun onMessageReceived(messages: List<ChatMessage>)
     fun showUploadImageProgress(progress: Int)
-
-    fun onReceiveGroupData(conversation: Conversation)
+    fun onConversationDataReceived(conversation: Conversation)
+    fun onParticipantsDataReceived(participants: List<UserAccount>)
 }

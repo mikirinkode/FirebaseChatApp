@@ -37,30 +37,21 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     private fun handleIntent() {
-        // TODO: merge
         // data from previous activity
-        val interlocutorIdFromActivity = intent?.getStringExtra(EXTRA_INTENT_INTERLOCUTOR_ID)
-        val idFromActivity = intent.getStringExtra(EXTRA_INTENT_CONVERSATION_ID)
-        val typeFromActivity = intent.getStringExtra(EXTRA_INTENT_CONVERSATION_TYPE)
-        if (interlocutorIdFromActivity != null && typeFromActivity != null) {
-            setupNavigation(idFromActivity, typeFromActivity, interlocutorIdFromActivity, "AnotherActivity")
-        }
+        val interlocutorId = intent?.getStringExtra(EXTRA_INTENT_INTERLOCUTOR_ID)
+        val conversationId = intent.getStringExtra(EXTRA_INTENT_CONVERSATION_ID)
+        val conversationType = intent.getStringExtra(EXTRA_INTENT_CONVERSATION_TYPE)
 
-        // data from notification that sent from system tray
-//        val extras = intent?.extras
-//        val interlocutorIdFromFCM = extras?.getString(EXTRA_INTENT_INTERLOCUTOR_ID)
-//        val idFromFCM = extras?.getString(EXTRA_INTENT_CONVERSATION_ID)
-//        val typeFromFCM = extras?.getString(EXTRA_INTENT_CONVERSATION_TYPE)
-//        if (idFromFCM != null && typeFromFCM != null && interlocutorIdFromFCM != null) {
-//            setupNavigation(idFromFCM, typeFromFCM, interlocutorIdFromFCM, null)
-//        }
+        if (conversationType != null) {
+            setupNavigation(conversationId, conversationType, interlocutorId, "AnotherActivity")
+        }
     }
 
 
     private fun setupNavigation(
         conversationId: String?,
         conversationType: String,
-        interlocutorId: String,
+        interlocutorId: String?,
         navigateFrom: String?
     ) {
         val navController = findNavController(R.id.navHostChatRoom)

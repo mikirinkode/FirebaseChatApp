@@ -28,9 +28,8 @@ import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import com.mikirinkode.firebasechatapp.data.model.UserRTDB
 import com.mikirinkode.firebasechatapp.databinding.FragmentConversationBinding
-import com.mikirinkode.firebasechatapp.feature.chat.*
+import com.mikirinkode.firebasechatapp.feature.chat.ConversationView
 import com.mikirinkode.firebasechatapp.feature.chat.adapter.ConversationAdapter
 import com.mikirinkode.firebasechatapp.feature.chat.presenter.ConversationPresenter
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
@@ -64,7 +63,6 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
 
     private var navigateFrom: String? = null // used to navigate back
     private var interlocutor: UserAccount? = null
-    private var conversation: Conversation? = null
 
     private lateinit var presenter: ConversationPresenter
     private var capturedImage: Uri? = null
@@ -91,31 +89,44 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         onAppBatItemSelectedClickListener()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
         presenter.detachView()
     }
 
+    override fun onStop() {
+        super.onStop()
+        presenter.resetTotalUnreadMessage()
+    }
+
     private fun initTextWatcher() {
-        val handler = Handler(Looper.getMainLooper())
-        binding.etMessage.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        if (args.conversationType == ConversationType.PERSONAL.toString()) {
+            val handler = Handler(Looper.getMainLooper())
+            binding.etMessage.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // User is typing or text is changing
-                interlocutor?.userId?.let { mCommonHelper.updateTypingStatus(true, it) }
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    // User is typing or text is changing
+                    interlocutor?.userId?.let { mCommonHelper.updateTypingStatus(true, it) }
 
-            }
+                }
 
-            override fun afterTextChanged(s: Editable?) {
-                // User has stopped typing
-                handler.postDelayed({
-                    interlocutor?.userId?.let { mCommonHelper.updateTypingStatus(false, it) }
-                }, 5000)
+                override fun afterTextChanged(s: Editable?) {
+                    // User has stopped typing
+                    handler.postDelayed({
+                        interlocutor?.userId?.let { mCommonHelper.updateTypingStatus(false, it) }
+                    }, 5000)
 
-            }
-        })
+                }
+            })
+        }
     }
 
     private fun initRecyclerView() {
@@ -133,27 +144,32 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
 
     private fun handleBundleArgs() {
         val conversationType: String = args.conversationType
-        val participantIdList: List<String> = listOf()
         navigateFrom = args.navigateFrom
+        val conversationId: String? = args.conversationId
 
         when (conversationType) {
             ConversationType.PERSONAL.toString() -> {
-                val interlocutorId = args.interlocutorId
-                val loggedUserId = loggedUser?.userId
-                if (loggedUserId != null) {
-                    val conversationId =
-                        if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
+                // if the message is empty, the conversationId is empty too
+                // then use the args.interlocutorId
+                if (conversationId.isNullOrBlank()) {
+                    val loggedUserId = loggedUser?.userId
+                    val interlocutorId = args.interlocutorId
+                    if (loggedUserId != null && interlocutorId != null) {
+                        val personalConversationId =
+                            if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
+                        setupPresenter(personalConversationId, conversationType)
+                        presenter.getUserOnlineStatus(interlocutorId)
+                        presenter.getConversationDataById(personalConversationId)
+                    }
+                } else {
                     setupPresenter(conversationId, conversationType)
-                    getInterlocutorData(interlocutorId)
-                    val participants = listOf<String>(loggedUser?.userId!!, args.interlocutorId)
-                    conversationAdapter.setParticipantIdList(participants)
+                    presenter.getConversationDataById(conversationId)
                 }
             }
             ConversationType.GROUP.toString() -> {
-                val conversationId: String? = args.conversationId
                 if (conversationId != null) {
                     setupPresenter(conversationId, conversationType)
-                    getGroupData(conversationId)
+                    presenter.getConversationDataById(conversationId)
                 }
             }
         }
@@ -162,15 +178,6 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     private fun setupPresenter(conversationId: String, conversationType: String) {
         presenter = ConversationPresenter()
         presenter.attachView(this, requireActivity(), conversationId, conversationType)
-    }
-
-    private fun getInterlocutorData(interlocutorId: String) {
-        presenter.getUserOnlineStatus(interlocutorId)
-        presenter.getInterlocutorData(interlocutorId)
-    }
-
-    private fun getGroupData(conversationId: String) {
-        presenter.getGroupData(conversationId)
     }
 
     private fun observeMessage() {
@@ -199,6 +206,8 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 if (isValid) {
                     etMessage.setText("")
                     val isFirstTime: Boolean = conversationAdapter.isChatEmpty()
+                    val receiverDeviceToken: List<String> =
+                        conversationAdapter.getReceiverDeviceToken()
 
                     if (isFirstTime) {
                         val interlocutorId = interlocutor?.userId
@@ -218,6 +227,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                                 message,
                                 senderId!!,
                                 senderName!!,
+                                receiverDeviceToken
                             )
                         }
                         MessageType.IMAGE -> {
@@ -231,7 +241,8 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                                     senderId!!,
                                     senderName!!,
                                     capturedImage!!,
-                                    path
+                                    path,
+                                    receiverDeviceToken
                                 )
                                 btnAddExtras.visibility = View.VISIBLE
                                 binding.layoutSelectedImage.visibility = View.GONE
@@ -242,32 +253,12 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                         MessageType.AUDIO -> {}
                     }
                 }
-//                when (args.conversationType) {
-//                    ConversationType.PERSONAL.toString() -> handlePersonalMessage(message)
-//                    ConversationType.GROUP.toString() -> handleGroupMessage(message)
-//                }
             }
         }
     }
 
-    override fun onReceiveGroupData(conversation: Conversation) {
-        this.conversation = conversation
-        binding.apply {
-            conversationAdapter.setParticipantIdList(conversation.participants.keys.toList())
-            tvAppBarTitle.text = conversation.conversationName
-            tvAppBarDescription.text = getString(R.string.txt_tap_to_see_group_info)
-            if (conversation.conversationAvatar == null || conversation.conversationAvatar == "") {
-                Glide.with(requireContext())
-                    .load(R.drawable.ic_default_group_avatar).into(binding.ivUserAvatar)
-            } else {
-                Glide.with(requireContext())
-                    .load(conversation.conversationAvatar)
-                    .into(ivUserAvatar)
-            }
-        }
-    }
 
-    override fun onGetInterlocutorProfileSuccess(user: UserAccount) {
+    private fun setupInterlocutorProfile(user: UserAccount) {
         binding.apply {
             interlocutor = user
 
@@ -283,17 +274,55 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         }
     }
 
+    private fun setupGroupProfile(conversation: Conversation) {
+        binding.apply {
+            tvAppBarTitle.text = conversation.conversationName
+            tvAppBarDescription.text = getString(R.string.txt_tap_to_see_group_info)
+            if (conversation.conversationAvatar == null || conversation.conversationAvatar == "") {
+                Glide.with(requireContext())
+                    .load(R.drawable.ic_default_group_avatar).into(binding.ivUserAvatar)
+            } else {
+                Glide.with(requireContext())
+                    .load(conversation.conversationAvatar)
+                    .into(ivUserAvatar)
+            }
+        }
+    }
+
+    override fun onConversationDataReceived(conversation: Conversation) {
+        conversationAdapter.setConversation(conversation)
+        if (args.conversationType == ConversationType.GROUP.toString()) {
+            setupGroupProfile(conversation)
+        }
+    }
+
+    override fun onParticipantsDataReceived(participants: List<UserAccount>) {
+        if (args.conversationType == ConversationType.PERSONAL.toString()) {
+            val user: UserAccount? = participants.firstOrNull { it.userId != loggedUser?.userId }
+            if (user != null) {
+                user.userId?.let { presenter.getUserOnlineStatus(it) }
+                setupInterlocutorProfile(user)
+            }
+        }
+
+        conversationAdapter.setParticipants(participants)
+    }
+
     override fun onMessagesReceived(messages: List<ChatMessage>) {
-        conversationAdapter.setData(messages)
+        conversationAdapter.setMessages(messages)
         if (messages.isNotEmpty()) {
             if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0) {
-                // TODO: check again later, error: NullPointerException
-                binding.rvMessages.smoothScrollToPosition(conversationAdapter.itemCount - 1)
+                binding.rvMessages.scrollToPosition(conversationAdapter.itemCount - 1)
             }
         }
     }
 
     override fun updateReceiverOnlineStatus(status: UserAccount) {
+        if (loggedUser != null) {
+            conversationAdapter.setParticipants(listOf(status, loggedUser!!))
+        }
+
+        setupInterlocutorProfile(status)
         binding.apply {
             if (status.online) {
                 tvAppBarDescription.text = getString(R.string.txt_online)
@@ -304,8 +333,10 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 }
             } else {
                 ivOnlineStatusIndicator.visibility = View.GONE
-                tvAppBarDescription.text =
-                    "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
+                if (status.lastOnlineTimestamp != 0L) {
+                    tvAppBarDescription.text =
+                        "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
+                }
             }
         }
     }
@@ -395,14 +426,23 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 conversationAdapter.onDeselectAllMessage()
             }
 
-            btnShowMessageInfo.setOnClickListener { // TODO
+            btnShowMessageInfo.setOnClickListener {
                 val totalSelectedMessages = conversationAdapter.getTotalSelectedMessages()
                 val currentSelectedMessage = conversationAdapter.getCurrentSelectedMessage()
+                val participantsId =
+                    conversationAdapter.getConversation()?.participants?.keys?.toTypedArray()
+                val conversationType = conversationAdapter.getConversation()?.conversationType
+                val array: Array<String?> =
+                    participantsId?.filterNotNull()?.toTypedArray() ?: arrayOfNulls<String>(0)
 
-                if (totalSelectedMessages == 1 && loggedUser?.userId != null && currentSelectedMessage != null) {
+                val isValid =
+                    participantsId != null && totalSelectedMessages == 1 && loggedUser?.userId != null && currentSelectedMessage != null && conversationType != null
+                if (isValid) {
                     val action = ConversationFragmentDirections.actionShowMessageInfo(
                         loggedUser?.userId!!,
-                        currentSelectedMessage
+                        conversationType!!,
+                        array,
+                        currentSelectedMessage!!
                     )
                     Navigation.findNavController(binding.root).navigate(action)
                     conversationAdapter.onDeselectAllMessage()
@@ -432,9 +472,9 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
             layoutInterlocutorProfile.setOnClickListener {
                 when (args.conversationType) {
                     ConversationType.GROUP.toString() -> {
-                        val conversationId = conversation?.conversationId
-                        val participantsId = conversation?.participants?.keys?.toTypedArray()
-                        val creatorId = conversation?.createdBy
+                        val conversationId = conversationAdapter.getConversation()?.conversationId
+                        val participantsId = conversationAdapter.getConversation()?.participants?.keys?.toTypedArray()
+                        val creatorId = conversationAdapter.getConversation()?.createdBy
                         if (conversationId != null && participantsId != null && creatorId != null) {
                             val action =
                                 ConversationFragmentDirections.actionOpenGroupProfile(
@@ -445,7 +485,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                             Navigation.findNavController(binding.root).navigate(action)
                         }
                     }
-                    ConversationType.PERSONAL.toString() -> { // TODO
+                    ConversationType.PERSONAL.toString() -> {
                         startActivity(
                             Intent(requireActivity(), ProfileActivity::class.java).putExtra(
                                 ProfileActivity.EXTRA_INTENT_USER_ID,
@@ -456,7 +496,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 }
             }
 
-            btnAddExtras.setOnClickListener { // TODO
+            btnAddExtras.setOnClickListener {
                 if (layoutSelectExtras.visibility == View.GONE) {
                     layoutSelectExtras.visibility = View.VISIBLE
                 } else {
@@ -478,6 +518,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
 
             btnImportFromGallery.setOnClickListener {
                 if (PermissionManager.isReadExternalPermissionGranted(requireContext())) {
+                    // TODO: UNIMPLEMENTED
 
                 } else {
                     PermissionManager.requestReadExternalPermission(requireActivity())
@@ -485,7 +526,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
             }
 
             btnEmoji.setOnClickListener {
-                // TODO
+                // TODO: UNIMPLEMENTED
             }
 
             btnRemoveCapturedImage.setOnClickListener {

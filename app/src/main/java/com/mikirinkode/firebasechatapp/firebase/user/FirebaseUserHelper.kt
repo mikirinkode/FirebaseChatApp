@@ -1,10 +1,8 @@
-package com.mikirinkode.firebasechatapp.firebase
+package com.mikirinkode.firebasechatapp.firebase.user
 
-import android.util.Log
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.toObject
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
-import kotlinx.coroutines.tasks.await
+import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
 class FirebaseUserHelper(
     private val mListener: FirebaseUserListener
@@ -19,8 +17,6 @@ class FirebaseUserHelper(
                 val user: UserAccount? = document?.toObject()
                 if (user != null) {
                     mListener.onGetUserSuccess(user)
-                } else {
-                    // TODO: on failure
                 }
             }
             ?.addOnFailureListener {

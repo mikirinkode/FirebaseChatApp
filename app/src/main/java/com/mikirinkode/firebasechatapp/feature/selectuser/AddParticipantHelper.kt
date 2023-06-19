@@ -1,15 +1,13 @@
 package com.mikirinkode.firebasechatapp.feature.selectuser
 
-import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
-class GroupHelper(
-    private val mListener: GroupParticipantListener
+class AddParticipantHelper(
+    private val mListener: AddParticipantListener
 ) {
 
     private val fireStore = FirebaseProvider.instance().getFirestore()
@@ -34,6 +32,6 @@ class GroupHelper(
     }
 }
 
-interface GroupParticipantListener {
+interface AddParticipantListener {
     fun onSuccessAddParticipantsToGroup()
 }
