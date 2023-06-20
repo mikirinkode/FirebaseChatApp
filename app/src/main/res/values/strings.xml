@@ -53,5 +53,6 @@
     <string name="txt_select_user_title">Select user</string>
     <string name="txt_description_label">Description</string>
     <string name="txt_read_by">Read By</string>
+    <string name="txt_new_message">New Message</string>
 
 </resources>

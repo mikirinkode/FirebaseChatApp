@@ -57,7 +57,6 @@ class ConversationHelper(
                                 updateLastMessageReadTime(
                                     loggedUser.userId!!, timeStamp
                                 )
-//                                resetTotalUnreadMessage() // move, reset when user close the view
                             }
                         }
                     }
@@ -248,21 +247,23 @@ class ConversationHelper(
     fun getParticipantList(participantsId: List<String>) {
         val userList = ArrayList<UserAccount>()
 
-        fireStore?.collection("users")
-            ?.whereIn("userId", participantsId)
-            ?.get()
-            ?.addOnSuccessListener { documentList ->
-                for (document in documentList) {
-                    if (document != null) {
-                        val userAccount: UserAccount = document.toObject()
-                        userList.add(userAccount)
+        if (participantsId.isNotEmpty()){
+            fireStore?.collection("users")
+                ?.whereIn("userId", participantsId)
+                ?.get()
+                ?.addOnSuccessListener { documentList ->
+                    for (document in documentList) {
+                        if (document != null) {
+                            val userAccount: UserAccount = document.toObject()
+                            userList.add(userAccount)
+                        }
                     }
+                    mListener.onParticipantsDataReceived(userList)
                 }
-                mListener.onParticipantsDataReceived(userList)
-            }
-            ?.addOnFailureListener {
-                // TODO: UNIMPLEMENTED
-            }
+                ?.addOnFailureListener {
+                    // TODO: UNIMPLEMENTED
+                }
+        }
     }
 
     fun receiveMessages() {

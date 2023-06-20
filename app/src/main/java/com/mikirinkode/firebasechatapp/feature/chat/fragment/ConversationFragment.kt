@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
@@ -60,6 +61,8 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     }
 
     private val args: ConversationFragmentArgs by navArgs()
+
+    private var isScrolledToBottom = false
 
     private var navigateFrom: String? = null // used to navigate back
     private var interlocutor: UserAccount? = null
@@ -139,6 +142,22 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 conversationAdapter.setLoggedUserId(loggedUser?.userId!!)
                 conversationAdapter.setConversationType(args.conversationType)
             }
+
+            rvMessages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                    val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                    val itemCount = layoutManager.itemCount
+                    // if the 7 last item is not visible
+                    if (lastVisibleItemPosition < itemCount - 7) {
+                        btnScrollToBottom.visibility = View.VISIBLE
+                    } else {
+                        btnScrollToBottom.visibility = View.GONE
+                    }
+                }
+            })
         }
     }
 
@@ -293,15 +312,41 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         conversationAdapter.setConversation(conversation)
         if (args.conversationType == ConversationType.GROUP.toString()) {
             setupGroupProfile(conversation)
+
+            val totalUnread = conversation.unreadMessageEachParticipant[loggedUser?.userId]
+            if (totalUnread != null) {
+                if (totalUnread > 0){
+                    val layoutManager = binding.rvMessages.layoutManager as LinearLayoutManager
+                    val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                    val itemCount = layoutManager.itemCount
+                    // if the 7 last item is not visible
+                    if (lastVisibleItemPosition < itemCount - 7) { // TODO
+                        binding.btnScrollToBottom.visibility = View.VISIBLE
+                        binding.tvNewMessage.visibility = View.VISIBLE
+                    } else {
+                        binding.tvNewMessage.visibility = View.GONE
+                        binding.btnScrollToBottom.visibility = View.GONE
+                    }
+                }
+            }
         }
     }
 
     override fun onParticipantsDataReceived(participants: List<UserAccount>) {
-        if (args.conversationType == ConversationType.PERSONAL.toString()) {
-            val user: UserAccount? = participants.firstOrNull { it.userId != loggedUser?.userId }
-            if (user != null) {
-                user.userId?.let { presenter.getUserOnlineStatus(it) }
-                setupInterlocutorProfile(user)
+        when (args.conversationType) {
+            ConversationType.PERSONAL.toString() -> {
+                val user: UserAccount? =
+                    participants.firstOrNull { it.userId != loggedUser?.userId }
+                if (user != null) {
+                    user.userId?.let { presenter.getUserOnlineStatus(it) }
+                    setupInterlocutorProfile(user)
+                }
+            }
+            ConversationType.GROUP.toString() -> {
+                val names: String = participants.joinToString(", ") { user ->
+                    user.name ?: ""
+                }
+                binding.tvAppBarDescription.text = names
             }
         }
 
@@ -311,8 +356,11 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     override fun onMessagesReceived(messages: List<ChatMessage>) {
         conversationAdapter.setMessages(messages)
         if (messages.isNotEmpty()) {
-            if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0) {
+            // TODO: SCROLL WHEN OPEN THE CHAT ROOM ON THE FIRST TIME
+            // DO NOT SCROLL WHEN THERE IS NEW MESSAGE
+            if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0 && !isScrolledToBottom) {
                 binding.rvMessages.scrollToPosition(conversationAdapter.itemCount - 1)
+                isScrolledToBottom = true
             }
         }
     }
@@ -469,11 +517,18 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 }
             }
 
+            btnScrollToBottom.setOnClickListener {
+                if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0) {
+                    binding.rvMessages.smoothScrollToPosition(conversationAdapter.itemCount - 1)
+                }
+            }
+
             layoutInterlocutorProfile.setOnClickListener {
                 when (args.conversationType) {
                     ConversationType.GROUP.toString() -> {
                         val conversationId = conversationAdapter.getConversation()?.conversationId
-                        val participantsId = conversationAdapter.getConversation()?.participants?.keys?.toTypedArray()
+                        val participantsId =
+                            conversationAdapter.getConversation()?.participants?.keys?.toTypedArray()
                         val creatorId = conversationAdapter.getConversation()?.createdBy
                         if (conversationId != null && participantsId != null && creatorId != null) {
                             val action =
