@@ -49,7 +49,6 @@ class CreateChatHelper(
                 type = MessageType.TEXT.toString(),
                 senderId = "",
                 senderName = "",
-                deliveredTimestamp = 0L
             )
 
             val conversation = Conversation(

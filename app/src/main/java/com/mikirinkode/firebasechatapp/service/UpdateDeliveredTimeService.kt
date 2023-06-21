@@ -66,8 +66,7 @@ class UpdateDeliveredTimeService : Service() {
 
                                 if (chatMessage != null) {
                                     if (chatMessage.senderId != loggedUserId) {
-                                        if (chatMessage.deliveredTimestamp == 0L) {
-
+                                        if (!chatMessage.beenDeliveredTo.containsKey(loggedUserId)) {
                                             val timeStamp = System.currentTimeMillis()
                                             updateMessageDeliveredTime(
                                                 conversationId,
@@ -134,20 +133,23 @@ class UpdateDeliveredTimeService : Service() {
         return notificationBuilder.build()
     }
 
+    // TODO
     private fun updateMessageDeliveredTime(
         conversationId: String,
         timeStamp: Long,
         messageId: String
     ) {
-        val messageRef =
-            messagesRef?.child(conversationId)?.child(messageId)?.ref
-        messageRef?.child("deliveredTimestamp")?.setValue(timeStamp)
+        messagesRef?.child(conversationId)?.child(messageId)?.child("beenDeliveredTo")
+            ?.child("loggedUserId")?.setValue(timeStamp)
     }
 
     private fun updateLastMessageDeliveredTime(conversationId: String, timeStamp: Long) {
-        val conversationRef = conversationsRef?.child(conversationId)?.child("lastMessage")?.ref
-        val update = mapOf("deliveredTimestamp" to timeStamp)
-        conversationRef?.updateChildren(update)
+
+        conversationsRef?.child(conversationId)?.child("lastMessage")?.child("beenDeliveredTo")
+            ?.child("loggedUserId")?.setValue(timeStamp)
+//        val conversationRef = conversationsRef?.child(conversationId)?.child("lastMessage")?.ref
+//        val update = mapOf("deliveredTimestamp" to timeStamp)
+//        conversationRef?.updateChildren(update)
     }
 
 }

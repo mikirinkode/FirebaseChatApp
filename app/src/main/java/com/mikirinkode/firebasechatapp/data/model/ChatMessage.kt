@@ -12,7 +12,8 @@ data class ChatMessage(
     val type: String = "",
     val senderId: String = "",
     val senderName: String = "",
-    val deliveredTimestamp: Long = 0L,
+//    val deliveredTimestamp: Long = 0L, // TODO: Remove
+    val beenDeliveredTo: Map<String, Long> = mapOf(), // TODO: is it need to initialize when sending message
     val beenReadBy: Map<String, Long> = mapOf(),
 
     var isSelected: Boolean = false

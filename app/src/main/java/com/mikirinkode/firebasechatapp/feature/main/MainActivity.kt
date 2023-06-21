@@ -1,25 +1,23 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.mikirinkode.firebasechatapp.constants.Constants
 import com.mikirinkode.firebasechatapp.constants.ConversationType
-import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
+import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
 import com.mikirinkode.firebasechatapp.feature.createchat.CreateNewChatActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
+import com.mikirinkode.firebasechatapp.service.UpdateDeliveredTimeService
 import com.mikirinkode.firebasechatapp.utils.PermissionManager
-import com.onesignal.OneSignal
-import org.json.JSONArray
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), MainView {
 
@@ -50,7 +48,7 @@ class MainActivity : AppCompatActivity(), MainView {
         initView()
         onActionClick()
 
-//        runService()
+        runService()
     }
 
     override fun onDestroy() {
@@ -67,14 +65,22 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
 
-//    private fun runService() { // TODO
-//        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
-//        if (Build.VERSION.SDK_INT >= 26) {
-//            startForegroundService(serviceIntent)
-//        } else {
-//            startService(serviceIntent)
-//        }
-//    }
+    private fun runService() { // TODO
+
+        // Create a repeating request for the worker
+//        val repeatingRequest = PeriodicWorkRequestBuilder<MyWorker>(15, TimeUnit.MINUTES)
+//            .build()
+
+        // Enqueue the repeating request with WorkManager
+//        WorkManager.getInstance(this).enqueue(repeatingRequest)
+
+        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
+        if (Build.VERSION.SDK_INT >= 26) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
 
     private fun initView() {
         binding.apply {

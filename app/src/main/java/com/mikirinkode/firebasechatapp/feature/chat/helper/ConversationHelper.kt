@@ -129,8 +129,7 @@ class ConversationHelper(
                 sendTimestamp = timeStamp,
                 type = MessageType.TEXT.toString(),
                 senderId = senderId,
-                senderName = senderName,
-                deliveredTimestamp = 0L,
+                senderName = senderName
             )
 
             val updateLastMessage = mapOf(
@@ -180,8 +179,7 @@ class ConversationHelper(
                         sendTimestamp = timeStamp,
                         type = MessageType.IMAGE.toString(),
                         senderId = senderId,
-                        senderName = senderName,
-                        deliveredTimestamp = 0L,
+                        senderName = senderName
                     )
 
 

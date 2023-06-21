@@ -70,8 +70,9 @@ class MessageInfoFragment : Fragment(), MessageInfoView {
                 ConversationType.PERSONAL.toString() -> {
                     layoutPersonalMessageInfo.visibility = View.VISIBLE
                     layoutGroupMessageInfo.visibility = View.GONE
-                    if (message.deliveredTimestamp != 0L){
-                        tvDeliveredTimestamp.text = DateHelper.getRegularFormattedDateTimeFromTimestamp(message.deliveredTimestamp)
+                    if (message.beenDeliveredTo.isNotEmpty()){
+                        val deliveredTimestamp = message.beenDeliveredTo.entries.first().value
+                        tvDeliveredTimestamp.text = DateHelper.getRegularFormattedDateTimeFromTimestamp(deliveredTimestamp)
                     } else {
                         tvDeliveredTimestamp.text = "-"
                     }

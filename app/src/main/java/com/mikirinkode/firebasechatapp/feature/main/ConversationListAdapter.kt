@@ -141,12 +141,12 @@ class ConversationListAdapter : RecyclerView.Adapter<ConversationListAdapter.Vie
             )
         } else {
             // if chat hasn't been read
-            if (chat.deliveredTimestamp != 0L) {
+            // TODO delivered timestamp
+            val isDelivered = chat.beenDeliveredTo.isNotEmpty()
+            if (isDelivered){
                 tvloggedUserMessageStatus.visibility = View.VISIBLE
                 tvloggedUserMessageStatus.text = "✓✓"
-            }
-
-            if (chat.deliveredTimestamp == 0L && chat.sendTimestamp != 0L) {
+            } else if (chat.sendTimestamp != 0L){
                 tvloggedUserMessageStatus.visibility = View.VISIBLE
                 tvloggedUserMessageStatus.text = "✓"
             }
