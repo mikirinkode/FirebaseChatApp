@@ -353,6 +353,10 @@ class ConversationAdapter : RecyclerView.Adapter<ConversationAdapter.ViewHolder>
         }
     }
 
+    fun getTotalUnreadMessageLoggedUser(): Int {
+        return conversation?.unreadMessageEachParticipant?.get(loggedUserId) ?: 0
+    }
+
     fun setLoggedUserId(userId: String) {
         loggedUserId = userId
     }

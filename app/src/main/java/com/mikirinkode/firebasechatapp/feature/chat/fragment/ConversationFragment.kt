@@ -147,14 +147,25 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
 
-                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                    val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-                    val itemCount = layoutManager.itemCount
-                    // if the 7 last item is not visible
-                    if (lastVisibleItemPosition < itemCount - 7) {
-                        btnScrollToBottom.visibility = View.VISIBLE
-                    } else {
-                        btnScrollToBottom.visibility = View.GONE
+                    binding.apply {
+                        val layoutManager = rvMessages.layoutManager as LinearLayoutManager
+                        val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                        val itemCount = layoutManager.itemCount
+                        // if the last item is not visible
+                        if (lastVisibleItemPosition < itemCount - 1) { // TODO
+                            btnScrollToBottom.visibility = View.VISIBLE
+                            // show there is new message when user scrolling up
+                            val totalUnread = conversationAdapter.getTotalUnreadMessageLoggedUser()
+                            if (totalUnread > 0) {
+                                tvTotalNewMessages.visibility = View.VISIBLE
+                                tvTotalNewMessages.text = totalUnread.toString()
+                            } else {
+                                tvTotalNewMessages.visibility = View.GONE
+                            }
+                        } else {
+                            tvTotalNewMessages.visibility = View.GONE
+                            btnScrollToBottom.visibility = View.GONE
+                        }
                     }
                 }
             })
@@ -312,22 +323,26 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         conversationAdapter.setConversation(conversation)
         if (args.conversationType == ConversationType.GROUP.toString()) {
             setupGroupProfile(conversation)
+        }
 
-            val totalUnread = conversation.unreadMessageEachParticipant[loggedUser?.userId]
-            if (totalUnread != null) {
-                if (totalUnread > 0){
-                    val layoutManager = binding.rvMessages.layoutManager as LinearLayoutManager
-                    val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-                    val itemCount = layoutManager.itemCount
-                    // if the 7 last item is not visible
-                    if (lastVisibleItemPosition < itemCount - 7) { // TODO
-                        binding.btnScrollToBottom.visibility = View.VISIBLE
-                        binding.tvNewMessage.visibility = View.VISIBLE
-                    } else {
-                        binding.tvNewMessage.visibility = View.GONE
-                        binding.btnScrollToBottom.visibility = View.GONE
-                    }
+        binding.apply {
+            val layoutManager = rvMessages.layoutManager as LinearLayoutManager
+            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+            val itemCount = layoutManager.itemCount
+            // if the last item is not visible
+            if (lastVisibleItemPosition < itemCount -1) { // TODO
+                btnScrollToBottom.visibility = View.VISIBLE
+                // show there is new message when user scrolling up
+                val totalUnread = conversationAdapter.getTotalUnreadMessageLoggedUser()
+                if (totalUnread > 0) {
+                    tvTotalNewMessages.visibility = View.VISIBLE
+                    tvTotalNewMessages.text = totalUnread.toString()
+                } else {
+                    tvTotalNewMessages.visibility = View.GONE
                 }
+            } else {
+                tvTotalNewMessages.visibility = View.GONE
+                btnScrollToBottom.visibility = View.GONE
             }
         }
     }
@@ -358,10 +373,27 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         if (messages.isNotEmpty()) {
             // TODO: SCROLL WHEN OPEN THE CHAT ROOM ON THE FIRST TIME
             // DO NOT SCROLL WHEN THERE IS NEW MESSAGE
-            if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0 && !isScrolledToBottom) {
-                binding.rvMessages.scrollToPosition(conversationAdapter.itemCount - 1)
-                isScrolledToBottom = true
+
+            binding.apply {
+                val layoutManager = binding.rvMessages.layoutManager as LinearLayoutManager
+                val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                val itemCount = layoutManager.itemCount
+                // if the last visible item is not more than 5
+                // ignore the isScrolledToBottom variable
+                if (lastVisibleItemPosition in (itemCount-5)..itemCount) { // TODO
+                    if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0) {
+                        rvMessages.scrollToPosition(conversationAdapter.itemCount - 1)
+                        isScrolledToBottom = true
+                    }
+                } else {
+                    // the visible item is more than 2 item
+                    if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0 && !isScrolledToBottom) {
+                        rvMessages.scrollToPosition(conversationAdapter.itemCount - 1)
+                        isScrolledToBottom = true
+                    }
+                }
             }
+
         }
     }
 
