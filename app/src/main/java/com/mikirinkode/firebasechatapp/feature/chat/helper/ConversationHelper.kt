@@ -282,7 +282,7 @@ class ConversationHelper(
                 if (conversation != null) {
                     participantIdList.clear()
                     participantIdList.addAll(conversation.participants.keys.toList())
-                    getParticipantList(conversation.participants.keys.toList())
+                    getParticipantList(conversation.participants.keys.toList()) // TODO: is this efficient?
                     mListener.onConversationDataReceived(conversation)
                 }
             }

@@ -14,8 +14,6 @@ data class UserAccount(
     var updatedAt: String? = "",
 
     val online: Boolean = false,
-    val typing: Boolean = false,
-    val currentlyTypingFor: String = "",
     val lastOnlineTimestamp: Long = 0L,
     val oneSignalToken: String? = "",
     val conversationIdList: List<String> = listOf<String>(),

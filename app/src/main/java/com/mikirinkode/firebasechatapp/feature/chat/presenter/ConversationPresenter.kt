@@ -14,13 +14,14 @@ import com.mikirinkode.firebasechatapp.commonhelper.CameraListener
 import com.mikirinkode.firebasechatapp.feature.chat.helper.ChatEventListener
 import com.mikirinkode.firebasechatapp.feature.chat.helper.ConversationHelper
 import com.mikirinkode.firebasechatapp.feature.chat.ConversationView
+import com.mikirinkode.firebasechatapp.firebase.CommonFirebaseTaskHelper
 
 class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener,
     UserOnlineStatusEventListener, CameraListener {
     private var mView: ConversationView? = null
     private var conversationHelper: ConversationHelper? = null
     private var cameraHelper: CameraHelper? = null
-    private var firebaseUserHelper: FirebaseUserHelper? = null
+    private var mCommonHelper: CommonFirebaseTaskHelper? = null
     private var userOnlineStatusHelper: FirebaseUserOnlineStatusHelper? = null
 
     fun resetTotalUnreadMessage(){
@@ -92,6 +93,10 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         mView?.updateReceiverOnlineStatus(status)
     }
 
+    fun updateTypingStatus(isTyping: Boolean, conversationId: String) {
+        mCommonHelper?.updateTypingStatus(isTyping, conversationId)
+    }
+
     /**
      * CAMERA
      */
@@ -112,7 +117,7 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         conversationHelper = ConversationHelper(this, conversationId, conversationType)
         cameraHelper = CameraHelper(this, mActivity)
         userOnlineStatusHelper = FirebaseUserOnlineStatusHelper(this)
-
+        mCommonHelper = CommonFirebaseTaskHelper()
     }
 
     override fun attachView(view: ConversationView) {
@@ -123,6 +128,7 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         conversationHelper?.deactivateListener()
         conversationHelper = null
         cameraHelper = null
+        mCommonHelper = null
         mView = null
     }
 }

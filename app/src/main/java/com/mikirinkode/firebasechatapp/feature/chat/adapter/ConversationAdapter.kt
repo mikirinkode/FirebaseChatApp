@@ -383,6 +383,8 @@ class ConversationAdapter : RecyclerView.Adapter<ConversationAdapter.ViewHolder>
         notifyDataSetChanged()
     }
 
+    fun getParticipants() = participants
+
     fun onDeselectAllMessage() {
         listIndexOfSelectedMessages.forEach { index ->
             val item: ChatMessage? = messages[index]

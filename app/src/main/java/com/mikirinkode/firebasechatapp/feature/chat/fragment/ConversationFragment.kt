@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,12 +55,6 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     private val conversationAdapter: ConversationAdapter by lazy {
         ConversationAdapter()
     }
-
-
-    private val mCommonHelper: CommonFirebaseTaskHelper by lazy {
-        CommonFirebaseTaskHelper()
-    }
-
     private val args: ConversationFragmentArgs by navArgs()
 
     private var isScrolledToBottom = false
@@ -104,32 +99,33 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     }
 
     private fun initTextWatcher() {
-        if (args.conversationType == ConversationType.PERSONAL.toString()) {
-            val handler = Handler(Looper.getMainLooper())
-            binding.etMessage.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-                }
+        val handler = Handler(Looper.getMainLooper())
+        binding.etMessage.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
 
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    // User is typing or text is changing
-                    interlocutor?.userId?.let { mCommonHelper.updateTypingStatus(true, it) }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // User is typing or text is changing
+//                    interlocutor?.userId?.let { mCommonHelper.updateTypingStatus(true, it) }
+                Log.e("ConversationFragment", "onTextChanged")
+                Log.e("ConversationFragment", "onTextChanged: ${args.conversationId}")
+                args.conversationId?.let { presenter.updateTypingStatus(true, it) }
+            }
 
-                }
+            override fun afterTextChanged(s: Editable?) {
+                // User has stopped typing
+                Log.e("ConversationFragment", "afterTextChanged: ${args.conversationId}")
+                handler.postDelayed({
+                    args.conversationId?.let { presenter.updateTypingStatus(false, it) }
+                }, 5000)
 
-                override fun afterTextChanged(s: Editable?) {
-                    // User has stopped typing
-                    handler.postDelayed({
-                        interlocutor?.userId?.let { mCommonHelper.updateTypingStatus(false, it) }
-                    }, 5000)
-
-                }
-            })
-        }
+            }
+        })
     }
 
     private fun initRecyclerView() {
@@ -307,7 +303,6 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     private fun setupGroupProfile(conversation: Conversation) {
         binding.apply {
             tvAppBarTitle.text = conversation.conversationName
-            tvAppBarDescription.text = getString(R.string.txt_tap_to_see_group_info)
             if (conversation.conversationAvatar == null || conversation.conversationAvatar == "") {
                 Glide.with(requireContext())
                     .load(R.drawable.ic_default_group_avatar).into(binding.ivUserAvatar)
@@ -319,10 +314,78 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         }
     }
 
+
+    private fun setupPersonalTypingStatus(participants: List<UserAccount>) {
+        val interlocutor = participants.firstOrNull { it.userId != loggedUser?.userId }
+        val isInterlocutorTyping = conversationAdapter.getConversation()?.typingUser?.get(interlocutor?.userId)
+        binding.apply {
+            if (interlocutor != null){
+
+                if (isInterlocutorTyping == true){
+                    tvAppBarDescription.text = getString(R.string.txt_typing)
+                } else if (interlocutor.online) {
+                    tvAppBarDescription.text = getString(R.string.txt_online)
+                    ivOnlineStatusIndicator.visibility = View.VISIBLE
+
+                } else {
+                    ivOnlineStatusIndicator.visibility = View.GONE
+                    if (interlocutor.lastOnlineTimestamp != 0L) {
+                        tvAppBarDescription.text =
+                            "Last Online at ${DateHelper.getFormattedLastOnline(interlocutor.lastOnlineTimestamp)}"
+                    }
+                }
+            }
+        }
+    }
+
+
+        private fun setupGroupTypingStatus(participants: List<UserAccount>) {
+        Log.e("ConversationFragment", "setupGroupTypingStatus")
+        val typingUser = conversationAdapter.getConversation()?.typingUser
+
+        val typingUserIdList: List<String>? = typingUser?.filterValues { it }?.keys?.toList()
+
+        Log.e("ConversationFragment", "typing filtered: ${typingUserIdList}")
+        Log.e("ConversationFragment", "participants: ${participants}")
+
+        if (!typingUserIdList.isNullOrEmpty()) {
+            val typingUsers = arrayListOf<UserAccount>()
+
+            if (participants.isNotEmpty()) {
+                for (user in participants) {
+                    if (user.userId in typingUserIdList && user.userId != loggedUser?.userId) {
+                        typingUsers.add(user)
+                    }
+                }
+            }
+
+            if (typingUsers.isNotEmpty()) {
+                val nameAndStatus: String = typingUsers.joinToString("... ") { user ->
+                    "${user.name} is typing"
+                }
+                binding.tvAppBarDescription.text = nameAndStatus
+            }
+        } else if (participants.isNotEmpty()) {
+            val names: String = participants.joinToString(", ") { user ->
+                user.name ?: ""
+            }
+
+            binding.tvAppBarDescription.text = names
+        } else {
+            binding.tvAppBarDescription.text = getString(R.string.txt_tap_to_see_group_info)
+        }
+    }
+
     override fun onConversationDataReceived(conversation: Conversation) {
+        Log.e("ConversationFragment", "onConversationDataReceived")
         conversationAdapter.setConversation(conversation)
-        if (args.conversationType == ConversationType.GROUP.toString()) {
-            setupGroupProfile(conversation)
+        when (args.conversationType) {
+            ConversationType.GROUP.toString() -> {
+                setupGroupProfile(conversation)
+            }
+            ConversationType.PERSONAL.toString() -> {
+
+            }
         }
 
         binding.apply {
@@ -330,7 +393,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
             val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
             val itemCount = layoutManager.itemCount
             // if the last item is not visible
-            if (lastVisibleItemPosition < itemCount -1) { // TODO
+            if (lastVisibleItemPosition < itemCount - 1) { // TODO
                 btnScrollToBottom.visibility = View.VISIBLE
                 // show there is new message when user scrolling up
                 val totalUnread = conversationAdapter.getTotalUnreadMessageLoggedUser()
@@ -348,31 +411,28 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     }
 
     override fun onParticipantsDataReceived(participants: List<UserAccount>) {
+        conversationAdapter.setParticipants(participants)
         when (args.conversationType) {
             ConversationType.PERSONAL.toString() -> {
                 val user: UserAccount? =
                     participants.firstOrNull { it.userId != loggedUser?.userId }
                 if (user != null) {
                     user.userId?.let { presenter.getUserOnlineStatus(it) }
-                    setupInterlocutorProfile(user)
+                    setupInterlocutorProfile(user) // TODO: IT IS CALLED TWICE?
                 }
+                setupPersonalTypingStatus(participants)
             }
             ConversationType.GROUP.toString() -> {
-                val names: String = participants.joinToString(", ") { user ->
-                    user.name ?: ""
-                }
-                binding.tvAppBarDescription.text = names
+                // setup group typing status
+                setupGroupTypingStatus(participants)
             }
         }
 
-        conversationAdapter.setParticipants(participants)
     }
 
     override fun onMessagesReceived(messages: List<ChatMessage>) {
         conversationAdapter.setMessages(messages)
         if (messages.isNotEmpty()) {
-            // TODO: SCROLL WHEN OPEN THE CHAT ROOM ON THE FIRST TIME
-            // DO NOT SCROLL WHEN THERE IS NEW MESSAGE
 
             binding.apply {
                 val layoutManager = binding.rvMessages.layoutManager as LinearLayoutManager
@@ -380,7 +440,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 val itemCount = layoutManager.itemCount
                 // if the last visible item is not more than 5
                 // ignore the isScrolledToBottom variable
-                if (lastVisibleItemPosition in (itemCount-5)..itemCount) { // TODO
+                if (lastVisibleItemPosition in (itemCount - 5)..itemCount) { // TODO
                     if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0) {
                         rvMessages.scrollToPosition(conversationAdapter.itemCount - 1)
                         isScrolledToBottom = true
@@ -403,22 +463,6 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         }
 
         setupInterlocutorProfile(status)
-        binding.apply {
-            if (status.online) {
-                tvAppBarDescription.text = getString(R.string.txt_online)
-                ivOnlineStatusIndicator.visibility = View.VISIBLE
-
-                if (status.typing && status.currentlyTypingFor == loggedUser?.userId) {
-                    tvAppBarDescription.text = getString(R.string.txt_typing)
-                }
-            } else {
-                ivOnlineStatusIndicator.visibility = View.GONE
-                if (status.lastOnlineTimestamp != 0L) {
-                    tvAppBarDescription.text =
-                        "Last Online at ${DateHelper.getFormattedLastOnline(status.lastOnlineTimestamp)}"
-                }
-            }
-        }
     }
 
     override fun onImageCaptured(capturedImage: Uri?) {
@@ -551,7 +595,8 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
 
             btnScrollToBottom.setOnClickListener {
                 if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0) {
-                    binding.rvMessages.smoothScrollToPosition(conversationAdapter.itemCount - 1)
+                    rvMessages.smoothScrollToPosition(conversationAdapter.itemCount - 1)
+                    presenter.resetTotalUnreadMessage()
                 }
             }
 

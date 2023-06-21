@@ -16,6 +16,7 @@ class CommonFirebaseTaskHelper {
     private val database = FirebaseProvider.instance().getDatabase()
     private val messaging = FirebaseProvider.instance().getMessaging()
     private val fireStore = FirebaseProvider.instance().getFirestore()
+    private val conversationsRef = database?.getReference("conversations")
 
     fun updateOneSignalDeviceToken() {
         // Retrieve the device token
@@ -40,19 +41,27 @@ class CommonFirebaseTaskHelper {
         }
     }
 
-    fun updateTypingStatus(isTyping: Boolean, currentReceiver: String) {
+
+    fun updateTypingStatus(isTyping: Boolean, conversationId: String) {
         val userId = auth?.currentUser?.uid
-
-        val userRef = userId?.let { fireStore?.collection("users")?.document(it) }
-        val newUpdate = hashMapOf<String, Any>(
-            "typing" to isTyping,
-            "currentlyTypingFor" to currentReceiver
-        )
-
         if (userId != null) {
-            userRef?.set(newUpdate, SetOptions.merge())
+            conversationsRef?.child(conversationId)?.child("typingUser")?.child(userId)?.setValue(isTyping)
         }
     }
+
+//    fun updateTypingStatus(isTyping: Boolean, currentReceiver: String) {
+//        val userId = auth?.currentUser?.uid
+//
+//        val userRef = userId?.let { fireStore?.collection("users")?.document(it) }
+//        val newUpdate = hashMapOf<String, Any>(
+//            "typing" to isTyping,
+//            "currentlyTypingFor" to currentReceiver
+//        )
+//
+//        if (userId != null) {
+//            userRef?.set(newUpdate, SetOptions.merge())
+//        }
+//    }
 
     fun updateOnlineStatus() {
         val userId = auth?.currentUser?.uid
