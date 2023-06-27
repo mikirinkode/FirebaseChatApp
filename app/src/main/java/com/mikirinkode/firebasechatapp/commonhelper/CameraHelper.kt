@@ -6,8 +6,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
-import com.mikirinkode.firebasechatapp.feature.chat.ConversationActivity
-import com.mikirinkode.firebasechatapp.utils.PermissionManager
+import com.mikirinkode.firebasechatapp.feature.chat.chatroom.ConversationActivity
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -42,14 +41,14 @@ class CameraHelper(
                 // Set the output file URI for the camera intent
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImage)
 
-                if (PermissionManager.isCameraPermissionGranted(mActivity)) {
+                if (PermissionHelper.isCameraPermissionGranted(mActivity)) {
                     // Launch the camera intent
                     mActivity.startActivityForResult(takePictureIntent, ConversationActivity.REQUEST_IMAGE_CAPTURE)
                     if (capturedImage != null){
                         mListener.onImageCaptured(capturedImage)
                     }
                 } else {
-                    PermissionManager.requestCameraPermission(mActivity)
+                    PermissionHelper.requestCameraPermission(mActivity)
                 }
             }
         }

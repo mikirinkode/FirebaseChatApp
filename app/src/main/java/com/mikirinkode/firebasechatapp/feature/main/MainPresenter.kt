@@ -1,14 +1,13 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
-import android.util.Log
-import com.mikirinkode.firebasechatapp.base.BasePresenter
+import com.mikirinkode.firebasechatapp.base.presenter.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.Conversation
-import com.mikirinkode.firebasechatapp.firebase.CommonFirebaseTaskHelper
+import com.mikirinkode.firebasechatapp.firebase.common.CommonFirebaseTaskHelper
 
 class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     private var mView: MainView? = null
     private val mCommonHelper: CommonFirebaseTaskHelper = CommonFirebaseTaskHelper()
-    private val chatHistoryHelper = ChatHistoryHelper(this)
+    private val conversationListHelper = ConversationListHelper(this)
 
     fun updateUserOnlineStatus() {
         mCommonHelper.updateOnlineStatus()
@@ -19,7 +18,7 @@ class MainPresenter : BasePresenter<MainView>, ChatHistoryListener {
     }
 
     fun getMessageHistory() {
-        chatHistoryHelper.receiveMessageHistory()
+        conversationListHelper.receiveMessageHistory()
         mView?.showLoading()
     }
 

@@ -10,7 +10,7 @@ import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ActivityProfileBinding
-import com.mikirinkode.firebasechatapp.feature.login.LoginActivity
+import com.mikirinkode.firebasechatapp.feature.auth.login.LoginActivity
 
 // TODO
 class ProfileActivity : AppCompatActivity(), ProfileView {

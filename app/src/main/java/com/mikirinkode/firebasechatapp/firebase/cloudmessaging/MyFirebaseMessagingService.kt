@@ -12,7 +12,7 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.mikirinkode.firebasechatapp.R
-import com.mikirinkode.firebasechatapp.feature.chat.ConversationActivity
+import com.mikirinkode.firebasechatapp.feature.chat.chatroom.ConversationActivity
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 

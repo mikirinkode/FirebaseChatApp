@@ -27,7 +27,7 @@
             android:name=".feature.profile.ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".feature.chat.ConversationActivity"
+            android:name=".feature.chat.chatroom.ConversationActivity"
             android:exported="true"
             android:parentActivityName=".feature.main.MainActivity" >
             <intent-filter>
@@ -41,14 +41,14 @@
                 android:value=".feature.main.MainActivity" />
         </activity>
         <activity
-            android:name=".feature.register.RegisterActivity"
+            android:name=".feature.auth.register.RegisterActivity"
             android:exported="false" />
         <activity
             android:name=".feature.main.MainActivity"
             android:exported="true"
             android:launchMode="singleTop" />
         <activity
-            android:name=".feature.login.LoginActivity"
+            android:name=".feature.auth.login.LoginActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

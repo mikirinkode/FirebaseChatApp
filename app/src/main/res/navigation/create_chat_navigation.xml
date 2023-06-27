@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/selectUserFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.selectuser.SelectUserFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.createchat.selectparticipant.SelectParticipantFragment"
         android:label="SelectUserFragment"
         tools:layout="@layout/fragment_select_user">
         <action
@@ -28,7 +28,7 @@
 
     <fragment
         android:id="@+id/createGroupChatFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.createchat.SetupProfileGroupChatFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.createchat.setupgroup.SetupProfileGroupChatFragment"
         android:label="fragment_create_group_chat"
         tools:layout="@layout/fragment_setup_group_chat" >
         <argument
@@ -37,7 +37,7 @@
     </fragment>
     <fragment
         android:id="@+id/userListFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.userlist.UserListFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.createchat.userlist.UserListFragment"
         android:label="UserListFragment"
         tools:layout="@layout/fragment_user_list" >
         <action

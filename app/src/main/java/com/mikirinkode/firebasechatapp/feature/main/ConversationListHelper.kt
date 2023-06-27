@@ -1,6 +1,5 @@
 package com.mikirinkode.firebasechatapp.feature.main
 
-import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -13,7 +12,7 @@ import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 
-class ChatHistoryHelper(
+class ConversationListHelper(
     private val mListener: ChatHistoryListener
 ) {
     private val database = FirebaseProvider.instance().getDatabase()

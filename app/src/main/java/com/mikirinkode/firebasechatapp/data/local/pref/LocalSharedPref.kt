@@ -8,7 +8,33 @@ import com.google.gson.Gson
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 
 class LocalSharedPref {
+    companion object {
 
+        private var instance: LocalSharedPref? = null
+        private var mSharedPreferences: SharedPreferences? = null
+
+        fun init(context: Context){
+            mSharedPreferences = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
+        }
+
+        fun instance(): LocalSharedPref? {
+            validateInitialization()
+            if (instance == null){
+                synchronized(LocalSharedPref::class.java){
+                    if (instance == null){
+                        instance = LocalSharedPref()
+                    }
+                }
+            }
+            return instance
+        }
+
+        private fun validateInitialization() {
+            if (mSharedPreferences == null){
+                throw Exception("SuitSave Library must be initialized inside your application class by calling SuitSave.init(getApplicationContext)")
+            }
+        }
+    }
 
     fun saveInt(key: String, value: Int) {
         val editor = mSharedPreferences?.edit()
@@ -142,32 +168,4 @@ class LocalSharedPref {
         return map != null && map.containsKey(key)
     }
 
-
-    companion object {
-
-        private var instance: LocalSharedPref? = null
-        private var mSharedPreferences: SharedPreferences? = null
-
-        fun init(context: Context){
-            mSharedPreferences = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
-        }
-
-        fun instance(): LocalSharedPref? {
-            validateInitialization()
-            if (instance == null){
-                synchronized(LocalSharedPref::class.java){
-                    if (instance == null){
-                        instance = LocalSharedPref()
-                    }
-                }
-            }
-            return instance
-        }
-
-        private fun validateInitialization() {
-            if (mSharedPreferences == null){
-                throw Exception("SuitSave Library must be initialized inside your application class by calling SuitSave.init(getApplicationContext)")
-            }
-        }
-    }
 }

@@ -2,7 +2,7 @@ package com.mikirinkode.firebasechatapp.feature.createchat
 
 import android.app.Activity
 import android.net.Uri
-import com.mikirinkode.firebasechatapp.base.BasePresenter
+import com.mikirinkode.firebasechatapp.base.presenter.BasePresenter
 import com.mikirinkode.firebasechatapp.commonhelper.CameraHelper
 import com.mikirinkode.firebasechatapp.commonhelper.CameraListener
 

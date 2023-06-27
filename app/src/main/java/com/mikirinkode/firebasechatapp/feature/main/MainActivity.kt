@@ -17,7 +17,7 @@ import com.mikirinkode.firebasechatapp.databinding.ActivityMainBinding
 import com.mikirinkode.firebasechatapp.feature.createchat.CreateNewChatActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.service.UpdateDeliveredTimeService
-import com.mikirinkode.firebasechatapp.utils.PermissionManager
+import com.mikirinkode.firebasechatapp.commonhelper.PermissionHelper
 
 class MainActivity : AppCompatActivity(), MainView {
 
@@ -107,9 +107,9 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     private fun checkPermission() {
-        if (!PermissionManager.isNotificationPermissionGranted(this)) {
+        if (!PermissionHelper.isNotificationPermissionGranted(this)) {
             Toast.makeText(this, "Notification Permission Not Granted", Toast.LENGTH_SHORT).show()
-            PermissionManager.requestNotificationPermission(this)
+            PermissionHelper.requestNotificationPermission(this)
         } else {
             Toast.makeText(this, "Notification Permission Already Granted", Toast.LENGTH_SHORT)
                 .show()
@@ -159,7 +159,7 @@ class MainActivity : AppCompatActivity(), MainView {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PermissionManager.NOTIFICATION_REQUEST_PERMISSION_CODE) {
+        if (requestCode == PermissionHelper.NOTIFICATION_REQUEST_PERMISSION_CODE) {
             if (grantResults.isNotEmpty()) {
                 for (result in grantResults) {
                     Toast.makeText(this, "Notification Permission Granted", Toast.LENGTH_SHORT)

@@ -19,6 +19,9 @@ import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import kotlinx.coroutines.*
 
+/**
+ * TODO: WIP
+ */
 class UpdateDeliveredTimeService : Service() {
 
     companion object {

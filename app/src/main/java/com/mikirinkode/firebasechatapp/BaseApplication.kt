@@ -3,12 +3,10 @@ package com.mikirinkode.firebasechatapp
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.mikirinkode.firebasechatapp.constants.Constants
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
-import com.mikirinkode.firebasechatapp.feature.chat.ConversationActivity
+import com.mikirinkode.firebasechatapp.feature.chat.chatroom.ConversationActivity
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
-import com.mikirinkode.firebasechatapp.notification.NotificationHandler
 import com.onesignal.OSNotificationOpenedResult
 import com.onesignal.OneSignal
 

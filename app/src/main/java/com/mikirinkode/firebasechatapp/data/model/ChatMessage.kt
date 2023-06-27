@@ -16,5 +16,5 @@ data class ChatMessage(
     val beenDeliveredTo: Map<String, Long> = mapOf(), // TODO: is it need to initialize when sending message
     val beenReadBy: Map<String, Long> = mapOf(),
 
-    var isSelected: Boolean = false
+    var isSelected: Boolean = false // used to show the message is selected or not
 ): Parcelable

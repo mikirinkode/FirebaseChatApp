@@ -1,6 +1,6 @@
 package com.mikirinkode.firebasechatapp.feature.profile
 
-import com.mikirinkode.firebasechatapp.base.BasePresenter
+import com.mikirinkode.firebasechatapp.base.presenter.BasePresenter
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 
 class ProfilePresenter : BasePresenter<ProfileView>, ProfileEventListener {

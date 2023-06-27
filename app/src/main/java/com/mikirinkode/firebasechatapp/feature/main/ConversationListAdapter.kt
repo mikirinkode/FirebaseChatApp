@@ -3,7 +3,6 @@ package com.mikirinkode.firebasechatapp.feature.main
 import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,9 +15,8 @@ import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.databinding.ItemChatHistoryBinding
 import com.mikirinkode.firebasechatapp.constants.ConversationType
-import com.mikirinkode.firebasechatapp.feature.chat.ConversationActivity
+import com.mikirinkode.firebasechatapp.feature.chat.chatroom.ConversationActivity
 import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
-import kotlin.math.absoluteValue
 
 class ConversationListAdapter : RecyclerView.Adapter<ConversationListAdapter.ViewHolder>() {
 
