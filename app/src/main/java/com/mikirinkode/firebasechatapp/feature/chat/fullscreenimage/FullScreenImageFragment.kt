@@ -10,7 +10,6 @@ import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 import com.mikirinkode.firebasechatapp.databinding.FragmentFullScreenImageBinding
-import com.mikirinkode.firebasechatapp.feature.chat.fragment.FullScreenImageFragmentArgs
 
 
 // TODO: MOVE?

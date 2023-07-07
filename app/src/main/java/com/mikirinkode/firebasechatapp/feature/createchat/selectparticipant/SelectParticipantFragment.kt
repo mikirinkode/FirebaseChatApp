@@ -11,8 +11,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.FragmentSelectUserBinding
-import com.mikirinkode.firebasechatapp.feature.selectuser.SelectUserFragmentArgs
-import com.mikirinkode.firebasechatapp.feature.selectuser.SelectUserFragmentDirections
 
 class SelectParticipantFragment : Fragment(), SelectParticipantView, ParticipantAdapter.UserClickListener,
     SelectedParticipantAdapter.UserClickListener {
@@ -32,7 +30,7 @@ class SelectParticipantFragment : Fragment(), SelectParticipantView, Participant
 
     private lateinit var presenter: SelectParticipantPresenter
 
-    private val args: SelectUserFragmentArgs by navArgs()
+    private val args: SelectParticipantFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -168,7 +166,7 @@ class SelectParticipantFragment : Fragment(), SelectParticipantView, Participant
                     }
                     presenter.addParticipantsToGroup(conversationId, participantsId)
                 } else {
-                    val action = SelectUserFragmentDirections.actionContinue(
+                    val action = SelectParticipantFragmentDirections.actionContinue(
                         selectedUserList.toTypedArray()
                     )
                     Navigation.findNavController(binding.root).navigate(action)

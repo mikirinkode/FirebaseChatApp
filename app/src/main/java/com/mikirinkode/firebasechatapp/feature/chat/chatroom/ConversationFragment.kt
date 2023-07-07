@@ -31,8 +31,6 @@ import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.FragmentConversationBinding
-import com.mikirinkode.firebasechatapp.feature.chat.fragment.ConversationFragmentArgs
-import com.mikirinkode.firebasechatapp.feature.chat.fragment.ConversationFragmentDirections
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.commonhelper.PermissionHelper

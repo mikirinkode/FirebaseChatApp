@@ -12,7 +12,6 @@ import com.mikirinkode.firebasechatapp.constants.ConversationType
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.FragmentUserListBinding
 import com.mikirinkode.firebasechatapp.feature.chat.chatroom.ConversationActivity
-import com.mikirinkode.firebasechatapp.feature.userlist.UserListFragmentDirections
 
 
 class UserListFragment : Fragment(), UserListView, UserListAdapter.UserClickListener {

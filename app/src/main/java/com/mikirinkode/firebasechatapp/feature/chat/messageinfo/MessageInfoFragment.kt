@@ -14,7 +14,6 @@ import com.mikirinkode.firebasechatapp.constants.ConversationType
 import com.mikirinkode.firebasechatapp.constants.MessageType
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.FragmentMessageInfoBinding
-import com.mikirinkode.firebasechatapp.feature.messageinfo.MessageInfoFragmentArgs
 
 class MessageInfoFragment : Fragment(), MessageInfoView {
 

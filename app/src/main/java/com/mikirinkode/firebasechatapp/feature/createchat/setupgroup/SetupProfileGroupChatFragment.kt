@@ -18,7 +18,6 @@ import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.FragmentSetupGroupChatBinding
 import com.mikirinkode.firebasechatapp.feature.createchat.CreateChatPresenter
 import com.mikirinkode.firebasechatapp.feature.createchat.CreateChatView
-import com.mikirinkode.firebasechatapp.feature.createchat.SetupProfileGroupChatFragmentArgs
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.commonhelper.PermissionHelper
 
