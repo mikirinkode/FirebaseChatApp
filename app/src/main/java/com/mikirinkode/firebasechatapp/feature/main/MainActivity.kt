@@ -74,12 +74,12 @@ class MainActivity : AppCompatActivity(), MainView {
         // Enqueue the repeating request with WorkManager
 //        WorkManager.getInstance(this).enqueue(repeatingRequest)
 
-        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
-        if (Build.VERSION.SDK_INT >= 26) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
-        }
+//        val serviceIntent = Intent(this, UpdateDeliveredTimeService::class.java)
+//        if (Build.VERSION.SDK_INT >= 26) {
+//            startForegroundService(serviceIntent)
+//        } else {
+//            startService(serviceIntent)
+//        }
     }
 
     private fun initView() {
