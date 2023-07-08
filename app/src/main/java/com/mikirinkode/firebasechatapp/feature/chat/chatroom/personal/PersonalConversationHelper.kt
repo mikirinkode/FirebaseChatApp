@@ -16,6 +16,7 @@ import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
+import com.mikirinkode.firebasechatapp.data.model.UserStatus
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 import com.onesignal.OneSignal
 import org.json.JSONArray
@@ -32,6 +33,7 @@ class PersonalConversationHelper(
 
     private val conversationsRef = database?.getReference("conversations")
     private val messagesRef = database?.getReference("messages")
+    private val usersRef = database?.getReference("users")
 
     private val pref = LocalSharedPref.instance()
     private val loggedUser = pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
@@ -77,7 +79,7 @@ class PersonalConversationHelper(
         }
     }
 
-    fun receiveMessage(){
+    fun receiveMessage() {
         val ref = conversationId.let { messagesRef?.child(it) }
         ref?.addValueEventListener(receiveListener)
     }
@@ -97,8 +99,12 @@ class PersonalConversationHelper(
         // create conversation object on realtime database
         val timeStamp = System.currentTimeMillis()
         val participants = mapOf(
-            userId to true,
-            anotherUserId to true
+            userId to mapOf(
+                "joinedAt" to timeStamp
+            ),
+            anotherUserId to mapOf(
+                "joinedAt" to timeStamp
+            ),
         )
         val initialConversation = mapOf(
             "conversationId" to conversationId,
@@ -291,11 +297,25 @@ class PersonalConversationHelper(
         fireStore?.collection("users")
             ?.document(userId)
             ?.get()
-            ?.addOnSuccessListener {document ->
+            ?.addOnSuccessListener { document ->
                 val user: UserAccount? = document.toObject()
                 if (user != null) {
                     mListener.onInterlocutorDataReceived(user)
                 }
             }
+    }
+
+    fun getUserStatus(userId: String) {
+        usersRef?.child(userId)?.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val status = snapshot.getValue(UserStatus::class.java)
+                if (status != null) {
+                    mListener?.onUserStatusReceived(status)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
     }
 }

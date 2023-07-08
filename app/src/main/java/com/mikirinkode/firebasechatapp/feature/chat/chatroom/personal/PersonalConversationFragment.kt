@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.mikirinkode.firebasechatapp.R
+import com.mikirinkode.firebasechatapp.commonhelper.DateHelper
 import com.mikirinkode.firebasechatapp.commonhelper.ImageHelper
 import com.mikirinkode.firebasechatapp.commonhelper.PermissionHelper
 import com.mikirinkode.firebasechatapp.constants.ConversationType
@@ -30,6 +31,7 @@ import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.OnlineStatus
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
+import com.mikirinkode.firebasechatapp.data.model.UserStatus
 import com.mikirinkode.firebasechatapp.databinding.FragmentPersonalConversationBinding
 import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
@@ -252,6 +254,26 @@ class PersonalConversationFragment : Fragment(), PersonalConversationView,
             } else {
                 Glide.with(requireContext())
                     .load(R.drawable.ic_default_user_avatar).into(binding.ivUserAvatar)
+            }
+        }
+    }
+
+    override fun onUserStatusReceived(status: UserStatus) {
+        val isTyping = status.typingStatus?.typing == true && status.typingStatus?.typingFor == loggedUser?.userId
+        val isOnline = status.onlineStatus?.online == true
+        val lastOnlineTimestamp = status.onlineStatus?.lastOnlineTimestamp ?: 0L
+        binding.apply {
+            if (isTyping ){
+                tvInterlocutorStatus.text = getString(R.string.txt_typing)
+                ivOnlineStatusIndicator.visibility = View.VISIBLE
+            } else if (isOnline){
+                tvInterlocutorStatus.text = "Online"
+                ivOnlineStatusIndicator.visibility = View.VISIBLE
+            } else {
+                ivOnlineStatusIndicator.visibility = View.GONE
+                if (lastOnlineTimestamp != 0L){
+                    tvInterlocutorStatus.text = "Last Online at ${DateHelper.getRegularFormattedDateTimeFromTimestamp(lastOnlineTimestamp)}"
+                }
             }
         }
     }

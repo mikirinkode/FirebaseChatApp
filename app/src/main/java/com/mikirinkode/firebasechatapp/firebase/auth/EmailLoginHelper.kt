@@ -26,7 +26,7 @@ class EmailLoginHelper(
             auth?.signInWithEmailAndPassword(email, password)?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-
+                    // TODO: update last login
                     val userRef = fireStore?.collection("users")?.document(user?.uid ?: "")
                     userRef?.get()
                         ?.addOnSuccessListener { document ->

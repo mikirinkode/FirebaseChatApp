@@ -8,6 +8,7 @@ import com.mikirinkode.firebasechatapp.commonhelper.CameraHelper
 import com.mikirinkode.firebasechatapp.commonhelper.CameraListener
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
+import com.mikirinkode.firebasechatapp.data.model.UserStatus
 import com.mikirinkode.firebasechatapp.firebase.common.CommonFirebaseTaskHelper
 
 class PersonalConversationPresenter(
@@ -85,10 +86,15 @@ class PersonalConversationPresenter(
      */
     fun getInterlocutorData(userId: String){
         mHelper.getUserById(userId)
+        mHelper.getUserStatus(userId)
     }
 
     override fun onInterlocutorDataReceived(user: UserAccount) {
         mView?.onInterlocutorDataReceived(user)
+    }
+
+    override fun onUserStatusReceived(status: UserStatus) {
+        mView?.onUserStatusReceived(status)
     }
 
 

@@ -251,9 +251,9 @@ class GroupConversationFragment : Fragment(), GroupConversationView,
 
     private fun setupGroupTypingStatus(participants: List<UserAccount>) {
         Log.e("ConversationFragment", "setupGroupTypingStatus")
-        val typingUser = groupConversationAdapter.getConversation()?.typingUser
+        val userWhoIsTyping = groupConversationAdapter.getConversation()?.participants?.filter { entry ->  entry.value.typing }
 
-        val typingUserIdList: List<String>? = typingUser?.filterValues { it }?.keys?.toList()
+        val typingUserIdList: List<String>? = userWhoIsTyping?.keys?.toList()
 
         Log.e("ConversationFragment", "typing filtered: ${typingUserIdList}")
         Log.e("ConversationFragment", "participants: ${participants}")
@@ -270,9 +270,10 @@ class GroupConversationFragment : Fragment(), GroupConversationView,
             }
 
             if (typingUsers.isNotEmpty()) {
-                val nameAndStatus: String = typingUsers.joinToString("... ") { user ->
-                    "${user.name} is typing"
-                }
+//                val nameAndStatus: String = typingUsers.joinToString("... ") { user ->
+//                    "${user.name} is typing"
+//                }
+                val nameAndStatus: String = "${typingUsers.first().name} is typing..."
                 binding.tvAppBarDescription.text = nameAndStatus
             }
         } else if (participants.isNotEmpty()) {

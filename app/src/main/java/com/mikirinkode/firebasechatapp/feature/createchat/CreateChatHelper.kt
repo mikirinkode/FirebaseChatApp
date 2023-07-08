@@ -7,6 +7,7 @@ import com.mikirinkode.firebasechatapp.constants.ConversationType
 import com.mikirinkode.firebasechatapp.constants.MessageType
 import com.mikirinkode.firebasechatapp.data.model.ChatMessage
 import com.mikirinkode.firebasechatapp.data.model.Conversation
+import com.mikirinkode.firebasechatapp.data.model.ParticipantStatus
 import com.mikirinkode.firebasechatapp.firebase.FirebaseProvider
 
 class CreateChatHelper(
@@ -30,17 +31,17 @@ class CreateChatHelper(
         if (conversationId != null) {
             // add conversationId to all participants
             val unreadMessageCountMap = mutableMapOf<String, Int>()
-            val groupParticipant = mutableMapOf<String, Boolean>()
+            val groupParticipant = mutableMapOf<String, ParticipantStatus>()
+            val timeStamp = System.currentTimeMillis()
 
             for (userId in participants) {
                 unreadMessageCountMap[userId] = 0
-                groupParticipant[userId] = true
+                groupParticipant[userId] = ParticipantStatus(joinedAt = timeStamp)
                 val userRef = fireStore?.collection("users")?.document(userId)
 
                 userRef?.update("conversationIdList", FieldValue.arrayUnion(conversationId))
             }
 
-            val timeStamp = System.currentTimeMillis()
 
             val initialMessage = ChatMessage(
                 messageId = "",

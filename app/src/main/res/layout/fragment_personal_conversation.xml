@@ -87,7 +87,7 @@
                 android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/cardUserAvatar"
-                app:layout_constraintTop_toBottomOf="@id/tvAppBarTitle"
+                app:layout_constraintTop_toBottomOf="@id/tvInterlocutorName"
                 tools:text="Online" />
 
 

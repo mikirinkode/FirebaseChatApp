@@ -17,10 +17,9 @@ class ProfileHelper(
 
     fun getUserById(userId: String) {
         firestore?.collection("users")
-            ?.whereEqualTo("userId", userId)
+            ?.document(userId)
             ?.get()
-            ?.addOnSuccessListener {
-                val document = it.documents.first()
+            ?.addOnSuccessListener {document ->
                 val user: UserAccount? = document.toObject()
                 if (user != null) {
                     mListener.onGetProfileSuccess(user)

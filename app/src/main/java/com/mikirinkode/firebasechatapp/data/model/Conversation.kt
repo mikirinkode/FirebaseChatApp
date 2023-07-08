@@ -3,11 +3,9 @@ package com.mikirinkode.firebasechatapp.data.model
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
 data class Conversation(
     var conversationId: String? = "",
-    var participants: Map<String, Boolean> = mapOf(),
-    var typingUser: Map<String, Boolean> = mapOf(),
+    var participants: Map<String, ParticipantStatus> = mapOf(), // TODO: Update
     var lastMessage: ChatMessage? = null,
     var conversationType: String? = "",
     var conversationAvatar: String? = "",
@@ -17,4 +15,9 @@ data class Conversation(
     var unreadMessageEachParticipant: Map<String, Int> = mapOf(),
 
     var interlocutor: UserAccount? = null
-): Parcelable
+)
+
+data class ParticipantStatus(
+    var joinedAt: Long? = 0L,
+    var typing: Boolean = false,
+)

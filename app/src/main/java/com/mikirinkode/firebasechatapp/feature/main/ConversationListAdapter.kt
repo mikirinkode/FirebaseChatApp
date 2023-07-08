@@ -31,13 +31,34 @@ class ConversationListAdapter : RecyclerView.Adapter<ConversationListAdapter.Vie
                 val latestMessage: ChatMessage? = conversation.lastMessage
                 setTimestamp(tvTimestamp, latestMessage?.sendTimestamp ?: 0)
 
+                // set message display
+                val participantWhoIsTyping = conversation.participants.filter { entry -> entry.key != loggedUserId  }.values.filter { it.typing }
+
+//                if (participantWhoIsTyping.isNotEmpty()){
+//                    when (conversation.conversationType) {
+//                        ConversationType.GROUP.toString() -> {
+//                            tvMessage.text = "someone is typing..."
+//                        }
+//                        ConversationType.PERSONAL.toString() -> {
+//                            tvMessage.text = "typing..."
+//                        }
+//                    }
+//                } else {
+//                    if (latestMessage?.senderId == loggedUserId) {
+//                        // the logged user is the sender
+//                        tvMessage.text = "you: ${latestMessage.message}"
+//                    } else {
+//                        tvMessage.text = latestMessage?.message
+//                    }
+//                }
+
+
+                // set message status
                 if (latestMessage?.senderId == loggedUserId) {
                     // the logged user is the sender
-                    tvMessage.text = "you: ${latestMessage.message}"
                     updateMessageStatus(latestMessage, conversation.participants.size, tvMessageStatus, itemView.resources)
                     tvUnreadMessages.visibility = View.GONE
                 } else {
-                    tvMessage.text = latestMessage?.message
                     // the interlocutor is the sender and the logged user is the receiver
                     tvMessageStatus.visibility = View.GONE
 
@@ -62,16 +83,37 @@ class ConversationListAdapter : RecyclerView.Adapter<ConversationListAdapter.Vie
                                 .load(R.drawable.ic_default_group_avatar).into(binding.ivUserAvatar)
                         }
 
-                        if (latestMessage?.messageId == null || latestMessage.messageId == "") {
+
+                        if (participantWhoIsTyping.isNotEmpty()){
+                            tvMessage.text = "someone is typing..."
+                        } else if (latestMessage?.messageId == null || latestMessage.messageId == "") {
                             setTimestamp(tvTimestamp, conversation.createdAt ?: 0)
                             if (conversation.createdBy == loggedUserId) {
                                 tvMessage.text = "You created this group"
                             } else {
                                 tvMessage.text = "Someone added you"
                             }
+                        } else {
+                            if (latestMessage?.senderId == loggedUserId) {
+                                // the logged user is the sender
+                                tvMessage.text = "you: ${latestMessage.message}"
+                            } else {
+                                tvMessage.text = latestMessage?.message
+                            }
                         }
                     }
                     ConversationType.PERSONAL.toString() -> {
+                        if (participantWhoIsTyping.isNotEmpty()){
+                            tvMessage.text = "typing..."
+                        } else {
+                            if (latestMessage?.senderId == loggedUserId) {
+                                // the logged user is the sender
+                                tvMessage.text = "you: ${latestMessage.message}"
+                            } else {
+                                tvMessage.text = latestMessage?.message
+                            }
+                        }
+
                         tvUserName.text = conversation.interlocutor?.name
 
                         if (conversation.interlocutor?.avatarUrl != null && conversation.interlocutor?.avatarUrl != "") {
