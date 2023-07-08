@@ -2,41 +2,32 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/chat_room_navigation"
-    app:startDestination="@id/chatRoomFragment">
+    android:id="@+id/personal_chat_room_navigation"
+    app:startDestination="@id/personalConversationFragment">
+
 
     <fragment
-        android:id="@+id/chatRoomFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.chat.chatroom.ConversationFragment"
-        android:label="ChatRoomFragment" >
+        android:id="@+id/personalConversationFragment"
+        android:name="com.mikirinkode.firebasechatapp.feature.chat.chatroom.personal.PersonalConversationFragment"
+        android:label="PersonalConversationFragment"
+        tools:layout="@layout/fragment_personal_conversation">
+
         <action
             android:id="@+id/actionOpenImage"
             app:destination="@id/fullScreenImageFragment" />
         <action
             android:id="@+id/actionShowMessageInfo"
             app:destination="@id/messageInfoFragment" />
-        <action
-            android:id="@+id/actionOpenGroupProfile"
-            app:destination="@id/groupProfileFragment" />
         <argument
             android:name="conversationId"
-            android:defaultValue=""
-            app:nullable="true"
-            app:argType="string"/>
-        <argument
-            android:name="conversationType"
-            android:defaultValue=""
             app:argType="string"/>
         <argument
             android:name="interlocutorId"
-            android:defaultValue=""
-            app:nullable="true"
             app:argType="string"/>
         <argument
             android:name="navigateFrom"
             app:argType="string"
             app:nullable="true" />
-
     </fragment>
 
     <fragment
@@ -76,21 +67,6 @@
         <argument
             android:name="chatMessage"
             app:argType="com.mikirinkode.firebasechatapp.data.model.ChatMessage" />
-    </fragment>
-    <fragment
-        android:id="@+id/groupProfileFragment"
-        android:name="com.mikirinkode.firebasechatapp.feature.chat.groupprofile.GroupProfileFragment"
-        android:label="fragment_group_profile"
-        tools:layout="@layout/fragment_group_profile" >
-        <argument
-            android:name="conversationId"
-            app:argType="string" />
-        <argument
-            android:name="creatorId"
-            app:argType="string" />
-        <argument
-            android:name="participantsId"
-            app:argType="string[]"/>
     </fragment>
 
 </navigation>

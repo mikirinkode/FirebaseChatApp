@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.chat.chatroom
+package com.mikirinkode.firebasechatapp.feature.chat.chatroom.group
 
 import android.content.Context
 import android.content.res.Configuration
@@ -20,13 +20,12 @@ import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.ItemMessageBinding
 import java.util.*
 
-class ConversationAdapter : RecyclerView.Adapter<ConversationAdapter.ViewHolder>() {
+class GroupConversationAdapter : RecyclerView.Adapter<GroupConversationAdapter.ViewHolder>() {
 
     private var conversation: Conversation? = null
     private val messages: ArrayList<ChatMessage> = ArrayList()
     private val participants: ArrayList<UserAccount> = ArrayList()
     private var loggedUserId: String = ""
-    private var conversationType: String = ""
 
     private val listIndexOfSelectedMessages = ArrayList<Int>()
     private var currentSelectedMessage: ChatMessage? = null
@@ -85,42 +84,27 @@ class ConversationAdapter : RecyclerView.Adapter<ConversationAdapter.ViewHolder>
                     tvInterlocutorTimestamp.text =
                         DateHelper.getTimeFromTimestamp(chat.sendTimestamp)
 
-                    when (conversationType) {
-                        ConversationType.GROUP.toString() -> {
-                            tvInterlocutorName.visibility = View.VISIBLE
-                            tvInterlocutorName.text = chat.senderName
+                    tvInterlocutorName.text = chat.senderName
 
-                            val sender = participants.firstOrNull { it.userId == chat.senderId }
+                    val sender = participants.firstOrNull { it.userId == chat.senderId }
 
-                            // if the conversation type is group
-                            // then show the user avatar using initial name
-                            cardInterlocutorAvatar.visibility = View.VISIBLE
+                    if (sender?.avatarUrl.isNullOrBlank()){
+                        ivInterlocutorAvatar.visibility = View.GONE
+                        tvAvatarName.visibility = View.VISIBLE
+                        val separateName = chat.senderName.split(" ")
 
+                        val firstNameInitial = chat.senderName[0]
+                        val lastNameInitial = separateName.last().getOrNull(0)
 
-                            if (sender?.avatarUrl.isNullOrBlank()){
-                                ivInterlocutorAvatar.visibility = View.GONE
-                                tvAvatarName.visibility = View.VISIBLE
-                                val separateName = chat.senderName.split(" ")
-
-                                val firstNameInitial = chat.senderName[0]
-                                val lastNameInitial = separateName.last().getOrNull(0)
-
-                                val initialName =
-                                    if (lastNameInitial == null) firstNameInitial.toString() else "${firstNameInitial}${lastNameInitial}"
-                                tvAvatarName.text = initialName
-                            } else {
-                                tvAvatarName.visibility = View.GONE
-                                ivInterlocutorAvatar.visibility = View.VISIBLE
-                                Glide.with(itemView.context)
-                                    .load(sender?.avatarUrl)
-                                    .into(ivInterlocutorAvatar)
-                            }
-
-                        }
-                        else -> {
-                            cardInterlocutorAvatar.visibility = View.GONE
-                            tvInterlocutorName.visibility = View.GONE
-                        }
+                        val initialName =
+                            if (lastNameInitial == null) firstNameInitial.toString() else "${firstNameInitial}${lastNameInitial}"
+                        tvAvatarName.text = initialName
+                    } else {
+                        tvAvatarName.visibility = View.GONE
+                        ivInterlocutorAvatar.visibility = View.VISIBLE
+                        Glide.with(itemView.context)
+                            .load(sender?.avatarUrl)
+                            .into(ivInterlocutorAvatar)
                     }
                 }
 
@@ -359,10 +343,6 @@ class ConversationAdapter : RecyclerView.Adapter<ConversationAdapter.ViewHolder>
 
     fun setLoggedUserId(userId: String) {
         loggedUserId = userId
-    }
-
-    fun setConversationType(type: String) {
-        conversationType = type
     }
 
     fun setConversation(conversation: Conversation) {

@@ -2,11 +2,13 @@ package com.mikirinkode.firebasechatapp.feature.chat.chatroom
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.navigation.findNavController
 import com.mikirinkode.firebasechatapp.R
 import com.mikirinkode.firebasechatapp.databinding.ActivityChatBinding
 import com.mikirinkode.firebasechatapp.commonhelper.PermissionHelper
+import com.mikirinkode.firebasechatapp.constants.ConversationType
 
 class ConversationActivity : AppCompatActivity() {
 
@@ -22,7 +24,6 @@ class ConversationActivity : AppCompatActivity() {
         const val EXTRA_INTENT_CONVERSATION_TYPE = "intent_conversation_type"
 
         const val BUNDLE_CONVERSATION_ID = "conversationId"
-        const val BUNDLE_CONVERSATION_TYPE = "conversationType"
         const val BUNDLE_INTERLOCUTOR_ID = "interlocutorId"
         const val BUNDLE_NAVIGATE_FROM = "navigateFrom"
     }
@@ -54,13 +55,30 @@ class ConversationActivity : AppCompatActivity() {
         navigateFrom: String?
     ) {
         val navController = findNavController(R.id.navHostChatRoom)
-        val bundle = Bundle()
-        bundle.putString(BUNDLE_CONVERSATION_ID, conversationId)
-        bundle.putString(BUNDLE_CONVERSATION_TYPE, conversationType)
-        bundle.putString(BUNDLE_INTERLOCUTOR_ID, interlocutorId)
-        bundle.putString(BUNDLE_NAVIGATE_FROM, navigateFrom)
 
-        navController.setGraph(R.navigation.chat_room_navigation, bundle)
+        Log.e("ConversationActivity", "setup navigation")
+        Log.e("ConversationActivity", "conversation id: ${conversationId}")
+        Log.e("ConversationActivity", "conversation type: ${conversationType}")
+        Log.e("ConversationActivity", "interlocutor id: ${interlocutorId}")
+
+        when (conversationType) {
+            ConversationType.PERSONAL.toString() -> {
+                if (conversationId != null && interlocutorId != null) {
+                    val bundle = Bundle()
+                    bundle.putString(BUNDLE_CONVERSATION_ID, conversationId)
+                    bundle.putString(BUNDLE_INTERLOCUTOR_ID, interlocutorId)
+                    bundle.putString(BUNDLE_NAVIGATE_FROM, navigateFrom)
+                    navController.setGraph(R.navigation.personal_chat_room_navigation, bundle)
+                }
+            }
+            ConversationType.GROUP.toString() -> {
+                val bundle = Bundle()
+                bundle.putString(BUNDLE_CONVERSATION_ID, conversationId)
+                bundle.putString(BUNDLE_NAVIGATE_FROM, navigateFrom)
+                navController.setGraph(R.navigation.group_chat_room_navigation, bundle)
+            }
+        }
+
     }
 
     override fun onRequestPermissionsResult(

@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.chat.chatroom
+package com.mikirinkode.firebasechatapp.feature.chat.chatroom.group
 
 import android.net.Uri
 import com.google.firebase.database.*
@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.StorageReference
 import com.mikirinkode.firebasechatapp.constants.Constants
+import com.mikirinkode.firebasechatapp.constants.ConversationType
 import com.mikirinkode.firebasechatapp.constants.MessageType
 import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
 import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
@@ -17,10 +18,9 @@ import com.onesignal.OneSignal
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ConversationHelper(
-    private val mListener: ChatEventListener,
-    private val conversationId: String,
-    private val conversationType: String,
+class GroupConversationHelper(
+    private val mListener: GroupConversationListener,
+    private val conversationId: String
 ) {
     private val fireStore = FirebaseProvider.instance().getFirestore()
     private val database = FirebaseProvider.instance().getDatabase()
@@ -72,47 +72,6 @@ class ConversationHelper(
         }
     }
 
-    fun createPersonaChatRoom(userId: String, anotherUserId: String) {
-
-        // add conversation id to user firestore collection
-        val userRef = fireStore?.collection("users")?.document(userId)
-        userRef?.update("conversationIdList", FieldValue.arrayUnion(conversationId))
-        val anotherUserRef = fireStore?.collection("users")?.document(anotherUserId)
-        anotherUserRef?.update("conversationIdList", FieldValue.arrayUnion(conversationId))
-
-
-        // create conversation object on realtime database
-        val timeStamp = System.currentTimeMillis()
-        val participants = mapOf(
-            userId to true,
-            anotherUserId to true
-        )
-        val initialConversation = mapOf(
-            "conversationId" to conversationId,
-            "participants" to participants,
-            "conversationType" to "PERSONAL",
-            "createdAt" to timeStamp
-        )
-        conversationsRef?.child(conversationId)?.updateChildren(initialConversation)
-
-        val currentUser = pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
-        val newConversationList = ArrayList<String>()
-        currentUser?.conversationIdList?.let { newConversationList.addAll(it) }
-        newConversationList.add(conversationId)
-        val newUserData = UserAccount(
-            userId = currentUser?.userId,
-            email = currentUser?.email,
-            name = currentUser?.name,
-            avatarUrl = currentUser?.avatarUrl,
-            createdAt = currentUser?.createdAt,
-            lastLoginAt = currentUser?.lastLoginAt,
-            updatedAt = currentUser?.updatedAt,
-            conversationIdList = newConversationList
-        )
-
-        pref?.saveObject(PreferenceConstant.USER, newUserData)
-
-    }
 
     fun sendMessage(
         message: String,
@@ -219,7 +178,7 @@ class ConversationHelper(
         val receivers = JSONArray(receiverDeviceTokenList)
         val customData = JSONObject().apply {
             put("conversationId", conversationId)
-            put("conversationType", conversationType)
+            put("conversationType", ConversationType.GROUP.toString())
         }
         val notificationJson = JSONObject().apply {
             put("app_id", Constants.ONE_SIGNAL_APP_ID)
@@ -340,7 +299,7 @@ class ConversationHelper(
     }
 }
 
-interface ChatEventListener {
+interface GroupConversationListener {
     fun onMessageReceived(messages: List<ChatMessage>)
     fun showUploadImageProgress(progress: Int)
     fun onConversationDataReceived(conversation: Conversation)

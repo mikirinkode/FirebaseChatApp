@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.chat.chatroom
+package com.mikirinkode.firebasechatapp.feature.chat.chatroom.group
 
 import android.app.Activity
 import android.net.Uri
@@ -12,21 +12,19 @@ import com.mikirinkode.firebasechatapp.commonhelper.CameraHelper
 import com.mikirinkode.firebasechatapp.commonhelper.CameraListener
 import com.mikirinkode.firebasechatapp.firebase.common.CommonFirebaseTaskHelper
 
-class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener,
-    OnlineStatusListener, CameraListener {
-    private var mView: ConversationView? = null
-    private var conversationHelper: ConversationHelper? = null
-    private var cameraHelper: CameraHelper? = null
-    private var mCommonHelper: CommonFirebaseTaskHelper? = null
-    private var userOnlineStatusHelper: OnlineStatusHelper? = null
+class GroupConversationPresenter(
+    private val conversationId: String,
+    private val mActivity: Activity,
+) : BasePresenter<GroupConversationView>, GroupConversationListener, CameraListener {
+    private var mView: GroupConversationView? = null
+    private var groupConversationHelper: GroupConversationHelper? = GroupConversationHelper(this, conversationId)
+    private var cameraHelper: CameraHelper? = CameraHelper(this, mActivity)
+    private var mCommonHelper: CommonFirebaseTaskHelper? = CommonFirebaseTaskHelper()
 
     fun resetTotalUnreadMessage(){
-        conversationHelper?.resetTotalUnreadMessage()
+        groupConversationHelper?.resetTotalUnreadMessage()
     }
 
-    fun createPersonaChatRoom(userId: String, anotherUserId: String) {
-        conversationHelper?.createPersonaChatRoom(userId, anotherUserId)
-    }
 
     fun sendMessage(
         message: String,
@@ -34,7 +32,7 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         senderName: String,
         receiverDeviceTokenList: List<String>
     ) {
-        conversationHelper?.sendMessage(message, senderId, senderName, receiverDeviceTokenList)
+        groupConversationHelper?.sendMessage(message, senderId, senderName, receiverDeviceTokenList)
     }
 
     fun sendMessage(
@@ -45,7 +43,7 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         path: String,
         receiverDeviceTokenList: List<String>
     ) {
-        conversationHelper?.sendMessage(
+        groupConversationHelper?.sendMessage(
             message,
             senderId,
             senderName,
@@ -56,7 +54,7 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
     }
 
     fun receiveMessage() {
-        conversationHelper?.receiveMessages()
+        groupConversationHelper?.receiveMessages()
     }
 
     override fun onMessageReceived(messages: List<ChatMessage>) {
@@ -71,7 +69,7 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
      * GROUP CHAT DATA
      */
     fun getConversationDataById(conversationId: String) {
-        conversationHelper?.getConversationById(conversationId)
+        groupConversationHelper?.getConversationById(conversationId)
     }
 
     override fun onConversationDataReceived(conversation: Conversation) {
@@ -79,15 +77,8 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
     }
 
     /**
-     * USER ONLINE STATUS
+     * USER STATUS
      */
-    fun getUserOnlineStatus(userId: String) {
-        userOnlineStatusHelper?.getUserOnlineStatus(userId)
-    }
-
-    override fun onUserOnlineStatusReceived(status: UserAccount) {
-        mView?.updateReceiverOnlineStatus(status)
-    }
 
     fun updateTypingStatus(isTyping: Boolean, conversationId: String) {
         mCommonHelper?.updateTypingStatus(isTyping, conversationId)
@@ -108,21 +99,13 @@ class ConversationPresenter : BasePresenter<ConversationView>, ChatEventListener
         mView?.onParticipantsDataReceived(participants)
     }
 
-    fun attachView(view: ConversationView, mActivity: Activity, conversationId: String, conversationType: String) {
-        attachView(view)
-        conversationHelper = ConversationHelper(this, conversationId, conversationType)
-        cameraHelper = CameraHelper(this, mActivity)
-        userOnlineStatusHelper = OnlineStatusHelper(this)
-        mCommonHelper = CommonFirebaseTaskHelper()
-    }
-
-    override fun attachView(view: ConversationView) {
+    override fun attachView(view: GroupConversationView) {
         mView = view
     }
 
     override fun detachView() {
-        conversationHelper?.deactivateListener()
-        conversationHelper = null
+        groupConversationHelper?.deactivateListener()
+        groupConversationHelper = null
         cameraHelper = null
         mCommonHelper = null
         mView = null

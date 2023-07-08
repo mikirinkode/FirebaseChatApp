@@ -1,4 +1,4 @@
-package com.mikirinkode.firebasechatapp.feature.chat.chatroom
+package com.mikirinkode.firebasechatapp.feature.chat.chatroom.group
 
 import android.content.Context
 import android.content.Intent
@@ -35,7 +35,8 @@ import com.mikirinkode.firebasechatapp.feature.main.MainActivity
 import com.mikirinkode.firebasechatapp.feature.profile.ProfileActivity
 import com.mikirinkode.firebasechatapp.commonhelper.PermissionHelper
 
-class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.ChatClickListener {
+class GroupConversationFragment : Fragment(), GroupConversationView,
+    GroupConversationAdapter.ChatClickListener {
 
     private var _binding: FragmentConversationBinding? = null
     private val binding get() = _binding!!
@@ -48,17 +49,16 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
     }
 
-    private val conversationAdapter: ConversationAdapter by lazy {
-        ConversationAdapter()
+    private val groupConversationAdapter: GroupConversationAdapter by lazy {
+        GroupConversationAdapter()
     }
-    private val args: ConversationFragmentArgs by navArgs()
+    private val args: GroupConversationFragmentArgs by navArgs()
 
     private var isScrolledToBottom = false
 
     private var navigateFrom: String? = null // used to navigate back
-    private var interlocutor: UserAccount? = null
 
-    private lateinit var presenter: ConversationPresenter
+    private lateinit var presenter: GroupConversationPresenter
     private var capturedImage: Uri? = null
     private var currentMessageType = MessageType.TEXT
 
@@ -75,9 +75,10 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initTextWatcher()
+        navigateFrom = args.navigateFrom
         initRecyclerView()
-        handleBundleArgs()
+        setupPresenter()
+        initTextWatcher()
         observeMessage()
         onActionClicked()
         onAppBatItemSelectedClickListener()
@@ -123,12 +124,11 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     private fun initRecyclerView() {
         binding.apply {
             rvMessages.layoutManager = LinearLayoutManager(requireContext())
-            rvMessages.adapter = conversationAdapter
-            conversationAdapter.chatClickListener = this@ConversationFragment
+            rvMessages.adapter = groupConversationAdapter
+            groupConversationAdapter.chatClickListener = this@GroupConversationFragment
 
             if (loggedUser?.userId != null) {
-                conversationAdapter.setLoggedUserId(loggedUser?.userId!!)
-                conversationAdapter.setConversationType(args.conversationType)
+                groupConversationAdapter.setLoggedUserId(loggedUser?.userId!!)
             }
 
             rvMessages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -143,7 +143,8 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                         if (lastVisibleItemPosition < itemCount - 1) { // TODO
                             btnScrollToBottom.visibility = View.VISIBLE
                             // show there is new message when user scrolling up
-                            val totalUnread = conversationAdapter.getTotalUnreadMessageLoggedUser()
+                            val totalUnread =
+                                groupConversationAdapter.getTotalUnreadMessageLoggedUser()
                             if (totalUnread > 0) {
                                 tvTotalNewMessages.visibility = View.VISIBLE
                                 tvTotalNewMessages.text = totalUnread.toString()
@@ -160,44 +161,11 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         }
     }
 
-    private fun handleBundleArgs() {
-        val conversationType: String = args.conversationType
-        navigateFrom = args.navigateFrom
-        val conversationId: String? = args.conversationId
 
-        when (conversationType) {
-            ConversationType.PERSONAL.toString() -> {
-                // if the message is empty, the conversationId is empty too
-                // then use the args.interlocutorId
-                // interlocutor id need for personal conversation to receive the user profile
-                // even the conversation is not started yet
-                if (conversationId.isNullOrBlank()) {
-                    val loggedUserId = loggedUser?.userId
-                    val interlocutorId = args.interlocutorId
-                    if (loggedUserId != null && interlocutorId != null) {
-                        val personalConversationId =
-                            if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
-                        setupPresenter(personalConversationId, conversationType)
-                        presenter.getUserOnlineStatus(interlocutorId)
-                        presenter.getConversationDataById(personalConversationId)
-                    }
-                } else {
-                    setupPresenter(conversationId, conversationType)
-                    presenter.getConversationDataById(conversationId)
-                }
-            }
-            ConversationType.GROUP.toString() -> {
-                if (conversationId != null) {
-                    setupPresenter(conversationId, conversationType)
-                    presenter.getConversationDataById(conversationId)
-                }
-            }
-        }
-    }
-
-    private fun setupPresenter(conversationId: String, conversationType: String) {
-        presenter = ConversationPresenter()
-        presenter.attachView(this, requireActivity(), conversationId, conversationType)
+    private fun setupPresenter() {
+        presenter = GroupConversationPresenter(args.conversationId, requireActivity())
+        presenter.attachView(this)
+        presenter.getConversationDataById(args.conversationId)
     }
 
     private fun observeMessage() {
@@ -225,21 +193,10 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 val isValid: Boolean = senderId != null && senderName != null
                 if (isValid) {
                     etMessage.setText("")
-                    val isFirstTime: Boolean = conversationAdapter.isChatEmpty()
-                    val receiverDeviceToken: List<String> =
-                        conversationAdapter.getReceiverDeviceToken()
 
-                    if (isFirstTime) {
-                        val interlocutorId = interlocutor?.userId
-                        if (interlocutorId != null) {
-                            presenter.createPersonaChatRoom(senderId!!, interlocutorId)
-                            Toast.makeText(
-                                requireContext(),
-                                "Chat Room Created",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+                    val receiverDeviceToken: List<String> =
+                        groupConversationAdapter.getReceiverDeviceToken()
+
 
                     when (currentMessageType) {
                         MessageType.TEXT -> {
@@ -278,22 +235,6 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     }
 
 
-    private fun setupInterlocutorProfile(user: UserAccount) {
-        binding.apply {
-            interlocutor = user
-
-            tvAppBarTitle.text = user.name
-            if (user.avatarUrl != null && user.avatarUrl != "") {
-                Glide.with(requireContext())
-                    .load(user.avatarUrl)
-                    .into(ivUserAvatar)
-            } else {
-                Glide.with(requireContext())
-                    .load(R.drawable.ic_default_user_avatar).into(binding.ivUserAvatar)
-            }
-        }
-    }
-
     private fun setupGroupProfile(conversation: Conversation) {
         binding.apply {
             tvAppBarTitle.text = conversation.conversationName
@@ -308,35 +249,9 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         }
     }
 
-
-    private fun setupPersonalTypingStatus(participants: List<UserAccount>) {
-        val interlocutor = participants.firstOrNull { it.userId != loggedUser?.userId }
-        val isInterlocutorTyping =
-            conversationAdapter.getConversation()?.typingUser?.get(interlocutor?.userId)
-        binding.apply {
-            if (interlocutor != null) {
-
-                if (isInterlocutorTyping == true) {
-                    tvAppBarDescription.text = getString(R.string.txt_typing)
-                } else if (interlocutor.online) {
-                    tvAppBarDescription.text = getString(R.string.txt_online)
-                    ivOnlineStatusIndicator.visibility = View.VISIBLE
-
-                } else {
-                    ivOnlineStatusIndicator.visibility = View.GONE
-                    if (interlocutor.lastOnlineTimestamp != 0L) {
-                        tvAppBarDescription.text =
-                            "Last Online at ${DateHelper.getFormattedLastOnline(interlocutor.lastOnlineTimestamp)}"
-                    }
-                }
-            }
-        }
-    }
-
-
     private fun setupGroupTypingStatus(participants: List<UserAccount>) {
         Log.e("ConversationFragment", "setupGroupTypingStatus")
-        val typingUser = conversationAdapter.getConversation()?.typingUser
+        val typingUser = groupConversationAdapter.getConversation()?.typingUser
 
         val typingUserIdList: List<String>? = typingUser?.filterValues { it }?.keys?.toList()
 
@@ -373,15 +288,8 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
 
     override fun onConversationDataReceived(conversation: Conversation) {
         Log.e("ConversationFragment", "onConversationDataReceived")
-        conversationAdapter.setConversation(conversation)
-        when (args.conversationType) {
-            ConversationType.GROUP.toString() -> {
-                setupGroupProfile(conversation)
-            }
-            ConversationType.PERSONAL.toString() -> {
-
-            }
-        }
+        groupConversationAdapter.setConversation(conversation)
+        setupGroupProfile(conversation)
 
         binding.apply {
             val layoutManager = rvMessages.layoutManager as LinearLayoutManager
@@ -391,7 +299,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
             if (lastVisibleItemPosition < itemCount - 1) { // TODO
                 btnScrollToBottom.visibility = View.VISIBLE
                 // show there is new message when user scrolling up
-                val totalUnread = conversationAdapter.getTotalUnreadMessageLoggedUser()
+                val totalUnread = groupConversationAdapter.getTotalUnreadMessageLoggedUser()
                 if (totalUnread > 0) {
                     tvTotalNewMessages.visibility = View.VISIBLE
                     tvTotalNewMessages.text = totalUnread.toString()
@@ -406,27 +314,13 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
     }
 
     override fun onParticipantsDataReceived(participants: List<UserAccount>) {
-        conversationAdapter.setParticipants(participants)
-        when (args.conversationType) {
-            ConversationType.PERSONAL.toString() -> {
-                val user: UserAccount? =
-                    participants.firstOrNull { it.userId != loggedUser?.userId }
-                if (user != null) {
-                    user.userId?.let { presenter.getUserOnlineStatus(it) }
-                    setupInterlocutorProfile(user) // TODO: IT IS CALLED TWICE?
-                }
-                setupPersonalTypingStatus(participants)
-            }
-            ConversationType.GROUP.toString() -> {
-                // setup group typing status
-                setupGroupTypingStatus(participants)
-            }
-        }
-
+        groupConversationAdapter.setParticipants(participants)
+        setupGroupTypingStatus(participants)
     }
 
+    // TODO: DUPLICATE LIKE IN PERSONAL
     override fun onMessagesReceived(messages: List<ChatMessage>) {
-        conversationAdapter.setMessages(messages)
+        groupConversationAdapter.setMessages(messages)
         if (messages.isNotEmpty()) {
 
             binding.apply {
@@ -436,14 +330,14 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
                 // if the last visible item is not more than 5
                 // ignore the isScrolledToBottom variable
                 if (lastVisibleItemPosition in (itemCount - 5)..itemCount) { // TODO
-                    if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0) {
-                        rvMessages.scrollToPosition(conversationAdapter.itemCount - 1)
+                    if (groupConversationAdapter.itemCount != null && groupConversationAdapter.itemCount - 1 > 0) {
+                        rvMessages.scrollToPosition(groupConversationAdapter.itemCount - 1)
                         isScrolledToBottom = true
                     }
                 } else {
                     // the visible item is more than 2 item
-                    if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0 && !isScrolledToBottom) {
-                        rvMessages.scrollToPosition(conversationAdapter.itemCount - 1)
+                    if (groupConversationAdapter.itemCount != null && groupConversationAdapter.itemCount - 1 > 0 && !isScrolledToBottom) {
+                        rvMessages.scrollToPosition(groupConversationAdapter.itemCount - 1)
                         isScrolledToBottom = true
                     }
                 }
@@ -452,15 +346,6 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
         }
     }
 
-    override fun updateReceiverOnlineStatus(status: UserAccount) {
-        if (args.conversationType == ConversationType.PERSONAL.toString()) {
-            if (loggedUser != null) {
-                conversationAdapter.setParticipants(listOf(status, loggedUser!!))
-            }
-
-            setupInterlocutorProfile(status)
-        }
-    }
 
     override fun onImageCaptured(capturedImage: Uri?) {
         this.capturedImage = capturedImage
@@ -498,7 +383,7 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
      */
     override fun onImageClick(chat: ChatMessage) {
         binding.apply {
-            val action = ConversationFragmentDirections.actionOpenImage(
+            val action = GroupConversationFragmentDirections.actionOpenImage(
                 chat.imageUrl,
                 chat.message,
                 chat.sendTimestamp,
@@ -519,13 +404,13 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
 
     private fun updateAppBarOnSelectedView() {
         binding.apply {
-            val totalSelectedMessages = conversationAdapter.getTotalSelectedMessages()
+            val totalSelectedMessages = groupConversationAdapter.getTotalSelectedMessages()
             if (totalSelectedMessages > 0) {
                 appBarLayoutOnItemSelected.visibility = View.VISIBLE
                 tvTotalSelectedMessages.text = totalSelectedMessages.toString()
 
                 val selectedMessageSender =
-                    conversationAdapter.getCurrentSelectedMessage()?.senderId
+                    groupConversationAdapter.getCurrentSelectedMessage()?.senderId
 
                 if (totalSelectedMessages == 1 && selectedMessageSender == loggedUser?.userId) {
                     btnShowMessageInfo.visibility = View.VISIBLE
@@ -544,29 +429,29 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
 
             btnBackOnItemSelected.setOnClickListener {
                 appBarLayoutOnItemSelected.visibility = View.GONE
-                conversationAdapter.onDeselectAllMessage()
+                groupConversationAdapter.onDeselectAllMessage()
             }
 
             btnShowMessageInfo.setOnClickListener {
-                val totalSelectedMessages = conversationAdapter.getTotalSelectedMessages()
-                val currentSelectedMessage = conversationAdapter.getCurrentSelectedMessage()
+                val totalSelectedMessages = groupConversationAdapter.getTotalSelectedMessages()
+                val currentSelectedMessage = groupConversationAdapter.getCurrentSelectedMessage()
                 val participantsId =
-                    conversationAdapter.getConversation()?.participants?.keys?.toTypedArray()
-                val conversationType = conversationAdapter.getConversation()?.conversationType
+                    groupConversationAdapter.getConversation()?.participants?.keys?.filter { it != loggedUser?.userId }?.toTypedArray()
+                val conversationType = groupConversationAdapter.getConversation()?.conversationType
                 val array: Array<String?> =
                     participantsId?.filterNotNull()?.toTypedArray() ?: arrayOfNulls<String>(0)
 
                 val isValid =
                     participantsId != null && totalSelectedMessages == 1 && loggedUser?.userId != null && currentSelectedMessage != null && conversationType != null
                 if (isValid) {
-                    val action = ConversationFragmentDirections.actionShowMessageInfo(
+                    val action = GroupConversationFragmentDirections.actionShowMessageInfo(
                         loggedUser?.userId!!,
                         conversationType!!,
                         array,
                         currentSelectedMessage!!
                     )
                     Navigation.findNavController(binding.root).navigate(action)
-                    conversationAdapter.onDeselectAllMessage()
+                    groupConversationAdapter.onDeselectAllMessage()
                 } else {
                     Toast.makeText(
                         requireContext(),
@@ -591,37 +476,25 @@ class ConversationFragment : Fragment(), ConversationView, ConversationAdapter.C
             }
 
             btnScrollToBottom.setOnClickListener {
-                if (conversationAdapter.itemCount != null && conversationAdapter.itemCount - 1 > 0) {
-                    rvMessages.smoothScrollToPosition(conversationAdapter.itemCount - 1)
+                if (groupConversationAdapter.itemCount != null && groupConversationAdapter.itemCount - 1 > 0) {
+                    rvMessages.smoothScrollToPosition(groupConversationAdapter.itemCount - 1)
                     presenter.resetTotalUnreadMessage()
                 }
             }
 
             layoutInterlocutorProfile.setOnClickListener {
-                when (args.conversationType) {
-                    ConversationType.GROUP.toString() -> {
-                        val conversationId = conversationAdapter.getConversation()?.conversationId
-                        val participantsId =
-                            conversationAdapter.getConversation()?.participants?.keys?.toTypedArray()
-                        val creatorId = conversationAdapter.getConversation()?.createdBy
-                        if (conversationId != null && participantsId != null && creatorId != null) {
-                            val action =
-                                ConversationFragmentDirections.actionOpenGroupProfile(
-                                    conversationId,
-                                    creatorId,
-                                    participantsId
-                                )
-                            Navigation.findNavController(binding.root).navigate(action)
-                        }
-                    }
-                    ConversationType.PERSONAL.toString() -> {
-                        startActivity(
-                            Intent(requireActivity(), ProfileActivity::class.java).putExtra(
-                                ProfileActivity.EXTRA_INTENT_USER_ID,
-                                interlocutor?.userId
-                            )
+                val conversationId = groupConversationAdapter.getConversation()?.conversationId
+                val participantsId =
+                    groupConversationAdapter.getConversation()?.participants?.keys?.toTypedArray()
+                val creatorId = groupConversationAdapter.getConversation()?.createdBy
+                if (conversationId != null && participantsId != null && creatorId != null) {
+                    val action =
+                        GroupConversationFragmentDirections.actionOpenGroupProfile(
+                            conversationId,
+                            creatorId,
+                            participantsId
                         )
-                    }
+                    Navigation.findNavController(binding.root).navigate(action)
                 }
             }
 

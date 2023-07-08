@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mikirinkode.firebasechatapp.constants.ConversationType
+import com.mikirinkode.firebasechatapp.data.local.pref.LocalSharedPref
+import com.mikirinkode.firebasechatapp.data.local.pref.PreferenceConstant
 import com.mikirinkode.firebasechatapp.data.model.UserAccount
 import com.mikirinkode.firebasechatapp.databinding.FragmentUserListBinding
 import com.mikirinkode.firebasechatapp.feature.chat.chatroom.ConversationActivity
@@ -23,6 +25,14 @@ class UserListFragment : Fragment(), UserListView, UserListAdapter.UserClickList
 
     private val userAdapter: UserListAdapter by lazy {
         UserListAdapter()
+    }
+
+    private val pref: LocalSharedPref? by lazy {
+        LocalSharedPref.instance()
+    }
+
+    private val loggedUser: UserAccount? by lazy {
+        pref?.getObject(PreferenceConstant.USER, UserAccount::class.java)
     }
 
     override fun onCreateView(
@@ -78,12 +88,17 @@ class UserListFragment : Fragment(), UserListView, UserListAdapter.UserClickList
     }
 
     override fun onUserClick(user: UserAccount) {
-        // TODO:
-        startActivity(
-            Intent(requireContext(), ConversationActivity::class.java)
-                .putExtra(ConversationActivity.EXTRA_INTENT_INTERLOCUTOR_ID, user.userId)
-                .putExtra(ConversationActivity.EXTRA_INTENT_CONVERSATION_TYPE, ConversationType.PERSONAL.toString())
-        )
+        val interlocutorId = user.userId
+        val loggedUserId = loggedUser?.userId
+        if (loggedUserId != null && interlocutorId != null){
+            val conversationId = if (interlocutorId < loggedUserId) "$interlocutorId-$loggedUserId" else "$loggedUserId-$interlocutorId"
+            startActivity(
+                Intent(requireContext(), ConversationActivity::class.java)
+                    .putExtra(ConversationActivity.EXTRA_INTENT_INTERLOCUTOR_ID, user.userId)
+                    .putExtra(ConversationActivity.EXTRA_INTENT_CONVERSATION_ID, conversationId)
+                    .putExtra(ConversationActivity.EXTRA_INTENT_CONVERSATION_TYPE, ConversationType.PERSONAL.toString())
+            )
+        }
     }
 
     private fun onActionClicked() {
