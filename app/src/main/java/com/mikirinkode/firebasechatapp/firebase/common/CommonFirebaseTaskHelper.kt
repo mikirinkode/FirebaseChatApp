@@ -50,19 +50,6 @@ class CommonFirebaseTaskHelper {
         }
     }
 
-//    fun updateTypingStatus(isTyping: Boolean, currentReceiver: String) {
-//        val userId = auth?.currentUser?.uid
-//
-//        val userRef = userId?.let { fireStore?.collection("users")?.document(it) }
-//        val newUpdate = hashMapOf<String, Any>(
-//            "typing" to isTyping,
-//            "currentlyTypingFor" to currentReceiver
-//        )
-//
-//        if (userId != null) {
-//            userRef?.set(newUpdate, SetOptions.merge())
-//        }
-//    }
 
     // TODO: Need to be checked again, because sometimes the online status is not updated
     // when user close the app or not connected to internet
